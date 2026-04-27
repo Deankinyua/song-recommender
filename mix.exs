@@ -9,7 +9,7 @@ defmodule SongRecommender.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: ne3ko_deps() ++ phoenix_deps(),
+      deps: app_deps() ++ ne3ko_deps() ++ phoenix_deps(),
       dialyzer: [
         # Put the project-level PLT in the priv/ directory (instead of the default _build/ location)
         plt_add_apps: [:ex_unit, :mix],
@@ -53,6 +53,12 @@ defmodule SongRecommender.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: :test, runtime: false},
       {:mix_audit, "~> 2.1", only: :test, runtime: false}
+    ]
+  end
+
+  defp app_deps do
+    [
+      {:boltx, "~> 0.0.6"}
     ]
   end
 
