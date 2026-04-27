@@ -28,6 +28,20 @@ song_recommender-*.tar
 # Ignore assets that are produced by build tools.
 /priv/static/assets/
 
+# ignore environment variables
+.env
+
+# Ignore digested assets with hashes
+/priv/static/**/*-????????????????????????????????.*
+/priv/static/**/*.gz
+
+# Ne3ko development/test artifacts
+/node_modules/
+/priv/plts/
+/package.json
+/package-lock.json
+.DS_Store
+
 # Ignore digested assets cache.
 /priv/static/cache_manifest.json
 
@@ -35,3 +49,5 @@ song_recommender-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# spotify_data
+spotify_data.csv
