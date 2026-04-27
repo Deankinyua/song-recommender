@@ -9,7 +9,45 @@ import Config
 
 config :song_recommender,
   ecto_repos: [SongRecommender.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime],
+  # 35 total genres
+  genres: [
+    "acoustic",
+    "afrobeat",
+    "alt-rock",
+    "ambient",
+    "black-metal",
+    "blues",
+    "breakbeat",
+    "chicago-house",
+    "chill",
+    "classical",
+    "club",
+    "comedy",
+    "techno",
+    "country",
+    "dance",
+    "dancehall",
+    "death-metal",
+    "deep-house",
+    "disco",
+    "dub",
+    "edm",
+    "funk",
+    "gospel",
+    "guitar",
+    "pop",
+    "metal",
+    "metalcore",
+    "hard-rock",
+    "heavy-metal",
+    "hip-hop",
+    "house",
+    "jazz",
+    "k-pop",
+    "trip-hop",
+    "soul"
+  ]
 
 # Configure the endpoint
 config :song_recommender, SongRecommenderWeb.Endpoint,
