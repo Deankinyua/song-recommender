@@ -96,6 +96,14 @@ defmodule SongRecommenderWeb do
     end
   end
 
+  def setup_aliases do
+    quote do
+      alias SongRecommender.Accounts
+      alias SongRecommender.Accounts.User
+      alias SongRecommenderWeb.CustomComponents
+    end
+  end
+
   def verified_routes do
     quote do
       use Phoenix.VerifiedRoutes,
