@@ -285,6 +285,7 @@ defmodule SongRecommenderWeb.CoreComponents do
           id={@id}
           value={HTML.Form.normalize_value(@type, @value)}
           class={[
+            "focus:ring-0 focus:outline-none",
             @class || "w-full input",
             @errors != [] && (@error_class || "input-error")
           ]}
