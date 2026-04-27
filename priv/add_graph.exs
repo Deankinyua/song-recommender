@@ -41,7 +41,7 @@ defmodule AddGraph do
   defp process_chunk(chunk), do: Enum.map(chunk, &add_song_details(&1))
 
   defp add_song_details(song_details) do
-    [[artist, track_name, popularity, year_released, genre, duration_ms]] =
+    [[artist, track_name, track_id, popularity, year_released, genre, duration_ms]] =
       song_details
       |> String.trim()
       |> MyCSV.parse_string(skip_headers: false)
@@ -57,12 +57,14 @@ defmodule AddGraph do
       OPTIONAL MATCH (s)-[:BELONGS_TO]->(genre:Genre)
       CALL (*) {
         WHEN genre IS NULL THEN {
-          MERGE (s)-[:BELONGS_TO]->(g:Genre {name: $genre})
+          MATCH (g:Genre {name: $genre})
+          MERGE (s)-[:BELONGS_TO]->(g)
           MERGE (a:Artist {name: $artist})
           MERGE (a)-[:SANG]->(s)
-          RETURN s
+          RETURN s.name AS song
         }
       }
+      RETURN song
       """,
       %{
         artist: artist,
