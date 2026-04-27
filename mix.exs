@@ -9,7 +9,18 @@ defmodule SongRecommender.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps(),
+      deps: ne3ko_deps() ++ phoenix_deps(),
+      dialyzer: [
+        # Put the project-level PLT in the priv/ directory (instead of the default _build/ location)
+        plt_add_apps: [:ex_unit, :mix],
+        plt_file: {:no_warn, "priv/plts/project.plt"}
+      ],
+      preferred_cli_env: [
+        ci: :test
+      ],
+      name: "Song Recommender",
+      source_url: "https://github.com/Deankinyua/song-recommender",
+      docs: &docs/0,
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
       listeners: [Phoenix.CodeReloader]
     ]
@@ -25,9 +36,11 @@ defmodule SongRecommender.MixProject do
     ]
   end
 
-  def cli do
+  defp docs do
     [
-      preferred_envs: [precommit: :test]
+      # The main page in the docs
+      main: "Song Recommender",
+      extras: ["README.md"]
     ]
   end
 
@@ -35,10 +48,16 @@ defmodule SongRecommender.MixProject do
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
-  # Specifies your project dependencies.
-  #
+  defp ne3ko_deps do
+    [
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: :test, runtime: false},
+      {:mix_audit, "~> 2.1", only: :test, runtime: false}
+    ]
+  end
+
   # Type `mix help deps` for examples and options.
-  defp deps do
+  defp phoenix_deps do
     [
       {:phoenix, "~> 1.8.5"},
       {:phoenix_ecto, "~> 4.5"},
@@ -77,10 +96,7 @@ defmodule SongRecommender.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-      "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      setup: ["deps.get", "assets.setup", "assets.build"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["compile", "tailwind song_recommender", "esbuild song_recommender"],
       "assets.deploy": [
@@ -88,7 +104,17 @@ defmodule SongRecommender.MixProject do
         "esbuild song_recommender --minify",
         "phx.digest"
       ],
-      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
+      ci: [
+        "deps.unlock --check-unused",
+        "deps.audit",
+        "format --check-formatted",
+        "cmd npx prettier -c .",
+        "credo --strict",
+        "dialyzer",
+        "test"
+      ],
+      credo: ["credo --strict"],
+      prettier: ["cmd npx prettier -w ."]
     ]
   end
 end
