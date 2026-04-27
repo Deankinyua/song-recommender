@@ -15,6 +15,10 @@ defmodule SongRecommender.Application do
       # Start a worker by calling: SongRecommender.Worker.start_link(arg)
       # {SongRecommender.Worker, arg},
       # Start to serve requests, typically the last entry
+      %{
+        id: Boltx,
+        start: {Boltx, :start_link, [Application.get_env(:boltx, Bolt)]}
+      },
       SongRecommenderWeb.Endpoint
     ]
 
