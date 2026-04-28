@@ -58,9 +58,8 @@ defmodule AddGraph do
       CALL (*) {
         WHEN genre IS NULL THEN {
           MATCH (g:Genre {name: $genre})
-          MERGE (s)-[:BELONGS_TO]->(g)
           MERGE (a:Artist {name: $artist})
-          MERGE (a)-[:SANG]->(s)
+          MERGE (a)-[:SANG]->(s)-[:BELONGS_TO]->(g)
           RETURN s.name AS song
         }
       }
