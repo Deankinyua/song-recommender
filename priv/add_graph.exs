@@ -1,4 +1,8 @@
 defmodule AddGraph do
+  @moduledoc """
+  Add songs, genres and artists from the spotify_data csv file
+  """
+
   require Logger
 
   @chunk_size 30
