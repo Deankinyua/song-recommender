@@ -24,11 +24,21 @@ defmodule CreateListeningHistory do
 
     Logger.info("Create fake users and their listening history...", ansi_color: :green)
 
-    genre_categories = get_genre_categories()
+    # genre_categories = get_genre_categories()
+
+    genre_categories = [
+      [
+        "acoustic",
+        "blues",
+        "country",
+        "guitar",
+        "jazz"
+      ]
+    ]
 
     Enum.each(genre_categories, fn category ->
       # 1..2800
-      1..40
+      1..2
       |> Stream.chunk_every(@chunk_size)
       |> Enum.map(&process_chunk(&1, category))
     end)
@@ -47,11 +57,13 @@ defmodule CreateListeningHistory do
       name_suffix = Ecto.UUID.generate()
       name = "User_#{name_suffix}"
 
-      CreateUserWorker.enqueue(%{
-        "name" => name,
-        "yob" => yob,
-        "listening_history" => listening_history
-      })
+      dbg(listening_history)
+
+      # CreateUserWorker.enqueue(%{
+      #   "name" => name,
+      #   "yob" => yob,
+      #   "listening_history" => listening_history
+      # })
     end)
   end
 
