@@ -59,7 +59,8 @@ defmodule SongRecommender.MixProject do
   defp app_deps do
     [
       {:boltx, "~> 0.0.6"},
-      {:nimble_csv, "~> 1.1"}
+      {:nimble_csv, "~> 1.1"},
+      {:testcontainers, "~> 2.3", only: [:test, :dev]}
     ]
   end
 
