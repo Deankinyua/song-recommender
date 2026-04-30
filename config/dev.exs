@@ -10,6 +10,36 @@ config :song_recommender, SongRecommender.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
+spotify_data_file_path =
+  System.get_env("SPOTIFY_DATA_FILE_PATH") ||
+    raise """
+    environment variable SPOTIFY_DATA_FILE_PATH is missing.
+    """
+
+config :song_recommender, spotify_data_file_path: spotify_data_file_path
+
+neo4j_password =
+  System.get_env("NEO4J_PASS") ||
+    raise """
+    environment variable NEO4J_PASS is missing.
+    """
+
+neo4j_user =
+  System.get_env("NEO4J_USER") ||
+    raise """
+    environment variable NEO4J_USER is missing.
+    """
+
+config :boltx, Bolt,
+  uri: "bolt://localhost:7687",
+  auth: [username: neo4j_user, password: neo4j_password],
+  user_agent: "boltxTest/1",
+  pool_size: 15,
+  max_overflow: 3,
+  prefix: :default,
+  show_sensitive_data_on_connection_error: true,
+  name: Bolt
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

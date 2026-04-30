@@ -24,12 +24,20 @@ defmodule SongRecommender.Accounts do
 
   """
 
-  @spec register_user(attrs()) :: {:ok, user()}
-  def register_user(%{"name" => username, "yob" => user_yob}) do
-    %{"user" => %{"name" => name, "yob" => yob}} = create_user(username, user_yob)
+  @spec register_user(attrs()) :: {:ok, user()} | {:error, changeset()}
+  def register_user(attrs) do
+    changeset = change_user_registration(%User{}, attrs)
 
-    genres = get_user_genres(name)
-    {:ok, %User{genres: genres, name: name, yob: yob}}
+    if changeset.valid? do
+      %{name: username, yob: user_yob} = changeset.changes
+
+      %{"user" => %{"name" => name, "yob" => yob}} = create_user(username, user_yob)
+
+      genres = get_user_genres(name)
+      {:ok, %User{genres: genres, name: name, yob: yob}}
+    else
+      {:error, changeset}
+    end
   end
 
   def create_user(name, yob) do
