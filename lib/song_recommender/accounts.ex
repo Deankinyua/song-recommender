@@ -40,7 +40,7 @@ defmodule SongRecommender.Accounts do
     end
   end
 
-  def create_user(name, yob) do
+  defp create_user(name, yob) do
     Bolt
     |> Boltx.query!(
       """
