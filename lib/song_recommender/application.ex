@@ -7,25 +7,37 @@ defmodule SongRecommender.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      SongRecommenderWeb.Telemetry,
-      SongRecommender.Repo,
-      {DNSCluster, query: Application.get_env(:song_recommender, :dns_cluster_query) || :ignore},
-      {Phoenix.PubSub, name: SongRecommender.PubSub},
-      # Start a worker by calling: SongRecommender.Worker.start_link(arg)
-      # {SongRecommender.Worker, arg},
-      # Start to serve requests, typically the last entry
-      %{
-        id: Boltx,
-        start: {Boltx, :start_link, [Application.get_env(:boltx, Bolt)]}
-      },
-      SongRecommenderWeb.Endpoint
-    ]
+    children =
+      [
+        SongRecommenderWeb.Telemetry,
+        SongRecommender.Repo,
+        {DNSCluster,
+         query: Application.get_env(:song_recommender, :dns_cluster_query) || :ignore},
+        {Phoenix.PubSub, name: SongRecommender.PubSub},
+        # Start a worker by calling: SongRecommender.Worker.start_link(arg)
+        # {SongRecommender.Worker, arg},
+        # Start to serve requests, typically the last entry
+
+        SongRecommenderWeb.Endpoint
+      ] ++ bolt_child()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: SongRecommender.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  defp bolt_child do
+    if Application.get_env(:boltx, :start_bolt, true) do
+      [
+        %{
+          id: Boltx,
+          start: {Boltx, :start_link, [Application.get_env(:boltx, Bolt)]}
+        }
+      ]
+    else
+      []
+    end
   end
 
   # Tell Phoenix to update the endpoint configuration
