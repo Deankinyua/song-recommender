@@ -17,6 +17,7 @@ defmodule SongRecommender.DataCase do
   use ExUnit.CaseTemplate
 
   alias Ecto.Adapters.SQL.Sandbox
+  alias SongRecommender.GraphHelpers
 
   using do
     quote do
@@ -31,6 +32,11 @@ defmodule SongRecommender.DataCase do
 
   setup tags do
     SongRecommender.DataCase.setup_sandbox(tags)
+
+    on_exit(fn ->
+      GraphHelpers.clear_graph()
+    end)
+
     :ok
   end
 

@@ -15,8 +15,12 @@ defmodule SongRecommender.MixProject do
         plt_add_apps: [:ex_unit, :mix],
         plt_file: {:no_warn, "priv/plts/project.plt"}
       ],
+      test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
-        ci: :test
+        ci: :test,
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.html": :test
       ],
       name: "Song Recommender",
       source_url: "https://github.com/Deankinyua/song-recommender",
@@ -52,14 +56,16 @@ defmodule SongRecommender.MixProject do
     [
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: :test, runtime: false},
-      {:mix_audit, "~> 2.1", only: :test, runtime: false}
+      {:mix_audit, "~> 2.1", only: :test, runtime: false},
+      {:excoveralls, "~> 0.18", only: :test}
     ]
   end
 
   defp app_deps do
     [
       {:boltx, "~> 0.0.6"},
-      {:nimble_csv, "~> 1.1"}
+      {:nimble_csv, "~> 1.1"},
+      {:testcontainers, "~> 2.3", only: [:test, :dev]}
     ]
   end
 
@@ -118,7 +124,7 @@ defmodule SongRecommender.MixProject do
         "cmd npx prettier -c .",
         "credo --strict",
         "dialyzer",
-        "test"
+        "test --cover --warnings-as-errors"
       ],
       credo: ["credo --strict"],
       prettier: ["cmd npx prettier -w ."]
