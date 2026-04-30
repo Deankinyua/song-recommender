@@ -13,6 +13,16 @@ config :song_recommender, SongRecommender.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
+config :boltx, Bolt,
+  uri: "bolt://localhost:7687",
+  auth: [username: "neo4j", password: "test_password"],
+  user_agent: "boltxTest/1",
+  pool_size: 15,
+  max_overflow: 3,
+  prefix: :default,
+  show_sensitive_data_on_connection_error: true,
+  name: Bolt
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :song_recommender, SongRecommenderWeb.Endpoint,

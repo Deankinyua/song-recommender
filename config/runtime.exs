@@ -23,35 +23,6 @@ end
 config :song_recommender, SongRecommenderWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
-spotify_data_file_path =
-  System.get_env("SPOTIFY_DATA_FILE_PATH") ||
-    raise """
-    environment variable SPOTIFY_DATA_FILE_PATH is missing.
-    """
-
-config :song_recommender, spotify_data_file_path: spotify_data_file_path
-
-neo4j_password =
-  System.get_env("NEO4J_PASS") ||
-    raise """
-    environment variable NEO4J_PASS is missing.
-    """
-
-neo4j_user =
-  System.get_env("NEO4J_USER") ||
-    raise """
-    environment variable NEO4J_USER is missing.
-    """
-
-config :boltx, Bolt,
-  uri: "bolt://localhost:7687",
-  auth: [username: neo4j_user, password: neo4j_password],
-  user_agent: "boltxTest/1",
-  pool_size: 15,
-  max_overflow: 3,
-  prefix: :default,
-  name: Bolt
-
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
