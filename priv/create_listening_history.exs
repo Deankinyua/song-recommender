@@ -14,7 +14,7 @@ defmodule CreateListeningHistory do
 
   @birth_date 1970..2005
   @chunk_size 20
-  @listening_threshold_in_minutes 9000
+  @listening_threshold_in_minutes 2400
   @max_percentage_for_a_genre 58..69
 
   def start do
@@ -24,21 +24,10 @@ defmodule CreateListeningHistory do
 
     Logger.info("Create fake users and their listening history...", ansi_color: :green)
 
-    # genre_categories = get_genre_categories()
-
-    genre_categories = [
-      [
-        "acoustic",
-        "blues",
-        "country",
-        "guitar",
-        "jazz"
-      ]
-    ]
+    genre_categories = get_genre_categories()
 
     Enum.each(genre_categories, fn category ->
-      # 1..2800
-      1..2
+      1..2800
       |> Stream.chunk_every(@chunk_size)
       |> Enum.map(&process_chunk(&1, category))
     end)
@@ -57,13 +46,11 @@ defmodule CreateListeningHistory do
       name_suffix = Ecto.UUID.generate()
       name = "User_#{name_suffix}"
 
-      dbg(listening_history)
-
-      # CreateUserWorker.enqueue(%{
-      #   "name" => name,
-      #   "yob" => yob,
-      #   "listening_history" => listening_history
-      # })
+      CreateUserWorker.enqueue(%{
+        "name" => name,
+        "yob" => yob,
+        "listening_history" => listening_history
+      })
     end)
   end
 
@@ -87,11 +74,7 @@ defmodule CreateListeningHistory do
     end)
   end
 
-  @doc """
-  Exclude already listened to songs from being listened to again
-  """
-
-  def prepare_songs_for_traversal do
+  defp prepare_songs_for_traversal do
     Boltx.query!(
       Bolt,
       """
