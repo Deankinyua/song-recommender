@@ -1,7 +1,7 @@
 defmodule SongRecommender.Repo.Migrations.AddObanJobsTable do
   use Ecto.Migration
 
-  def up, do: Oban.Migration.up(version: 12)
+  def up, do: Oban.Migration.up(version: 14)
 
   # We specify `version: 1` in `down`, ensuring that we'll roll all the way back down if
   # necessary, regardless of which version we've migrated `up` to.
