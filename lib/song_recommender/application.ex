@@ -17,7 +17,7 @@ defmodule SongRecommender.Application do
         # Start a worker by calling: SongRecommender.Worker.start_link(arg)
         # {SongRecommender.Worker, arg},
         # Start to serve requests, typically the last entry
-
+        {Oban, Application.fetch_env!(:song_recommender, Oban)},
         SongRecommenderWeb.Endpoint
       ] ++ bolt_child()
 

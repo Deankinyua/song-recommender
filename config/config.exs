@@ -101,7 +101,7 @@ config :phoenix, :json_library, Jason
 config :song_recommender, Oban,
   engine: Oban.Engines.Basic,
   queues: [
-    create_user: 4,
+    create_user: 3,
     set_song_history: 1
   ],
   repo: SongRecommender.Repo
