@@ -31,12 +31,12 @@ defmodule SongRecommender.Accounts.CreateHistoryWorker do
     Enum.each(song_distribution, fn %{"limit" => limit, "genre" => genre} ->
       1..limit
       |> Stream.chunk_every(@chunk_size)
-      |> Enum.map(&process_chunk(&1, username, genre))
+      |> Enum.map(&process_songs(&1, username, genre))
     end)
   end
 
-  defp process_chunk(chunk, username, genre) do
-    Enum.each(chunk, fn _num ->
+  defp process_songs(songs, username, genre) do
+    Enum.each(songs, fn _song ->
       for duration <- @song_duration_minutes do
         duration_ms = duration * @ms_per_minute
         Songs.listen_from_genre(username, genre, duration_ms)

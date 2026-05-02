@@ -3,9 +3,9 @@ defmodule CreateListeningHistory do
   Calculated guesswork, using Zipf's Law to generate listening history.
   An official research paper by Juan I. Perotti et al finds that Zipf's law
   emerges when a combination of chords and notes are chosen as Zipfian units
-  (https://arxiv.org/abs/1902.06678) Songs with similar characteristics
-  belong to the same genre and even though this is a bit of an oversimplification,
-  I used the genre as the zipfian units.
+  (https://arxiv.org/abs/1902.06678) Songs from the same genre might share
+  similar characteristics; even though this is a bit of an oversimplification.
+  That said, I used the genre as the Zipfian units.
   """
 
   alias SongRecommender.Accounts.CreateUserWorker
@@ -14,8 +14,9 @@ defmodule CreateListeningHistory do
 
   @birth_date 1970..2005
   @chunk_size 20
-  @listening_threshold_in_minutes 2400
+  @listening_threshold_minutes 1200
   @max_percentage_for_a_genre 58..69
+  @zipf_exponent 0.96
 
   def start do
     Logger.info("Preparing songs for traversal...", ansi_color: :green)
@@ -27,21 +28,22 @@ defmodule CreateListeningHistory do
     genre_categories = get_genre_categories()
 
     Enum.each(genre_categories, fn category ->
+      # 2800 users per group of genres
       1..2800
       |> Stream.chunk_every(@chunk_size)
-      |> Enum.map(&process_chunk(&1, category))
+      |> Enum.map(&process_users(&1, category))
     end)
 
     Logger.info("Finished generating the listening history", ansi_color: :green)
   end
 
-  defp process_chunk(chunk, category) do
-    Enum.each(chunk, fn _element ->
+  defp process_users(users, category) do
+    Enum.each(users, fn _user ->
       max_percentage = Enum.at(@max_percentage_for_a_genre, :rand.uniform(10))
       yob = Enum.at(@birth_date, :rand.uniform(34))
 
       listening_history =
-        calculate_genre_distribution(max_percentage, category, @listening_threshold_in_minutes)
+        calculate_genre_distribution(max_percentage, category, @listening_threshold_minutes)
 
       name_suffix = Ecto.UUID.generate()
       name = "User_#{name_suffix}"
@@ -54,23 +56,29 @@ defmodule CreateListeningHistory do
     end)
   end
 
-  defp calculate_genre_distribution(top_genre_percentage, category, minutes_per_user) do
+  defp calculate_genre_distribution(max_percentage, category, minutes_per_user) do
     [lead_genre | other_genres] = Enum.shuffle(category)
     genre_count = Enum.count(category)
-    lead_genre_minutes = div(minutes_per_user, 100) * top_genre_percentage
-    other_genre_minutes = Enum.map(2..genre_count, fn rank -> 1 / rank * lead_genre_minutes end)
+    lead_genre_minutes = div(minutes_per_user, 100) * max_percentage
 
-    other_genre_minutes
+    other_genres_minutes =
+      Enum.map(2..genre_count, fn rank ->
+        coefficient = 1 / :math.pow(rank, @zipf_exponent)
+
+        coefficient * lead_genre_minutes
+      end)
+
+    other_genres_minutes
     |> Enum.with_index()
-    |> Enum.into(%{lead_genre => lead_genre_minutes}, fn {value, index} ->
+    |> Enum.into(%{lead_genre => lead_genre_minutes}, fn {minutes, index} ->
       genre = Enum.at(other_genres, index)
 
-      truncated_value =
-        value
+      truncated_minutes =
+        minutes
         |> :math.floor()
         |> trunc()
 
-      {genre, truncated_value}
+      {genre, truncated_minutes}
     end)
   end
 

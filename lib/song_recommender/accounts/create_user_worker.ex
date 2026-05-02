@@ -10,7 +10,7 @@ defmodule SongRecommender.Accounts.CreateUserWorker do
   alias SongRecommender.Accounts
   alias SongRecommender.Accounts.CreateHistoryWorker
 
-  @total_minutes_across_all_five_genres 175
+  @total_minutes_per_genre 35
 
   @type job :: Oban.Job.t()
 
@@ -36,7 +36,7 @@ defmodule SongRecommender.Accounts.CreateUserWorker do
 
   defp songs_per_genre(listening_history) do
     Enum.map(listening_history, fn {genre, minutes} ->
-      songs_per_genre = div(minutes, @total_minutes_across_all_five_genres)
+      songs_per_genre = div(minutes, @total_minutes_per_genre)
 
       %{genre: genre, limit: songs_per_genre}
     end)
