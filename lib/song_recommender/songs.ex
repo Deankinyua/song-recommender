@@ -8,41 +8,49 @@ defmodule SongRecommender.Songs do
   @type username :: String.t()
 
   @doc """
-  `LISTEN_TO` to one song from a given genre
-  It first checks if it can a find a song that no one has listened_to (UnvisitedSong)
-  If it finds one it marks it as LISTENED_TO by removing the UnvisitedSong label
-  then returns it for processing. If it can't find one it retrieves one song
-  from the genre (regardless of whether it has been listened to already) and returns it
-  It then marks that the user listened to that song for a specific duration of time
+  Listen's to the most popular song from a given genre.
+  It first finds songs the user hasn't listened to already.
+  Finding one, it adds the LISTENED_TO relationship to it with the
+  duration_played_ms property being the song duration.
+  After exhausting all songs it will retrieve only the songs that were played less
+  than 3 times. Then, it will update the duration_played_ms property
+  each time setting it to the former value + the song duration.
   """
 
-  @spec listen_from_genre(username(), genre(), integer()) :: bolt_response()
-  def listen_from_genre(username, genre, duration_played_ms) do
-    Bolt
-    |> Boltx.query!(
+  @spec listen_from_genre(username(), genre()) :: bolt_response()
+  def listen_from_genre(username, genre) do
+    Boltx.query!(
+      Bolt,
       """
-      MATCH (u:User {name: $username})
-      MATCH (g:Genre {name: $genre})
-      OPTIONAL MATCH (s:UnvisitedSong)-[:BELONGS_TO]->(g)
-      WITH s, u, g LIMIT 1
+      MATCH (user:User {name: $username})
+      MATCH (genre:Genre {name: $genre})
+      OPTIONAL MATCH (song:Song)-[:BELONGS_TO]->(genre)
+      WHERE NOT exists( (user)-[:LISTENED_TO]->(song) )
+      WITH song, user, genre
+        ORDER BY song.popularity DESC
+        LIMIT 1
       CALL (*) {
-        WHEN s IS NULL THEN {
-          MATCH (song:Song)-[:BELONGS_TO]->(g)
-          RETURN song LIMIT 1
+        WHEN song IS NULL THEN {
+          MATCH (user)-[l:LISTENED_TO]->(listenedToSong:Song)-[:BELONGS_TO]->(genre)
+          WHERE l.duration_played_ms < listenedToSong.duration_ms * 3
+          RETURN listenedToSong AS finalSong
+          ORDER BY finalSong.popularity DESC
+          LIMIT 1
         }
-        WHEN s IS NOT NULL THEN {
-          REMOVE s:UnvisitedSong
-          RETURN s AS song
+        WHEN song IS NOT NULL THEN {
+          RETURN song AS finalSong
         }
       }
-      MERGE (u)-[:LISTENED_TO {duration_played_ms: $duration_played_ms}]->(song)
+      MERGE (user)-[lt:LISTENED_TO]->(finalSong)
+      ON CREATE
+      SET lt.duration_played_ms = finalSong.duration_ms
+      ON MATCH
+      SET lt.duration_played_ms = lt.duration_played_ms + finalSong.duration_ms
       """,
       %{
-        duration_played_ms: duration_played_ms,
         genre: genre,
         username: username
       }
     )
-    |> Boltx.Response.first()
   end
 end
