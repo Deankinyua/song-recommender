@@ -102,7 +102,7 @@ config :song_recommender, Oban,
   engine: Oban.Engines.Basic,
   queues: [
     create_user: 3,
-    set_song_history: 1
+    set_song_history: 2
   ],
   repo: SongRecommender.Repo
 

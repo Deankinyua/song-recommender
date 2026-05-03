@@ -67,11 +67,10 @@ defmodule AddGraph do
           RETURN s.name AS song
         }
       }
-      RETURN song
       """,
       %{
         artist: artist,
-        duration_ms: duration_ms,
+        duration_ms: String.to_integer(duration_ms),
         genre: genre,
         popularity: String.to_integer(popularity),
         track_id: track_id,
