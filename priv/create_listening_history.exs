@@ -14,22 +14,18 @@ defmodule CreateListeningHistory do
 
   @birth_date 1970..2005
   @chunk_size 20
-  @listening_threshold_minutes 1200
-  @max_percentage_for_a_genre 58..69
+  @max_percentage_for_a_genre 43..69
+  @songs_threshold 120
   @zipf_exponent 0.96
 
   def start do
-    Logger.info("Preparing songs for traversal...", ansi_color: :green)
-    prepare_songs_for_traversal()
-    Logger.info("Marked relevant songs as Unvisited", ansi_color: :green)
-
     Logger.info("Create fake users and their listening history...", ansi_color: :green)
 
     genre_categories = get_genre_categories()
 
     Enum.each(genre_categories, fn category ->
-      # 2800 users per group of genres
-      1..2800
+      # 500 users per group of genres
+      1..500
       |> Stream.chunk_every(@chunk_size)
       |> Enum.map(&process_users(&1, category))
     end)
@@ -39,11 +35,11 @@ defmodule CreateListeningHistory do
 
   defp process_users(users, category) do
     Enum.each(users, fn _user ->
-      max_percentage = Enum.at(@max_percentage_for_a_genre, :rand.uniform(10))
+      max_percentage = Enum.at(@max_percentage_for_a_genre, :rand.uniform(25))
       yob = Enum.at(@birth_date, :rand.uniform(34))
 
       listening_history =
-        calculate_genre_distribution(max_percentage, category, @listening_threshold_minutes)
+        calculate_genre_distribution(max_percentage, category, @songs_threshold)
 
       name_suffix = Ecto.UUID.generate()
       name = "User_#{name_suffix}"
@@ -56,40 +52,37 @@ defmodule CreateListeningHistory do
     end)
   end
 
-  defp calculate_genre_distribution(max_percentage, category, minutes_per_user) do
+  defp calculate_genre_distribution(max_percentage, category, songs_threshold) do
     [lead_genre | other_genres] = Enum.shuffle(category)
     genre_count = Enum.count(category)
-    lead_genre_minutes = div(minutes_per_user, 100) * max_percentage
+    lead_genre_songs = songs_threshold / 100 * max_percentage
 
-    other_genres_minutes =
+    truncated_lead_genre_songs =
+      lead_genre_songs
+      |> :math.floor()
+      |> trunc()
+
+    other_genres_songs =
       Enum.map(2..genre_count, fn rank ->
         coefficient = 1 / :math.pow(rank, @zipf_exponent)
 
-        coefficient * lead_genre_minutes
+        coefficient * lead_genre_songs
       end)
 
-    other_genres_minutes
+    other_genres_songs
     |> Enum.with_index()
-    |> Enum.into(%{lead_genre => lead_genre_minutes}, fn {minutes, index} ->
-      genre = Enum.at(other_genres, index)
+    |> Enum.reduce(
+      [%{genre: lead_genre, limit: truncated_lead_genre_songs}],
+      fn {songs, index}, acc ->
+        genre = Enum.at(other_genres, index)
 
-      truncated_minutes =
-        minutes
-        |> :math.floor()
-        |> trunc()
+        truncated_songs =
+          songs
+          |> :math.floor()
+          |> trunc()
 
-      {genre, truncated_minutes}
-    end)
-  end
-
-  defp prepare_songs_for_traversal do
-    Boltx.query!(
-      Bolt,
-      """
-      MATCH (s:Song)
-      WHERE NOT exists((s)<-[:LISTENED_TO]-())
-      SET s:UnvisitedSong
-      """
+        [%{genre: genre, limit: truncated_songs} | acc]
+      end
     )
   end
 
