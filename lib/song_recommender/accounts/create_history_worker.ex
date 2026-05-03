@@ -2,9 +2,8 @@ defmodule SongRecommender.Accounts.CreateHistoryWorker do
   @moduledoc """
   Creates listening history for a single user.
   A limit exists inside the song_distribution details
-  We will fetch 5 sets of (limit) songs and add LISTENED_TO relationships
-  to each song with a property of duration_played_ms defined in the
-  attribute song_duration_ms
+  and it determines the number of songs to add LISTENED_TO
+  relationships.
   """
 
   use Oban.Worker,
@@ -14,8 +13,6 @@ defmodule SongRecommender.Accounts.CreateHistoryWorker do
   alias SongRecommender.Songs
 
   @chunk_size 10
-  @ms_per_minute 60_000
-  @song_duration_minutes [15, 8, 5, 4, 3]
 
   @type job :: Oban.Job.t()
 
@@ -37,10 +34,7 @@ defmodule SongRecommender.Accounts.CreateHistoryWorker do
 
   defp process_songs(songs, username, genre) do
     Enum.each(songs, fn _song ->
-      for duration <- @song_duration_minutes do
-        duration_ms = duration * @ms_per_minute
-        Songs.listen_from_genre(username, genre, duration_ms)
-      end
+      Songs.listen_from_genre(username, genre)
     end)
   end
 
