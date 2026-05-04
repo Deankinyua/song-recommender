@@ -26,7 +26,7 @@ defmodule SongRecommender.Accounts.CreateUserWorker do
         :ok
 
       {:error, _changeset} ->
-        {:error, "failed to create user"}
+        {:error, "Failed to create the user"}
     end
   end
 

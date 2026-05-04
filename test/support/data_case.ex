@@ -21,6 +21,8 @@ defmodule SongRecommender.DataCase do
 
   using do
     quote do
+      use Oban.Testing, repo: SongRecommender.Repo
+
       alias SongRecommender.Repo
 
       import Ecto
