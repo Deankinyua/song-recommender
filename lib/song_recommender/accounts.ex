@@ -31,8 +31,7 @@ defmodule SongRecommender.Accounts do
     if changeset.valid? do
       %{name: username, yob: user_yob} = changeset.changes
 
-      %{"u" => %Boltx.Types.Node{properties: %{"name" => name, "yob" => yob}}} =
-        create_user(username, user_yob)
+      %{"user" => %{"name" => name, "yob" => yob}} = create_user(username, user_yob)
 
       genres = get_user_genres(name)
       {:ok, %User{genres: genres, name: name, yob: yob}}
@@ -41,13 +40,13 @@ defmodule SongRecommender.Accounts do
     end
   end
 
-  def create_user(name, yob) do
+  defp create_user(name, yob) do
     Bolt
     |> Boltx.query!(
       """
       MERGE (u:User {name: $name})
       ON CREATE SET u.yob = $yob
-      RETURN u
+      RETURN u { .name, .yob } as user
       """,
       %{
         name: name,
@@ -73,14 +72,7 @@ defmodule SongRecommender.Accounts do
       nil ->
         nil
 
-      %{
-        "u" => %Boltx.Types.Node{
-          properties: %{
-            "name" => name,
-            "yob" => yob
-          }
-        }
-      } ->
+      %{"user" => %{"name" => name, "yob" => yob}} ->
         %User{name: name, yob: yob}
     end
   end
@@ -90,7 +82,7 @@ defmodule SongRecommender.Accounts do
     |> Boltx.query!(
       """
       MATCH (u:User {name: $name})
-      RETURN u
+      RETURN u { .name, .yob } as user
       """,
       %{name: name}
     )
@@ -153,14 +145,7 @@ defmodule SongRecommender.Accounts do
       nil ->
         nil
 
-      %{
-        "u" => %Boltx.Types.Node{
-          properties: %{
-            "name" => name,
-            "yob" => yob
-          }
-        }
-      } ->
+      %{"user" => %{"name" => name, "yob" => yob}} ->
         {:ok, %User{name: name, yob: yob}}
     end
   end
@@ -172,7 +157,7 @@ defmodule SongRecommender.Accounts do
       MATCH (u:User)
       WHERE u.token = $token AND
       u.tokenInsertedAt >= datetime() - duration({days: 60})
-      RETURN u
+      RETURN u { .name, .yob } as user
       """,
       %{token: token}
     )
@@ -185,7 +170,7 @@ defmodule SongRecommender.Accounts do
         Bolt,
         """
         MATCH (u:User {name: $name})-[:PREFERS]->(g:Genre)
-        RETURN g
+        RETURN g.name AS genre
         """,
         %{name: username}
       )
@@ -197,12 +182,7 @@ defmodule SongRecommender.Accounts do
     end
   end
 
-  defp process_genre(%{
-         "g" => %Boltx.Types.Node{
-           properties: %{"name" => name}
-         }
-       }),
-       do: name
+  defp process_genre(%{"genre" => name}), do: name
 
   @doc """
   Deletes a user token, effectively logging out the user

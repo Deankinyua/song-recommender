@@ -98,6 +98,14 @@ config :logger, :default_formatter,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :song_recommender, Oban,
+  engine: Oban.Engines.Basic,
+  queues: [
+    create_user: 3,
+    set_song_history: 2
+  ],
+  repo: SongRecommender.Repo
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

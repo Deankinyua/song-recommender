@@ -51,3 +51,5 @@ config :phoenix,
   sort_verified_routes_query_params: true
 
 config :boltx, start_bolt: false
+
+config :song_recommender, Oban, testing: :manual

@@ -1,5 +1,5 @@
 defmodule SongRecommender.AccountsTest do
-  use SongRecommender.DataCase, async: true
+  use SongRecommender.DataCase, async: false
 
   import SongRecommender.AccountsFixtures
 
