@@ -8,7 +8,7 @@ defmodule SongRecommender.AccountsFixtures do
   alias SongRecommender.Accounts.User
 
   @doc """
-  Create a user.
+  Creates a user.
   """
   @spec user_fixture(map()) :: User.t()
   def user_fixture(attrs \\ %{}) do
