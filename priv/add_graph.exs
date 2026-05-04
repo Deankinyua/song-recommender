@@ -8,7 +8,7 @@ defmodule AddGraph do
   @chunk_size 30
   @genres Application.compile_env!(:song_recommender, :genres)
 
-  NimbleCSV.define(MyCSV, separator: ",", escape: "\"")
+  NimbleCSV.define(SpotifyDataCSV, separator: ",", escape: "\"")
 
   def start do
     Logger.info("Adding genres ...", ansi_color: :green)
@@ -39,16 +39,16 @@ defmodule AddGraph do
     |> fetch_csv_file()
     |> File.stream!()
     |> Stream.chunk_every(@chunk_size)
-    |> Enum.map(&process_chunk(&1))
+    |> Enum.map(&process_songs(&1))
   end
 
-  defp process_chunk(chunk), do: Enum.map(chunk, &add_song_details(&1))
+  defp process_songs(songs), do: Enum.map(songs, &add_song_details(&1))
 
   defp add_song_details(song_details) do
     [[artist, track_name, track_id, popularity, year_released, genre, duration_ms]] =
       song_details
       |> String.trim()
-      |> MyCSV.parse_string(skip_headers: false)
+      |> SpotifyDataCSV.parse_string(skip_headers: false)
 
     Boltx.query!(
       Bolt,

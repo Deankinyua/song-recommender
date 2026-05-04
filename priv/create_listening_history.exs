@@ -57,11 +57,6 @@ defmodule CreateListeningHistory do
     genre_count = Enum.count(category)
     lead_genre_songs = songs_threshold / 100 * max_percentage
 
-    truncated_lead_genre_songs =
-      lead_genre_songs
-      |> :math.floor()
-      |> trunc()
-
     other_genres_songs =
       Enum.map(2..genre_count, fn rank ->
         coefficient = 1 / :math.pow(rank, @zipf_exponent)
@@ -72,18 +67,19 @@ defmodule CreateListeningHistory do
     other_genres_songs
     |> Enum.with_index()
     |> Enum.reduce(
-      [%{genre: lead_genre, limit: truncated_lead_genre_songs}],
+      [%{genre: lead_genre, limit: truncate(lead_genre_songs)}],
       fn {songs, index}, acc ->
         genre = Enum.at(other_genres, index)
 
-        truncated_songs =
-          songs
-          |> :math.floor()
-          |> trunc()
-
-        [%{genre: genre, limit: truncated_songs} | acc]
+        [%{genre: genre, limit: truncate(songs)} | acc]
       end
     )
+  end
+
+  defp truncate(float) do
+    float
+    |> :math.floor()
+    |> trunc()
   end
 
   defp get_genre_categories do
