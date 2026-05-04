@@ -8,7 +8,7 @@ defmodule SongRecommender.Accounts.CreateUserWorker do
     queue: :create_user
 
   alias SongRecommender.Accounts
-  alias SongRecommender.Accounts.CreateSongHistoryWorker
+  alias SongRecommender.Songs.CreateSongHistoryWorker
 
   @type job :: Oban.Job.t()
 

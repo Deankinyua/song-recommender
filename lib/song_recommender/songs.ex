@@ -53,7 +53,7 @@ defmodule SongRecommender.Songs do
   end
 
   @doc """
-  Returns a the duration a user has listened to a particualar song
+  Returns the duration a user has listened to a particualar song
   """
 
   @spec get_song_listening_time(song_id(), username()) :: listening_duration()
