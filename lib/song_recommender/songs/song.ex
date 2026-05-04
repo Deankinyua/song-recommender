@@ -5,6 +5,8 @@ defmodule SongRecommender.Songs.Song do
 
   use Ecto.Schema
 
+  @type t :: %__MODULE__{}
+
   @primary_key false
   embedded_schema do
     field(:duration_ms, :integer)

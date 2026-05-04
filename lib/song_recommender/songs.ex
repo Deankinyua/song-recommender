@@ -3,9 +3,81 @@ defmodule SongRecommender.Songs do
   Tracks how users listen to songs
   """
 
+  alias SongRecommender.Songs.Song
+
   @type bolt_response :: Boltx.Response.t()
   @type genre :: String.t()
+  @type listening_duration :: integer()
+  @type song :: Song.t()
+  @type song_id :: String.t()
   @type username :: String.t()
+
+  @doc """
+  Returns a song with its details
+  """
+  @spec get_song!(song_id()) :: song() | nil
+  def get_song!(song_id) do
+    case song_by_id(song_id) do
+      nil ->
+        nil
+
+      %{
+        "song" => %{
+          "duration_ms" => duration_ms,
+          "id" => id,
+          "name" => name,
+          "popularity" => popularity,
+          "released" => released
+        }
+      } ->
+        %Song{
+          duration_ms: duration_ms,
+          id: id,
+          name: name,
+          popularity: popularity,
+          released: released
+        }
+    end
+  end
+
+  defp song_by_id(song_id) do
+    Bolt
+    |> Boltx.query!(
+      """
+      MATCH (s:Song {id: $song_id})
+      RETURN s { .* } as song
+      """,
+      %{song_id: song_id}
+    )
+    |> Boltx.Response.first()
+  end
+
+  @doc """
+  Returns a the duration a user has listened to a particualar song
+  """
+
+  @spec get_song_listening_time(song_id(), username()) :: listening_duration()
+  def get_song_listening_time(song_id, username) do
+    case get_listening_time(song_id, username) do
+      nil ->
+        nil
+
+      %{"listening_time" => listening_time} ->
+        listening_time
+    end
+  end
+
+  defp get_listening_time(song_id, username) do
+    Bolt
+    |> Boltx.query!(
+      """
+      MATCH (s:Song {id: $song_id})<-[lt:LISTENED_TO]-(User {name: $name})
+      RETURN lt.duration_played_ms AS listening_time
+      """,
+      %{song_id: song_id, name: username}
+    )
+    |> Boltx.Response.first()
+  end
 
   @doc """
   Listen's to the most popular song from a given genre.
