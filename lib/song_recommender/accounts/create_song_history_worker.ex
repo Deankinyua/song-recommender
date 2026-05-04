@@ -1,4 +1,4 @@
-defmodule SongRecommender.Accounts.CreateHistoryWorker do
+defmodule SongRecommender.Accounts.CreateSongHistoryWorker do
   @moduledoc """
   Creates listening history for a single user.
   A limit exists inside the song_distribution details

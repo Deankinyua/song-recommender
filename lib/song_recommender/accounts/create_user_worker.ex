@@ -8,7 +8,7 @@ defmodule SongRecommender.Accounts.CreateUserWorker do
     queue: :create_user
 
   alias SongRecommender.Accounts
-  alias SongRecommender.Accounts.CreateHistoryWorker
+  alias SongRecommender.Accounts.CreateSongHistoryWorker
 
   @type job :: Oban.Job.t()
 
@@ -18,7 +18,7 @@ defmodule SongRecommender.Accounts.CreateUserWorker do
       }) do
     case Accounts.register_user(args) do
       {:ok, user} ->
-        CreateHistoryWorker.enqueue(%{
+        CreateSongHistoryWorker.enqueue(%{
           "name" => user.name,
           "song_distribution" => listening_history
         })
