@@ -16,29 +16,9 @@ defmodule CreateIndexes do
       FOR (s:Song) ON (s.normalized_name)
       """,
       """
-      CREATE INDEX song_range_index_on_id
-      IF NOT EXISTS
-      FOR (s:Song) ON (s.id)
-      """,
-      """
       CREATE INDEX user_range_index_on_yob
       IF NOT EXISTS
       FOR (u:User) ON (u.yob)
-      """,
-      """
-      CREATE INDEX user_range_index_on_name
-      IF NOT EXISTS
-      FOR (u:User) ON (u.name)
-      """,
-      """
-      CREATE INDEX artist_range_index_on_name
-      IF NOT EXISTS
-      FOR (a:Artist) ON (a.name)
-      """,
-      """
-      CREATE INDEX genre_range_index_on_name
-      IF NOT EXISTS
-      FOR (g:Genre) ON (g.name)
       """
     ]
 
