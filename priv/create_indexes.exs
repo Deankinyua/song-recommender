@@ -8,12 +8,12 @@ defmodule CreateIndexes do
       """
       CREATE TEXT INDEX artist_text_index_on_name
       IF NOT EXISTS
-      FOR (a:Artist) ON (a.name)
+      FOR (a:Artist) ON (a.normalized_name)
       """,
       """
       CREATE TEXT INDEX song_text_index_on_name
       IF NOT EXISTS
-      FOR (s:Song) ON (s.name)
+      FOR (s:Song) ON (s.normalized_name)
       """,
       """
       CREATE INDEX song_range_index_on_id
