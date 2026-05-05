@@ -1,4 +1,10 @@
 defmodule CreateConstraints do
+  @moduledoc """
+  This is the first script that you should run if
+  you're building the data yourself. It creates constraints for
+  different node properties.
+  """
+
   require Logger
 
   def start do

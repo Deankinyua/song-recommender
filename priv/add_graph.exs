@@ -1,6 +1,7 @@
 defmodule AddGraph do
   @moduledoc """
-  Add songs, genres and artists from the spotify_data csv file
+  This is the third script that you should run.
+  It Add songs, genres and artists from the spotify_data csv file.
   """
 
   require Logger

@@ -1,4 +1,10 @@
 defmodule CreateIndexes do
+  @moduledoc """
+  This is the second script that you should run.
+  It creates indexes for different node properties.
+  Indexes are used to speed up searching
+  """
+
   require Logger
 
   def start do
