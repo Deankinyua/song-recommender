@@ -29,6 +29,16 @@ defmodule CreateIndexes do
       CREATE INDEX user_range_index_on_name
       IF NOT EXISTS
       FOR (u:User) ON (u.name)
+      """,
+      """
+      CREATE INDEX artist_range_index_on_name
+      IF NOT EXISTS
+      FOR (a:Artist) ON (a.name)
+      """,
+      """
+      CREATE INDEX genre_range_index_on_name
+      IF NOT EXISTS
+      FOR (g:Genre) ON (g.name)
       """
     ]
 
