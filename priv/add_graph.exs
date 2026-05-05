@@ -64,9 +64,9 @@ defmodule AddGraph do
           MATCH (g:Genre {name: $genre})
           MERGE (a:Artist {name: $artist})
           MERGE (a)-[:SANG]->(s)-[:BELONGS_TO]->(g)
-          RETURN s.name AS song
         }
       }
+      RETURN s.name AS song
       """,
       %{
         artist: artist,
