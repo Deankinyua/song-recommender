@@ -1,11 +1,13 @@
 defmodule CreateListeningHistory do
   @moduledoc """
-  Calculated guesswork, using Zipf's Law to generate listening history.
+  This is the fourth script that you should run. It does some
+  calculated guesswork, using Zipf's Law to generate listening history.
   An official research paper by Juan I. Perotti et al finds that Zipf's law
   emerges when a combination of chords and notes are chosen as Zipfian units
   (https://arxiv.org/abs/1902.06678) Songs from the same genre might share
   similar characteristics; even though this is a bit of an oversimplification.
-  That said, I used the genre as the Zipfian units.
+  That said, I used the genre as the Zipfian units. This script will definitely
+  take a while to complete, so you can just import the data into Neo4j.
   """
 
   alias SongRecommender.Accounts.CreateUserWorker

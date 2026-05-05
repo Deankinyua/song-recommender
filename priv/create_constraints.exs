@@ -1,4 +1,10 @@
 defmodule CreateConstraints do
+  @moduledoc """
+  This is the first script that you should run if
+  you're building the data yourself. It creates constraints for
+  different node properties.
+  """
+
   require Logger
 
   def start do
@@ -30,12 +36,12 @@ defmodule CreateConstraints do
       """
       CREATE CONSTRAINT artist_string_name IF NOT EXISTS
       FOR (a:Artist)
-      REQUIRE a.name IS :: STRING
+      REQUIRE a.normalized_name IS :: STRING
       """,
       """
       CREATE CONSTRAINT song_string_name IF NOT EXISTS
       FOR (s:Song)
-      REQUIRE s.name IS :: STRING
+      REQUIRE s.normalized_name IS :: STRING
       """
     ]
 

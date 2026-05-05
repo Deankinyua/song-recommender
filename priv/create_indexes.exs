@@ -1,4 +1,10 @@
 defmodule CreateIndexes do
+  @moduledoc """
+  This is the second script that you should run.
+  It creates indexes for different node properties.
+  Indexes are used to speed up searching
+  """
+
   require Logger
 
   def start do
@@ -8,27 +14,17 @@ defmodule CreateIndexes do
       """
       CREATE TEXT INDEX artist_text_index_on_name
       IF NOT EXISTS
-      FOR (a:Artist) ON (a.name)
+      FOR (a:Artist) ON (a.normalized_name)
       """,
       """
       CREATE TEXT INDEX song_text_index_on_name
       IF NOT EXISTS
-      FOR (s:Song) ON (s.name)
-      """,
-      """
-      CREATE INDEX song_range_index_on_id
-      IF NOT EXISTS
-      FOR (s:Song) ON (s.id)
+      FOR (s:Song) ON (s.normalized_name)
       """,
       """
       CREATE INDEX user_range_index_on_yob
       IF NOT EXISTS
       FOR (u:User) ON (u.yob)
-      """,
-      """
-      CREATE INDEX user_range_index_on_name
-      IF NOT EXISTS
-      FOR (u:User) ON (u.name)
       """
     ]
 

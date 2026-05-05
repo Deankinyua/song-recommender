@@ -1,6 +1,7 @@
 defmodule AddGraph do
   @moduledoc """
-  Add songs, genres and artists from the spotify_data csv file
+  This is the third script that you should run.
+  It Add songs, genres and artists from the spotify_data csv file.
   """
 
   require Logger
@@ -57,24 +58,28 @@ defmodule AddGraph do
       ON CREATE SET s.duration_ms = $duration_ms,
                     s.popularity = $popularity,
                     s.released = $year_released,
-                    s.name = $track_name
+                    s.name = $track_name,
+                    s.normalized_name = $track_normalized_name
       OPTIONAL MATCH (s)-[:BELONGS_TO]->(genre:Genre)
       CALL (*) {
         WHEN genre IS NULL THEN {
           MATCH (g:Genre {name: $genre})
-          MERGE (a:Artist {name: $artist})
+          MERGE (a:Artist {name: $artist_name})
+          ON CREATE SET a.normalized_name = $artist_normalized_name
           MERGE (a)-[:SANG]->(s)-[:BELONGS_TO]->(g)
-          RETURN s.name AS song
         }
       }
+      RETURN s.name AS song
       """,
       %{
-        artist: artist,
+        artist_name: artist,
+        artist_normalized_name: String.downcase(artist),
         duration_ms: String.to_integer(duration_ms),
         genre: genre,
         popularity: String.to_integer(popularity),
         track_id: track_id,
         track_name: track_name,
+        track_normalized_name: String.downcase(track_name),
         year_released: String.to_integer(year_released)
       }
     )
