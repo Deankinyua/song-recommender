@@ -51,6 +51,8 @@
   --color-warning-content: oklch(98% 0.022 95.277);
   --color-error: oklch(0.56 0.2073 17.585);
   --color-error-content: oklch(96% 0.015 12.422);
+  --color-gray: oklch(0.7858 0 0);
+  --color-gray-dark: oklch(0.6 0 0);
   --radius-selector: 0.25rem;
   --radius-field: 0.25rem;
   --radius-box: 0.5rem;
@@ -94,6 +96,14 @@
 }
 
 /* Other styles */
+
+.border-gray {
+  border-color: var(--color-gray);
+}
+
+.border-gray:has(input:focus) {
+  border-color: var(--color-gray-dark);
+}
 
 .btn-primary:is(.btn-disabled, [disabled], :disabled) {
   background-color: var(--color-primary-100);
