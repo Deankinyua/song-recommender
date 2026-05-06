@@ -10,6 +10,10 @@ defmodule SongRecommender.Search do
   @type query :: String.t()
   @type song :: Song.t()
 
+  @doc """
+  Searches for an item (Artist or Song) using the normalized_name property.
+  Returns artists first (most listened_to artist first) then songs.
+  """
   @spec search_query(query()) :: [artist() | song()]
   def search_query(query) do
     %Boltx.Response{results: search_items} =

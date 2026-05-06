@@ -20,4 +20,11 @@ defmodule SongRecommender.Artists.UpdateMonthlyListenersWorker do
     Logger.info("Updated all artists' listener count", ansi_color: :green)
     :ok
   end
+
+  @spec enqueue(map()) :: {:ok, job()} | {:error, Ecto.Changeset.t()}
+  def enqueue(attrs \\ %{}) do
+    attrs
+    |> __MODULE__.new()
+    |> Oban.insert()
+  end
 end

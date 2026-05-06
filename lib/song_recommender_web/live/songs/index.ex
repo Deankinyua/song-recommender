@@ -1,8 +1,8 @@
 defmodule SongRecommenderWeb.SongsLive.Index do
   use SongRecommenderWeb, :live_view
 
-  alias SongRecommenderWeb.CustomComponents
   alias SongRecommender.Search
+  alias SongRecommenderWeb.CustomComponents
 
   @impl Phoenix.LiveView
   def render(assigns) do
@@ -55,8 +55,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def handle_params(params, _url, %{assigns: %{current_user: _user}} = socket) do
     search_query = params["q"] || ""
 
-    results = Search.search_query(search_query)
-
+    results = if search_query != "", do: Search.search_query(search_query), else: []
     dbg(results)
 
     {:noreply, socket}
