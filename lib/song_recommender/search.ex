@@ -18,27 +18,19 @@ defmodule SongRecommender.Search do
         """
         MATCH (n:Artist|Song)
         WHERE n.normalized_name CONTAINS $query
-
         OPTIONAL MATCH (n)<-[:SANG]-(a:Artist)
-
-        WITH n, a,
-        CASE
-          WHEN n.duration_ms IS NOT NULL THEN 'song'
-          ELSE 'artist'
-        END AS sangBy
-
-        RETURN n {
-        .name,
-        .id,
-        artistName:
-        CASE
-          WHEN sangBy = 'song' THEN a.name
-          ELSE NULL
-        END
-        } AS searchItem
-
-        ORDER BY sangBy
-        LIMIT 10;
+        WITH n, a
+        CALL (*) {
+          WHEN a IS NULL THEN {
+            RETURN n {.name, .monthlyListeners, id: NULL, artistName: NULL} AS searchItem
+          }
+          WHEN a IS NOT NULL THEN {
+            RETURN n {.name, .id, monthlyListeners: NULL, artistName: a.name} AS searchItem
+          }
+        }
+        RETURN searchItem
+        ORDER BY labels(n), n.monthlyListeners DESC
+        LIMIT 15
         """,
         %{query: String.downcase(query)}
       )
@@ -53,10 +45,11 @@ defmodule SongRecommender.Search do
   defp process_search_item(%{
          "searchItem" => %{
            "artistName" => nil,
+           "monthlyListeners" => monthly_listeners,
            "name" => artist_name
          }
        }),
-       do: %Artist{name: artist_name}
+       do: %Artist{listeners: monthly_listeners, name: artist_name}
 
   defp process_search_item(%{
          "searchItem" => %{
