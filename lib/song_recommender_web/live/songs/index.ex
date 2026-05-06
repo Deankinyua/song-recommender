@@ -2,6 +2,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   use SongRecommenderWeb, :live_view
 
   alias SongRecommenderWeb.CustomComponents
+  alias SongRecommender.Search
 
   @impl Phoenix.LiveView
   def render(assigns) do
@@ -27,7 +28,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
                   name="search_query"
                   value={@search_query}
                   placeholder="Search for music and artists..."
-                  phx-debounce="700"
+                  phx-debounce="500"
                   class="w-full border-none outline-none"
                 />
               </section>
@@ -51,7 +52,27 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_params(_params, _url, socket) do
+  def handle_params(params, _url, %{assigns: %{current_user: _user}} = socket) do
+    search_query = params["q"] || ""
+
+    results = Search.search_query(search_query)
+
+    dbg(results)
+
     {:noreply, socket}
+  end
+
+  @impl Phoenix.LiveView
+  def handle_event("search_submit", %{"search_query" => query}, socket) do
+    trimmed_query =
+      query
+      |> to_string()
+      |> String.trim()
+
+    if trimmed_query != "" do
+      {:noreply, push_patch(socket, to: ~p"/?q=#{trimmed_query}")}
+    else
+      {:noreply, push_patch(socket, to: ~p"/")}
+    end
   end
 end
