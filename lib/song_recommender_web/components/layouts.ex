@@ -35,7 +35,7 @@ defmodule SongRecommenderWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 bg-base-200 border-b border-gray-200 sm:px-6">
+    <header class="navbar h-[8vh] px-4 bg-base-200 border-b border-gray-200 sm:px-6">
       <div class="flex-1">
         <div phx-click={JS.patch(~p"/")} class="w-[3rem] h-[3rem] cursor-pointer">
           <img src={~p"/images/logo.svg"} class="w-full h-full object-cover" alt="App Logo" />
@@ -111,7 +111,7 @@ defmodule SongRecommenderWeb.Layouts do
 
   def main(assigns) do
     ~H"""
-    <main class="min-h-[90vh] montserrat-regular bg-base-100">
+    <main class="montserrat-regular bg-base-100">
       <div>
         {render_slot(@inner_block)}
       </div>

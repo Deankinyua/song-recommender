@@ -5,6 +5,9 @@ defmodule SongRecommenderWeb.CustomComponents do
 
   use SongRecommenderWeb, :html
 
+  alias SongRecommender.Artists.Artist
+  alias SongRecommender.Songs.Song
+
   @type assigns :: map()
   @type rendered :: Phoenix.LiveView.Rendered.t()
 
@@ -52,4 +55,69 @@ defmodule SongRecommenderWeb.CustomComponents do
     <div class="divider max-w-[90%] my-0"></div>
     """
   end
+
+  @spec search(assigns()) :: rendered()
+  def search(assigns) do
+    ~H"""
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+      <g id="SVGRepo_iconCarrier">
+        <g clip-path="url(#clip0_15_152)">
+          <rect width="24" height="24" fill="currentBackgroundColor"></rect>
+
+          <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-linejoin="round"></circle>
+
+          <path
+            d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z"
+            fill="currentColor"
+          >
+          </path>
+        </g>
+
+        <defs>
+          <clipPath id="clip0_15_152">
+            <rect width="24" height="24" fill="white"></rect>
+          </clipPath>
+        </defs>
+      </g>
+    </svg>
+    """
+  end
+
+  @spec search(assigns()) :: rendered()
+  def search_item(%{item: %Artist{} = _artist} = assigns) do
+    ~H"""
+    <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular hover:bg-accent hover:text-base-100 hover:cursor-pointer">
+      <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
+        <img src={path_to_image(@image)} alt="artist image" class="w-full h-full object-cover" />
+      </section>
+      <section class="w-[47%] flex flex-col justify-center mx-2 gap-0">
+        <div class="happy-monkey-bold">{@item.name}</div>
+        <div>artist</div>
+      </section>
+      <section>
+        <button class="btn btn-secondary w-[7rem] h-[2rem] !rounded-full">
+          Follow
+        </button>
+      </section>
+    </div>
+    """
+  end
+
+  def search_item(%{item: %Song{} = _song} = assigns) do
+    ~H"""
+    <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular hover:bg-accent hover:text-base-100 hover:cursor-pointer">
+      <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
+        <img src={path_to_image(@image)} alt="song image" class="w-full h-full object-cover" />
+      </section>
+      <section class="w-[90%] flex flex-col justify-center mx-2 gap-0">
+        <div class="happy-monkey-bold">{@item.name}</div>
+        <div>song . {@item.sang_by}</div>
+      </section>
+    </div>
+    """
+  end
+
+  defp path_to_image(num), do: ~p"/images/songs/" <> "image_#{num}.jpeg"
 end

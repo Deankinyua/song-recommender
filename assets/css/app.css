@@ -2,6 +2,7 @@
    https://tailwindcss.com/docs/configuration */
 
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Happy+Monkey&display=swap");
 
 @import "tailwindcss";
 @source "../css";
@@ -29,6 +30,7 @@
   default: true;
   prefersdark: false;
   color-scheme: "light";
+  --color-base-50: oklch(0.9037 0 0);
   --color-base-100: oklch(98% 0 0);
   --color-base-200: oklch(96% 0.001 286.375);
   --color-base-300: oklch(92% 0.004 286.32);
@@ -39,7 +41,7 @@
   --color-secondary: oklch(0.54 0.1689 60);
   --color-secondary-200: oklch(0.67 0.1589 60);
   --color-secondary-content: oklch(98% 0.002 247.839);
-  --color-accent: oklch(0% 0 0);
+  --color-accent: oklch(0.5637 0 0);
   --color-accent-content: oklch(100% 0 0);
   --color-neutral: oklch(44% 0.017 285.786);
   --color-neutral-content: oklch(98% 0 0);
@@ -51,6 +53,8 @@
   --color-warning-content: oklch(98% 0.022 95.277);
   --color-error: oklch(0.56 0.2073 17.585);
   --color-error-content: oklch(96% 0.015 12.422);
+  --color-gray: oklch(0.7858 0 0);
+  --color-gray-dark: oklch(0.6 0 0);
   --radius-selector: 0.25rem;
   --radius-field: 0.25rem;
   --radius-box: 0.5rem;
@@ -93,7 +97,33 @@
   font-style: normal;
 }
 
+.happy-monkey-regular {
+  font-family: "Happy Monkey", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.happy-monkey-bold {
+  font-family: "Happy Monkey", system-ui;
+  font-weight: 700;
+  font-style: normal;
+}
+
 /* Other styles */
+
+input::placeholder {
+  font-family: "Happy Monkey", system-ui;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.bg-base-50 {
+  background: var(--color-base-50);
+}
+
+.border-gray {
+  border-color: var(--color-gray);
+}
 
 .btn-primary:is(.btn-disabled, [disabled], :disabled) {
   background-color: var(--color-primary-100);

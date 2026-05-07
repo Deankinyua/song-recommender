@@ -65,7 +65,8 @@ defmodule AddGraph do
         WHEN genre IS NULL THEN {
           MATCH (g:Genre {name: $genre})
           MERGE (a:Artist {name: $artist_name})
-          ON CREATE SET a.normalized_name = $artist_normalized_name
+          ON CREATE SET a.normalized_name = $artist_normalized_name,
+                        a.monthlyListeners = 0
           MERGE (a)-[:SANG]->(s)-[:BELONGS_TO]->(g)
         }
       }

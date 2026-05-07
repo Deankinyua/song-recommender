@@ -13,9 +13,9 @@ defmodule SongRecommender.Accounts.User do
 
   @primary_key false
   embedded_schema do
-    field(:genres, {:array, :string}, default: [])
-    field(:name, :string)
-    field(:yob, :integer)
+    field :genres, {:array, :string}, default: []
+    field :name, :string
+    field :yob, :integer
   end
 
   @spec changeset(t(), attrs()) ::

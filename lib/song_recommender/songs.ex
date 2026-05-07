@@ -114,10 +114,9 @@ defmodule SongRecommender.Songs do
         }
       }
       MERGE (user)-[lt:LISTENED_TO]->(finalSong)
-      ON CREATE
-      SET lt.duration_played_ms = finalSong.duration_ms
-      ON MATCH
-      SET lt.duration_played_ms = lt.duration_played_ms + finalSong.duration_ms
+      ON CREATE SET lt.duration_played_ms = finalSong.duration_ms
+      ON MATCH SET lt.duration_played_ms = lt.duration_played_ms + finalSong.duration_ms
+      SET lt.lastPlayedDate = datetime()
       """,
       %{
         genre: genre,
