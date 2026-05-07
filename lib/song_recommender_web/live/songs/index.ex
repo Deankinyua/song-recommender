@@ -8,7 +8,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
-      <div class="min-h-[90vh] flex">
+      <div class="h-[92vh] flex">
         <section class="w-[25%] border border-red-400"></section>
         <section class="flex-1 flex flex-col items-center gap-6">
           <div class="mt-4 w-[50%] max-w-[27rem] mx-auto py-2 rounded-2xl border border-gray">
