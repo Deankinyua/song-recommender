@@ -46,10 +46,13 @@ defmodule SongRecommenderWeb.SongsLive.Index do
         search_items_with_images =
           if Enum.empty?(search_items), do: [], else: add_image_numbers(search_items)
 
-        {:noreply, stream(socket, :search_items, search_items_with_images, reset: true)}
+        {:noreply,
+         socket
+         |> assign(:search_query, search_query)
+         |> stream(:search_items, search_items_with_images, reset: true)}
 
       false ->
-        {:noreply, socket}
+        {:noreply, assign(socket, :search_query, "")}
     end
   end
 

@@ -13,7 +13,7 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
     <section class="flex-1 flex flex-col items-center gap-6">
       <div
         id="search-bar-container"
-        class="relative bg-base-50 mt-4 w-[50%] max-w-[27rem] mx-auto py-2 rounded-2xl border border-gray"
+        class="relative bg-base-50 mt-4 w-[70%] max-w-[25rem] mx-auto py-3 rounded-full border border-gray"
         phx-click={JS.show(to: "#search-results", transition: "fade-in-scale")}
         phx-click-away={JS.hide(to: "#search-results", transition: "fade-out-scale")}
       >
@@ -35,14 +35,14 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
               value={@search_query}
               placeholder="Discover music and artists"
               phx-debounce="500"
-              class="w-full border-none outline-none"
+              class="w-full border-none outline-none text-base-content happy-monkey-bold placeholder:text-base-content"
             />
           </section>
         </form>
 
         <section
           id="search-results"
-          class="bg-base-50 min-h-[10rem] max-h-[20rem] rounded-md absolute top-[3.5rem] left-[-3rem] right-[-3rem] overflow-y-scroll hidden"
+          class="bg-base-50 min-h-[10rem] max-h-[20rem] py-3 rounded-2xl absolute top-[4rem] left-[-4rem] right-[-4rem] overflow-y-scroll hidden"
         >
           <div
             :for={{dom_id, {search_item, image_number}} <- @search_items}
@@ -54,7 +54,7 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
         </section>
       </div>
 
-      <div class="w-[90%] mx-auto">Previously played songs</div>
+      <div class="w-[90%] mx-auto"></div>
     </section>
     """
   end
