@@ -29,6 +29,7 @@
   default: true;
   prefersdark: false;
   color-scheme: "light";
+  --color-base-50: oklch(0.9037 0 0);
   --color-base-100: oklch(98% 0 0);
   --color-base-200: oklch(96% 0.001 286.375);
   --color-base-300: oklch(92% 0.004 286.32);
@@ -96,6 +97,10 @@
 }
 
 /* Other styles */
+
+.bg-base-50 {
+  background: var(--color-base-50);
+}
 
 .border-gray {
   border-color: var(--color-gray);

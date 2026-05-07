@@ -2,7 +2,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   use SongRecommenderWeb, :live_view
 
   alias SongRecommender.Search
-  alias SongRecommenderWeb.CustomComponents
+  alias SongRecommenderWeb.Songs.SongsComponent
 
   @impl Phoenix.LiveView
   def render(assigns) do
@@ -10,33 +10,13 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     <Layouts.app flash={@flash}>
       <div class="h-[92vh] flex">
         <section class="w-[25%] border border-red-400"></section>
-        <section class="flex-1 flex flex-col items-center gap-6">
-          <div class="mt-4 w-[50%] max-w-[27rem] mx-auto py-2 rounded-2xl border border-gray">
-            <form
-              phx-submit="search_submit"
-              phx-change="search_submit"
-              class="flex gap-2 items-center"
-            >
-              <section class="w-[2rem] h-[2rem] ml-3">
-                <CustomComponents.search />
-              </section>
 
-              <section class="w-[80%]">
-                <input
-                  id="search-query"
-                  type="text"
-                  name="search_query"
-                  value={@search_query}
-                  placeholder="Search for music and artists..."
-                  phx-debounce="500"
-                  class="w-full border-none outline-none"
-                />
-              </section>
-            </form>
-          </div>
-
-          <div class="w-[90%] mx-auto">Previously played songs</div>
-        </section>
+        <.live_component
+          id="songs-component"
+          module={SongsComponent}
+          search_items={@streams.search_items}
+          search_query={@search_query}
+        />
 
         <section class="w-[25%] border border-red-400"></section>
       </div>
@@ -48,17 +28,19 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(:search_query, "")}
+     |> assign(:search_query, "")
+     |> stream_configure(:search_items, dom_id: &"search-item-#{&1.id}")
+     |> stream(:search_items, [])}
   end
 
   @impl Phoenix.LiveView
-  def handle_params(params, _url, %{assigns: %{current_user: _user}} = socket) do
+  def handle_params(params, _url, socket) do
     search_query = params["q"] || ""
 
-    results = if search_query != "", do: Search.search_query(search_query), else: []
-    dbg(results)
+    search_items = if search_query != "", do: Search.search_query(search_query), else: []
+    dbg(search_items)
 
-    {:noreply, socket}
+    {:noreply, stream(socket, :search_items, search_items, reset: true)}
   end
 
   @impl Phoenix.LiveView

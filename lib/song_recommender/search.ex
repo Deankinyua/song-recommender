@@ -53,7 +53,7 @@ defmodule SongRecommender.Search do
            "name" => artist_name
          }
        }),
-       do: %Artist{listeners: monthly_listeners, name: artist_name}
+       do: %Artist{id: Ecto.UUID.generate(), listeners: monthly_listeners, name: artist_name}
 
   defp process_search_item(%{
          "searchItem" => %{
