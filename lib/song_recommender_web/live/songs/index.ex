@@ -4,6 +4,8 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   alias SongRecommender.Search
   alias SongRecommenderWeb.Songs.SongsComponent
 
+  @image_list 1..15
+
   @impl Phoenix.LiveView
   def render(assigns) do
     ~H"""
@@ -29,7 +31,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     {:ok,
      socket
      |> assign(:search_query, "")
-     |> stream_configure(:search_items, dom_id: &"search-item-#{&1.id}")
+     |> stream_configure(:search_items, dom_id: &"search-item-#{elem(&1, 0).id}")
      |> stream(:search_items, [])}
   end
 
@@ -37,10 +39,18 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def handle_params(params, _url, socket) do
     search_query = params["q"] || ""
 
-    search_items = if search_query != "", do: Search.search_query(search_query), else: []
-    dbg(search_items)
+    case search_query != "" do
+      true ->
+        search_items = Search.search_query(search_query)
 
-    {:noreply, stream(socket, :search_items, search_items, reset: true)}
+        search_items_with_images =
+          if Enum.empty?(search_items), do: [], else: add_image_numbers(search_items)
+
+        {:noreply, stream(socket, :search_items, search_items_with_images, reset: true)}
+
+      false ->
+        {:noreply, socket}
+    end
   end
 
   @impl Phoenix.LiveView
@@ -55,5 +65,23 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     else
       {:noreply, push_patch(socket, to: ~p"/")}
     end
+  end
+
+  defp add_image_numbers(items) do
+    item_count = Enum.count(items)
+
+    images =
+      @image_list
+      |> Enum.shuffle()
+      |> Enum.take(item_count)
+
+    items
+    |> Enum.with_index()
+    |> Enum.reduce([], fn {item, index}, acc ->
+      image_num = Enum.at(images, index)
+
+      [{item, image_num} | acc]
+    end)
+    |> Enum.reverse()
   end
 end

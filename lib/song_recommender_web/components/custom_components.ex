@@ -5,6 +5,9 @@ defmodule SongRecommenderWeb.CustomComponents do
 
   use SongRecommenderWeb, :html
 
+  alias SongRecommender.Artists.Artist
+  alias SongRecommender.Songs.Song
+
   @type assigns :: map()
   @type rendered :: Phoenix.LiveView.Rendered.t()
 
@@ -79,6 +82,19 @@ defmodule SongRecommenderWeb.CustomComponents do
         </defs>
       </g>
     </svg>
+    """
+  end
+
+  @spec search(assigns()) :: rendered()
+  def search_item(%{item: %Artist{} = _artist} = assigns) do
+    ~H"""
+    <div>{@item.name}</div>
+    """
+  end
+
+  def search_item(%{item: %Song{} = _song} = assigns) do
+    ~H"""
+    <div>{@item.name}</div>
     """
   end
 end

@@ -1,4 +1,8 @@
 defmodule SongRecommenderWeb.Songs.SongsComponent do
+  @moduledoc """
+  Holds the songs and the search bar
+  """
+
   use SongRecommenderWeb, :live_component
 
   alias SongRecommenderWeb.CustomComponents
@@ -41,11 +45,11 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
           class="bg-base-50 min-h-[10rem] max-h-[20rem] rounded-md absolute top-[3.5rem] left-[-3rem] right-[-3rem] overflow-y-scroll hidden"
         >
           <div
-            :for={{dom_id, search_item} <- @search_items}
+            :for={{dom_id, {search_item, image_number}} <- @search_items}
             id={dom_id}
             class=""
           >
-            <div class="py-4">{search_item.name}</div>
+            <CustomComponents.search_item item={search_item} image={image_number} />
           </div>
         </section>
       </div>
