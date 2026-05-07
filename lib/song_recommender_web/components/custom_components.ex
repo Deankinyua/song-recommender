@@ -88,13 +88,36 @@ defmodule SongRecommenderWeb.CustomComponents do
   @spec search(assigns()) :: rendered()
   def search_item(%{item: %Artist{} = _artist} = assigns) do
     ~H"""
-    <div>{@item.name}</div>
+    <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular hover:bg-accent hover:text-base-100 hover:cursor-pointer">
+      <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
+        <img src={path_to_image(@image)} alt="artist image" class="w-full h-full object-cover" />
+      </section>
+      <section class="w-[47%] flex flex-col justify-center mx-2 gap-0">
+        <div class="happy-monkey-bold">{@item.name}</div>
+        <div>artist</div>
+      </section>
+      <section>
+        <button class="btn btn-secondary w-[7rem] h-[2rem] !rounded-full">
+          Follow
+        </button>
+      </section>
+    </div>
     """
   end
 
   def search_item(%{item: %Song{} = _song} = assigns) do
     ~H"""
-    <div>{@item.name}</div>
+    <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular hover:bg-accent hover:text-base-100 hover:cursor-pointer">
+      <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
+        <img src={path_to_image(@image)} alt="song image" class="w-full h-full object-cover" />
+      </section>
+      <section class="w-[90%] flex flex-col justify-center mx-2 gap-0">
+        <div class="happy-monkey-bold">{@item.name}</div>
+        <div>song . {@item.sang_by}</div>
+      </section>
+    </div>
     """
   end
+
+  defp path_to_image(num), do: ~p"/images/songs/" <> "image_#{num}.jpeg"
 end
