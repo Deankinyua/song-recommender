@@ -55,7 +55,6 @@ defmodule SongRecommender.Songs do
   @doc """
   Returns the duration a user has listened to a particualar song
   """
-
   @spec get_song_listening_time(song_id(), username()) :: listening_duration()
   def get_song_listening_time(song_id, username) do
     case get_listening_time(song_id, username) do
@@ -71,7 +70,7 @@ defmodule SongRecommender.Songs do
     Bolt
     |> Boltx.query!(
       """
-      MATCH (s:Song {id: $song_id})<-[lt:LISTENED_TO]-(User {name: $name})
+      MATCH (:Song {id: $song_id})<-[lt:LISTENED_TO]-(:User {name: $name})
       RETURN lt.duration_played_ms AS listening_time
       """,
       %{song_id: song_id, name: username}
@@ -88,7 +87,6 @@ defmodule SongRecommender.Songs do
   than 3 times. Then, it will update the duration_played_ms property
   each time setting it to the former value + the song duration.
   """
-
   @spec listen_from_genre(username(), genre()) :: bolt_response()
   def listen_from_genre(username, genre) do
     Boltx.query!(
