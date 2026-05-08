@@ -19,8 +19,8 @@ defmodule SongRecommender.Accounts do
 
   ## Examples
 
-      iex> register_user(%{"name" => "Dean", "yob" => 2003})
-        {:ok, %User{genres: [], name: "Dean", yob: "2003"}}
+      iex> register_user(%{"name" => "Dean"})
+        {:ok, %User{genres: [], name: "Dean"}}
 
   """
 
@@ -29,29 +29,25 @@ defmodule SongRecommender.Accounts do
     changeset = change_user_registration(%User{}, attrs)
 
     if changeset.valid? do
-      %{name: username, yob: user_yob} = changeset.changes
+      %{name: username} = changeset.changes
 
-      %{"user" => %{"name" => name, "yob" => yob}} = create_user(username, user_yob)
+      %{"user" => %{"name" => name}} = create_user(username)
 
       genres = get_user_genres(name)
-      {:ok, %User{genres: genres, name: name, yob: yob}}
+      {:ok, %User{genres: genres, name: name}}
     else
       {:error, changeset}
     end
   end
 
-  defp create_user(name, yob) do
+  defp create_user(name) do
     Bolt
     |> Boltx.query!(
       """
       MERGE (u:User {name: $name})
-      ON CREATE SET u.yob = $yob
-      RETURN u { .name, .yob } as user
+      RETURN u { .name } as user
       """,
-      %{
-        name: name,
-        yob: yob
-      }
+      %{name: name}
     )
     |> Boltx.Response.first()
   end
@@ -62,7 +58,7 @@ defmodule SongRecommender.Accounts do
   ## Examples
 
       iex> get_user!("Dean")
-        %User{genres: [], name: "Dean", yob: "2003"}
+        %User{genres: [], name: "Dean"}
 
   """
 
@@ -72,8 +68,8 @@ defmodule SongRecommender.Accounts do
       nil ->
         nil
 
-      %{"user" => %{"name" => name, "yob" => yob}} ->
-        %User{name: name, yob: yob}
+      %{"user" => %{"name" => name}} ->
+        %User{name: name}
     end
   end
 
@@ -82,7 +78,7 @@ defmodule SongRecommender.Accounts do
     |> Boltx.query!(
       """
       MATCH (u:User {name: $name})
-      RETURN u { .name, .yob } as user
+      RETURN u { .name} as user
       """,
       %{name: name}
     )
@@ -145,8 +141,8 @@ defmodule SongRecommender.Accounts do
       nil ->
         nil
 
-      %{"user" => %{"name" => name, "yob" => yob}} ->
-        {:ok, %User{name: name, yob: yob}}
+      %{"user" => %{"name" => name}} ->
+        {:ok, %User{name: name}}
     end
   end
 
@@ -157,7 +153,7 @@ defmodule SongRecommender.Accounts do
       MATCH (u:User)
       WHERE u.token = $token AND
       u.tokenInsertedAt >= datetime() - duration({days: 60})
-      RETURN u { .name, .yob } as user
+      RETURN u { .name } as user
       """,
       %{token: token}
     )

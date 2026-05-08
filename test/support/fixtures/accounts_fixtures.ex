@@ -17,8 +17,7 @@ defmodule SongRecommender.AccountsFixtures do
     {:ok, user} =
       attrs
       |> Enum.into(%{
-        name: "some_name#{unique_id}",
-        yob: 2000
+        name: "some_name#{unique_id}"
       })
       |> Accounts.register_user()
 
