@@ -5,8 +5,6 @@ defmodule SongRecommender.Accounts.CreateUserWorkerTest do
   alias SongRecommender.Songs.CreateSongHistoryWorker
 
   @valid_username "Marion"
-  @valid_yob 1997
-  @invalid_yob 1800
 
   describe "perform/1" do
     test "enqueues a create_listening_history job if creating a user is successful" do
@@ -21,7 +19,6 @@ defmodule SongRecommender.Accounts.CreateUserWorkerTest do
       assert :ok =
                perform_job(CreateUserWorker, %{
                  name: @valid_username,
-                 yob: @valid_yob,
                  listening_history: listening_history
                })
 
@@ -45,8 +42,7 @@ defmodule SongRecommender.Accounts.CreateUserWorkerTest do
 
       assert {:error, reason} =
                perform_job(CreateUserWorker, %{
-                 name: @valid_username,
-                 yob: @invalid_yob,
+                 name: nil,
                  listening_history: listening_history
                })
 

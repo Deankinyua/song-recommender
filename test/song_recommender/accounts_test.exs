@@ -6,8 +6,8 @@ defmodule SongRecommender.AccountsTest do
   alias SongRecommender.Accounts
   alias SongRecommender.Accounts.User
 
-  @invalid_user_attrs %{name: "Marion", yob: nil}
-  @valid_user_attrs %{name: "Marion", yob: 1996}
+  @invalid_user_attrs %{name: nil}
+  @valid_user_attrs %{name: "Marion"}
 
   defp create_user_and_token(_attrs) do
     user = user_fixture()
@@ -20,13 +20,12 @@ defmodule SongRecommender.AccountsTest do
       {:ok, %User{} = user} = Accounts.register_user(@valid_user_attrs)
 
       assert user.name == "Marion"
-      assert user.yob == 1996
     end
 
     test "with invalid data, returns error changeset" do
       assert {:error, %Ecto.Changeset{} = changeset} = Accounts.register_user(@invalid_user_attrs)
 
-      assert "can't be blank" in errors_on(changeset).yob
+      assert "can't be blank" in errors_on(changeset).name
     end
   end
 
@@ -35,7 +34,7 @@ defmodule SongRecommender.AccountsTest do
 
     test "returns a user if they exist", %{user: user} do
       retrieved_user = Accounts.get_user!(user.name)
-      assert retrieved_user.yob == user.yob
+      assert retrieved_user.name == user.name
     end
 
     test "returns nil for a user that doesn't exist" do
@@ -49,7 +48,6 @@ defmodule SongRecommender.AccountsTest do
     test "adds an auth token for a user", %{user: user} do
       token = Accounts.generate_user_session_token(user.name)
       retrieved_user = Accounts.get_user_by_session_token(token)
-      assert retrieved_user.yob == user.yob
       assert retrieved_user.name == user.name
     end
   end
@@ -59,7 +57,6 @@ defmodule SongRecommender.AccountsTest do
 
     test "returns a user if the token is valid", %{token: token, user: user} do
       retrieved_user = Accounts.get_user_by_session_token(token)
-      assert retrieved_user.yob == user.yob
       assert retrieved_user.name == user.name
     end
 
