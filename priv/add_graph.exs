@@ -59,13 +59,13 @@ defmodule AddGraph do
                     s.popularity = $popularity,
                     s.released = $year_released,
                     s.name = $track_name,
-                    s.normalized_name = $track_normalized_name
+                    s.normalizedName = $track_normalized_name
       OPTIONAL MATCH (s)-[:BELONGS_TO]->(genre:Genre)
       CALL (*) {
         WHEN genre IS NULL THEN {
           MATCH (g:Genre {name: $genre})
           MERGE (a:Artist {name: $artist_name})
-          ON CREATE SET a.normalized_name = $artist_normalized_name,
+          ON CREATE SET a.normalizedName = $artist_normalized_name,
                         a.monthlyListeners = 0
           MERGE (a)-[:SANG]->(s)-[:BELONGS_TO]->(g)
         }

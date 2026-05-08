@@ -11,7 +11,7 @@ defmodule SongRecommender.Search do
   @type song :: Song.t()
 
   @doc """
-  Searches for an item (Artist or Song) using the normalized_name property.
+  Searches for an item (Artist or Song) using the normalizedName property.
   Returns artists first (most listened_to artist first) then songs.
   """
   @spec search_query(query()) :: [artist() | song()]
@@ -21,7 +21,7 @@ defmodule SongRecommender.Search do
         Bolt,
         """
         MATCH (n:Artist|Song)
-        WHERE n.normalized_name CONTAINS $query
+        WHERE n.normalizedName CONTAINS $query
         OPTIONAL MATCH (n)<-[:SANG]-(a:Artist)
         WITH n, a
         CALL (*) {
