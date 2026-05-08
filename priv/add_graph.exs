@@ -55,7 +55,7 @@ defmodule AddGraph do
       Bolt,
       """
       MERGE (s:Song {id: $track_id})
-      ON CREATE SET s.duration_ms = $duration_ms,
+      ON CREATE SET s.durationMs = $duration_ms,
                     s.popularity = $popularity,
                     s.released = $year_released,
                     s.name = $track_name,

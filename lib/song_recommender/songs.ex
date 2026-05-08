@@ -23,7 +23,7 @@ defmodule SongRecommender.Songs do
 
       %{
         "song" => %{
-          "duration_ms" => duration_ms,
+          "durationMs" => duration_ms,
           "id" => id,
           "name" => name,
           "popularity" => popularity,
@@ -102,7 +102,7 @@ defmodule SongRecommender.Songs do
       CALL (*) {
         WHEN song IS NULL THEN {
           MATCH (user)-[l:LISTENED_TO]->(listenedToSong:Song)-[:BELONGS_TO]->(genre)
-          WHERE l.durationPlayedMs < listenedToSong.duration_ms * 3
+          WHERE l.durationPlayedMs < listenedToSong.durationMs * 3
           RETURN listenedToSong AS finalSong
           ORDER BY finalSong.popularity DESC
           LIMIT 1
@@ -112,8 +112,8 @@ defmodule SongRecommender.Songs do
         }
       }
       MERGE (user)-[lt:LISTENED_TO]->(finalSong)
-      ON CREATE SET lt.durationPlayedMs = finalSong.duration_ms
-      ON MATCH SET lt.durationPlayedMs = lt.durationPlayedMs + finalSong.duration_ms
+      ON CREATE SET lt.durationPlayedMs = finalSong.durationMs
+      ON MATCH SET lt.durationPlayedMs = lt.durationPlayedMs + finalSong.durationMs
       SET lt.lastPlayedDate = datetime()
       """,
       %{
