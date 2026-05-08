@@ -103,7 +103,7 @@ config :song_recommender, Oban,
   plugins: [
     {Oban.Plugins.Cron,
      crontab: [
-       {"@daily", SongRecommender.Artists.UpdateMonthlyListenersWorker}
+       {"@weekly", SongRecommender.Artists.UpdateMonthlyListenersWorker}
      ]}
   ],
   queues: [
