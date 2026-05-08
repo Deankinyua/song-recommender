@@ -17,7 +17,7 @@ defmodule CreateListeningHistory do
   @birth_date 1970..2005
   @chunk_size 20
   @max_percentage_for_a_genre 43..69
-  @songs_threshold 120
+  @songs_threshold 200
   @zipf_exponent 0.96
 
   def start do
