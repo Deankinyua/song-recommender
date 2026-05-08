@@ -46,18 +46,6 @@ defmodule SongRecommenderWeb.AuthLive.SignUp do
                 />
               </div>
 
-              <div class="form-control">
-                <CustomComponents.label name="Year of birth" />
-
-                <.input
-                  field={@form[:yob]}
-                  type="number"
-                  placeholder="Please enter your real age"
-                  required
-                  class="input input-bordered w-[70%] focus:input-primary"
-                />
-              </div>
-
               <div class="w-[10rem] mt-10">
                 <.button
                   phx-disable-with="Creating account..."
