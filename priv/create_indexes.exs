@@ -20,11 +20,6 @@ defmodule CreateIndexes do
       CREATE TEXT INDEX song_text_index_on_name
       IF NOT EXISTS
       FOR (s:Song) ON (s.normalizedName)
-      """,
-      """
-      CREATE INDEX user_range_index_on_yob
-      IF NOT EXISTS
-      FOR (u:User) ON (u.yob)
       """
     ]
 

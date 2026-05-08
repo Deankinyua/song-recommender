@@ -14,7 +14,6 @@ defmodule CreateListeningHistory do
 
   require Logger
 
-  @birth_date 1970..2005
   @chunk_size 20
   @max_percentage_for_a_genre 43..69
   @songs_threshold 200
@@ -38,7 +37,6 @@ defmodule CreateListeningHistory do
   defp process_users(users, category) do
     Enum.each(users, fn _user ->
       max_percentage = Enum.at(@max_percentage_for_a_genre, :rand.uniform(25))
-      yob = Enum.at(@birth_date, :rand.uniform(34))
 
       listening_history =
         calculate_genre_distribution(max_percentage, category, @songs_threshold)
@@ -48,7 +46,6 @@ defmodule CreateListeningHistory do
 
       CreateUserWorker.enqueue(%{
         "name" => name,
-        "yob" => yob,
         "listening_history" => listening_history
       })
     end)
