@@ -14,12 +14,12 @@ defmodule CreateIndexes do
       """
       CREATE TEXT INDEX artist_text_index_on_name
       IF NOT EXISTS
-      FOR (a:Artist) ON (a.normalized_name)
+      FOR (a:Artist) ON (a.normalizedName)
       """,
       """
       CREATE TEXT INDEX song_text_index_on_name
       IF NOT EXISTS
-      FOR (s:Song) ON (s.normalized_name)
+      FOR (s:Song) ON (s.normalizedName)
       """,
       """
       CREATE INDEX user_range_index_on_yob

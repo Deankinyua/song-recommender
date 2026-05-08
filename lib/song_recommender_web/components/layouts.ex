@@ -44,7 +44,7 @@ defmodule SongRecommenderWeb.Layouts do
       <div class="flex-none">
         <ul class="flex flex-column px-1 space-x-6 items-center">
           <li>
-            <.link href={~p"/"} class="btn btn-classic">
+            <.link href={~p"/"} class="btn btn-primary">
               Generate Wrapped
             </.link>
           </li>
@@ -74,11 +74,6 @@ defmodule SongRecommenderWeb.Layouts do
                 </g>
               </svg>
               <p>Discover Artists</p>
-            </.link>
-          </li>
-          <li>
-            <.link patch={~p"/genres"} class="btn btn-classic">
-              Explore Genres
             </.link>
           </li>
 

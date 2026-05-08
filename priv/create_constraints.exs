@@ -36,12 +36,12 @@ defmodule CreateConstraints do
       """
       CREATE CONSTRAINT artist_string_name IF NOT EXISTS
       FOR (a:Artist)
-      REQUIRE a.normalized_name IS :: STRING
+      REQUIRE a.normalizedName IS :: STRING
       """,
       """
       CREATE CONSTRAINT song_string_name IF NOT EXISTS
       FOR (s:Song)
-      REQUIRE s.normalized_name IS :: STRING
+      REQUIRE s.normalizedName IS :: STRING
       """
     ]
 

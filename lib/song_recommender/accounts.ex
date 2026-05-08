@@ -1,6 +1,6 @@
 defmodule SongRecommender.Accounts do
   @moduledoc """
-    Simple user accounts backed by neo4j
+  Simple user accounts backed by Neo4j
   """
 
   alias SongRecommender.Accounts.User
@@ -116,8 +116,8 @@ defmodule SongRecommender.Accounts do
   end
 
   defp store_token(name, token) do
-    Bolt
-    |> Boltx.query!(
+    Boltx.query!(
+      Bolt,
       """
       MATCH (u:User {name: $name})
       SET u.token = $token, u.tokenInsertedAt = datetime()

@@ -26,9 +26,9 @@ defmodule SongRecommender.GraphHelpers do
     Bolt
     |> Boltx.query!(
       """
-       CREATE (song_1:Song {id: "6VtoP2sJt5oCmPOQIve2sf", duration_ms: 166240, name: "Someone Like You", popularity: 70, released: 2012}),
-              (song_2:Song {id: "2EKxmYmUdAVXlaHCnnW13o", duration_ms: 220160, name: "Heaven", popularity: 58, released: 2012}),
-              (song_3:Song {id: "7KG9zriC6iP8F1CNihtR8Y", duration_ms: 216387, name: "Princess", popularity: 39, released: 2014}),
+       CREATE (song_1:Song {id: "6VtoP2sJt5oCmPOQIve2sf", durationMs: 166240, name: "Someone Like You", popularity: 70, released: 2012}),
+              (song_2:Song {id: "2EKxmYmUdAVXlaHCnnW13o", durationMs: 220160, name: "Heaven", popularity: 58, released: 2012}),
+              (song_3:Song {id: "7KG9zriC6iP8F1CNihtR8Y", durationMs: 216387, name: "Princess", popularity: 39, released: 2014}),
 
               (genre_1:Genre {name: $genre}),
               (artist_1:Artist {name: 'Kendrick'}),
