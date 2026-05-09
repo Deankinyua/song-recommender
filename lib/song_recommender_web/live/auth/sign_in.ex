@@ -11,7 +11,7 @@ defmodule SongRecommenderWeb.AuthLive.SignIn do
           <CustomComponents.anime />
 
           <div class="p-4 flex flex-col justify-center md:p-6">
-            <div class="mb-4 text-center lg:text-left">
+            <div class="text-center lg:text-left">
               <h1 class="text-3xl font-bold mb-2">Sign In</h1>
               <p class="text-base-content/60">
                 New here?
@@ -29,7 +29,7 @@ defmodule SongRecommenderWeb.AuthLive.SignIn do
               id="login_form"
               action={~p"/sign-in"}
               phx-update="ignore"
-              class="space-y-4 relative py-6"
+              class="relative py-2"
             >
               <div class="form-control">
                 <CustomComponents.label name="Username" />
@@ -43,7 +43,7 @@ defmodule SongRecommenderWeb.AuthLive.SignIn do
                 />
               </div>
 
-              <div class="w-[7rem] mt-10">
+              <div class="w-[7rem] mt-4">
                 <.button
                   phx-disable-with="Logging you in..."
                   class="btn btn-primary btn-block shadow-lg py-5"

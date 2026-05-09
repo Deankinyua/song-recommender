@@ -17,6 +17,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           id="songs-component"
           module={SongsComponent}
           search_items={@streams.search_items}
+          no_search_items?={@search_items_empty?}
           search_query={@search_query}
         />
 
@@ -30,6 +31,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
+     |> assign(:search_items_empty?, true)
      |> assign(:search_query, "")
      |> stream_configure(:search_items, dom_id: &"search-item-#{elem(&1, 0).id}")
      |> stream(:search_items, [])}
@@ -43,16 +45,22 @@ defmodule SongRecommenderWeb.SongsLive.Index do
       true ->
         search_items = Search.search_query(search_query)
 
+        search_items_empty? = Enum.empty?(search_items)
+
         search_items_with_images =
-          if Enum.empty?(search_items), do: [], else: add_image_numbers(search_items)
+          if search_items_empty?, do: [], else: add_image_numbers(search_items)
 
         {:noreply,
          socket
+         |> assign(:search_items_empty?, search_items_empty?)
          |> assign(:search_query, search_query)
          |> stream(:search_items, search_items_with_images, reset: true)}
 
       false ->
-        {:noreply, assign(socket, :search_query, "")}
+        {:noreply,
+         socket
+         |> assign(:search_items_empty?, true)
+         |> assign(:search_query, "")}
     end
   end
 

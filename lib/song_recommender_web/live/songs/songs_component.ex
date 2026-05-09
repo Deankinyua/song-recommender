@@ -13,8 +13,10 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
     <section class="flex-1 flex flex-col items-center gap-6">
       <div
         id="search-bar-container"
-        class="relative bg-base-50 mt-4 w-[70%] max-w-[25rem] mx-auto py-3 rounded-full border border-gray"
-        phx-click={JS.show(to: "#search-results", transition: "fade-in-scale")}
+        class="relative bg-base-50 mt-4 w-[70%] max-w-[25rem] mx-auto py-3 rounded-full border border-gray cursor-text"
+        phx-click={
+          JS.show(to: "#search-results", transition: "fade-in-scale") |> JS.focus(to: "#search-query")
+        }
         phx-click-away={JS.hide(to: "#search-results", transition: "fade-out-scale")}
       >
         <form
@@ -46,10 +48,13 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
         >
           <div
             :for={{dom_id, {search_item, image_number}} <- @search_items}
+            :if={!@no_search_items?}
             id={dom_id}
-            class=""
           >
             <CustomComponents.search_item item={search_item} image={image_number} />
+          </div>
+          <div :if={@no_search_items?}>
+            <CustomComponents.recent_searches />
           </div>
         </section>
       </div>

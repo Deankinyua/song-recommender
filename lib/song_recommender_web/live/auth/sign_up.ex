@@ -11,7 +11,7 @@ defmodule SongRecommenderWeb.AuthLive.SignUp do
           <CustomComponents.anime />
 
           <div class="p-4 flex flex-col justify-center md:p-6">
-            <div class="mb-4 text-center lg:text-left">
+            <div class="text-center lg:text-left">
               <h1 class="text-3xl font-bold mb-2">Create Account</h1>
               <p class="text-base-content/60">
                 Already registered?
@@ -32,7 +32,7 @@ defmodule SongRecommenderWeb.AuthLive.SignUp do
               phx-trigger-action={@trigger_submit}
               action={~p"/sign-in?_action=registered"}
               method="post"
-              class="space-y-4 relative py-6"
+              class="relative py-2"
             >
               <div class="form-control">
                 <CustomComponents.label name="Username" />
@@ -46,7 +46,7 @@ defmodule SongRecommenderWeb.AuthLive.SignUp do
                 />
               </div>
 
-              <div class="w-[10rem] mt-10">
+              <div class="w-[10rem] mt-4">
                 <.button
                   phx-disable-with="Creating account..."
                   class="btn btn-primary btn-block shadow-lg py-5"
@@ -77,9 +77,13 @@ defmodule SongRecommenderWeb.AuthLive.SignUp do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("save", %{"user" => user_params}, socket) do
-    Accounts.register_user(user_params)
-    {:noreply, assign(socket, :trigger_submit, true)}
+  def handle_event("save", %{"user" => %{"name" => username} = user_params}, socket) do
+    if Accounts.get_user!(username) do
+      {:noreply, put_flash(socket, :info, "#{username} already exists, try logging in")}
+    else
+      Accounts.register_user(user_params)
+      {:noreply, assign(socket, :trigger_submit, true)}
+    end
   end
 
   def handle_event("validate", %{"user" => user_params}, socket) do

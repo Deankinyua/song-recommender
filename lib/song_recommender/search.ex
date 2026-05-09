@@ -26,14 +26,14 @@ defmodule SongRecommender.Search do
         WITH n, a
         CALL (*) {
           WHEN a IS NULL THEN {
-            RETURN n {.name, .monthlyListeners, id: NULL, artistName: NULL} AS searchItem
+            RETURN n {.name, .monthlyListeners, id: NULL, artistName: NULL, popularity: NULL} AS searchItem
           }
           WHEN a IS NOT NULL THEN {
-            RETURN n {.name, .id, monthlyListeners: NULL, artistName: a.name} AS searchItem
+            RETURN n {.name, .id, .popularity, monthlyListeners: NULL, artistName: a.name} AS searchItem
           }
         }
         RETURN searchItem
-        ORDER BY labels(n), n.monthlyListeners DESC
+        ORDER BY labels(n), n.popularity DESC, n.monthlyListeners DESC
         LIMIT 15
         """,
         %{query: String.downcase(query)}

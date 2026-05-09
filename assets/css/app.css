@@ -111,7 +111,7 @@
 
 /* Other styles */
 
-input::placeholder {
+#search-query::placeholder {
   font-family: "Happy Monkey", system-ui;
   font-weight: 700;
   font-style: normal;

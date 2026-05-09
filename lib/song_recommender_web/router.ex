@@ -45,7 +45,6 @@ defmodule SongRecommenderWeb.Router do
     live_session :require_authenticated_user,
       on_mount: [{SongRecommenderWeb.UserAuth, :ensure_authenticated}] do
       live "/", SongsLive.Index, :index
-      live "/genres", GenresLive.Index, :index
     end
   end
 
