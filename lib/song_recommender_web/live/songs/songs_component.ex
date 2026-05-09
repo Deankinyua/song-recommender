@@ -46,10 +46,13 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
         >
           <div
             :for={{dom_id, {search_item, image_number}} <- @search_items}
+            :if={!@no_search_items?}
             id={dom_id}
-            class=""
           >
             <CustomComponents.search_item item={search_item} image={image_number} />
+          </div>
+          <div :if={@no_search_items?}>
+            <CustomComponents.recent_searches />
           </div>
         </section>
       </div>

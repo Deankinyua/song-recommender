@@ -85,38 +85,49 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
-  @spec search(assigns()) :: rendered()
-  def search_item(%{item: %Artist{} = _artist} = assigns) do
+  @spec search_item(assigns()) :: rendered()
+  def search_item(assigns) do
     ~H"""
     <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular hover:bg-accent hover:text-base-100 hover:cursor-pointer">
       <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
-        <img src={path_to_image(@image)} alt="artist image" class="w-full h-full object-cover" />
+        <img src={path_to_image(@image)} alt="cover image" class="w-full h-full object-cover" />
       </section>
-      <section class="w-[47%] flex flex-col justify-center mx-2 gap-0">
-        <div class="happy-monkey-bold">{@item.name}</div>
-        <div class="text-sm">artist</div>
-      </section>
-      <section>
-        <button class="btn btn-secondary w-[7rem] h-[2rem] !rounded-full">
-          Follow
-        </button>
-      </section>
+      <.item item={@item} />
     </div>
     """
   end
 
-  def search_item(%{item: %Song{} = _song} = assigns) do
+  @spec item(assigns()) :: rendered()
+  def item(%{item: %Artist{} = _artist} = assigns) do
     ~H"""
-    <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular hover:bg-accent hover:text-base-100 hover:cursor-pointer">
-      <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
-        <img src={path_to_image(@image)} alt="song image" class="w-full h-full object-cover" />
-      </section>
-      <section class="w-[90%] flex flex-col justify-center mx-2 gap-0">
-        <div class="happy-monkey-bold">{@item.name}</div>
-        <div class="text-sm">
-          Song . <span class="happy-monkey-bold">{@item.sang_by}</span>
-        </div>
-      </section>
+    <section class="w-[47%] flex flex-col justify-center mx-2 gap-0">
+      <div class="happy-monkey-bold">{@item.name}</div>
+      <div class="text-sm">artist</div>
+    </section>
+    <section>
+      <button class="btn btn-secondary w-[7rem] h-[2rem] !rounded-full">
+        Follow
+      </button>
+    </section>
+    """
+  end
+
+  def item(%{item: %Song{} = _song} = assigns) do
+    ~H"""
+    <section class="w-[90%] flex flex-col justify-center mx-2 gap-0">
+      <div class="happy-monkey-bold">{@item.name}</div>
+      <div class="text-sm">
+        Song . <span class="happy-monkey-bold">{@item.sang_by}</span>
+      </div>
+    </section>
+    """
+  end
+
+  @spec recent_searches(assigns()) :: rendered()
+  def recent_searches(assigns) do
+    ~H"""
+    <div class="rounded-md py-2 px-2 mx-3 happy-monkey-regular">
+      Recent searches
     </div>
     """
   end
