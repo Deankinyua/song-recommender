@@ -13,8 +13,10 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
     <section class="flex-1 flex flex-col items-center gap-6">
       <div
         id="search-bar-container"
-        class="relative bg-base-50 mt-4 w-[70%] max-w-[25rem] mx-auto py-3 rounded-full border border-gray"
-        phx-click={JS.show(to: "#search-results", transition: "fade-in-scale")}
+        class="relative bg-base-50 mt-4 w-[70%] max-w-[25rem] mx-auto py-3 rounded-full border border-gray cursor-text"
+        phx-click={
+          JS.show(to: "#search-results", transition: "fade-in-scale") |> JS.focus(to: "#search-query")
+        }
         phx-click-away={JS.hide(to: "#search-results", transition: "fade-out-scale")}
       >
         <form
