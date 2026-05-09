@@ -94,7 +94,7 @@ defmodule SongRecommenderWeb.CustomComponents do
       </section>
       <section class="w-[47%] flex flex-col justify-center mx-2 gap-0">
         <div class="happy-monkey-bold">{@item.name}</div>
-        <div>artist</div>
+        <div class="text-sm">artist</div>
       </section>
       <section>
         <button class="btn btn-secondary w-[7rem] h-[2rem] !rounded-full">
@@ -113,7 +113,9 @@ defmodule SongRecommenderWeb.CustomComponents do
       </section>
       <section class="w-[90%] flex flex-col justify-center mx-2 gap-0">
         <div class="happy-monkey-bold">{@item.name}</div>
-        <div>song . {@item.sang_by}</div>
+        <div class="text-sm">
+          Song . <span class="happy-monkey-bold">{@item.sang_by}</span>
+        </div>
       </section>
     </div>
     """
