@@ -77,9 +77,13 @@ defmodule SongRecommenderWeb.AuthLive.SignUp do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("save", %{"user" => user_params}, socket) do
-    Accounts.register_user(user_params)
-    {:noreply, assign(socket, :trigger_submit, true)}
+  def handle_event("save", %{"user" => %{"name" => username} = user_params}, socket) do
+    if Accounts.get_user!(username) do
+      {:noreply, put_flash(socket, :info, "#{username} already exists, try logging in")}
+    else
+      Accounts.register_user(user_params)
+      {:noreply, assign(socket, :trigger_submit, true)}
+    end
   end
 
   def handle_event("validate", %{"user" => user_params}, socket) do
