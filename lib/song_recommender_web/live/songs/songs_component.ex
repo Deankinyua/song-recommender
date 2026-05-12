@@ -44,18 +44,28 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
           </form>
           <section
             id="search-results"
-            phx-update="stream"
             class="bg-base-50 min-h-[10rem] max-h-[20rem] py-3 rounded-2xl absolute top-[4rem] left-[-4rem] right-[-4rem] overflow-y-scroll hidden"
           >
-            <div
-              :for={{dom_id, {search_item, image_number}} <- @search_items}
-              :if={!@no_search_items?}
-              id={dom_id}
-            >
-              <CustomComponents.search_item item={search_item} image={image_number} />
+            <div :if={@show_recent_searches?}>
+              <div class="rounded-md py-2 px-2 mx-3 happy-monkey-regular">
+                Recent searches
+              </div>
             </div>
-            <div :if={@no_search_items?} id="no-search-results">
-              <CustomComponents.recent_searches />
+            <div :if={!@show_recent_searches? && @empty_search?}>
+              <div class="rounded-md py-2 px-2 mx-3 happy-monkey-regular">
+                Sorry dawg I don't have those songs
+              </div>
+            </div>
+            <div
+              id="search-items"
+              phx-update="stream"
+            >
+              <div
+                :for={{dom_id, {search_item, image_number}} <- @search_items}
+                id={dom_id}
+              >
+                <CustomComponents.search_item item={search_item} image={image_number} />
+              </div>
             </div>
           </section>
         </div>
