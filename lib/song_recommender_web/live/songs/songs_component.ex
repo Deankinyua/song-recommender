@@ -10,56 +10,68 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
   @impl Phoenix.LiveComponent
   def render(assigns) do
     ~H"""
-    <section class="flex-1 flex flex-col items-center gap-6">
-      <div
-        id="search-bar-container"
-        class="relative bg-base-50 mt-4 w-[70%] max-w-[25rem] mx-auto py-3 rounded-full border border-gray cursor-text"
-        phx-click={
-          JS.show(to: "#search-results", transition: "fade-in-scale") |> JS.focus(to: "#search-query")
-        }
-        phx-click-away={JS.hide(to: "#search-results", transition: "fade-out-scale")}
-      >
-        <form
-          phx-submit="search_submit"
-          phx-change="search_submit"
-          class="flex gap-2 items-center"
-          autocomplete="off"
+    <section class="flex-1 flex flex-col items-center gap-2">
+      <div class="w-full h-[10%] flex items-center border border-blue-400">
+        <div
+          id="search-bar-container"
+          class="relative bg-base-50 w-[70%] max-w-[25rem] mx-auto py-3 rounded-full border border-gray cursor-text"
+          phx-click={
+            JS.show(to: "#search-results", transition: "fade-in-scale")
+            |> JS.focus(to: "#search-query")
+          }
+          phx-click-away={JS.hide(to: "#search-results", transition: "fade-out-scale")}
         >
-          <section class="w-[2rem] h-[2rem] ml-3">
-            <CustomComponents.search />
-          </section>
-
-          <section class="w-[80%]">
-            <input
-              id="search-query"
-              type="text"
-              name="search_query"
-              value={@search_query}
-              placeholder="Discover music and artists"
-              phx-debounce="500"
-              class="w-full border-none outline-none text-base-content happy-monkey-bold placeholder:text-base-content"
-            />
-          </section>
-        </form>
-
-        <section
-          id="search-results"
-          class="bg-base-50 min-h-[10rem] max-h-[20rem] py-3 rounded-2xl absolute top-[4rem] left-[-4rem] right-[-4rem] overflow-y-scroll hidden"
-        >
-          <div
-            :for={{dom_id, {search_item, image_number}} <- @search_items}
-            :if={!@no_search_items?}
-            id={dom_id}
+          <form
+            phx-submit="search_submit"
+            phx-change="search_submit"
+            class="flex gap-2 items-center"
+            autocomplete="off"
           >
-            <CustomComponents.search_item item={search_item} image={image_number} />
-          </div>
-          <div :if={@no_search_items?}>
-            <CustomComponents.recent_searches />
+            <section class="w-[2rem] h-[2rem] ml-3">
+              <CustomComponents.search />
+            </section>
+            <section class="w-[80%]">
+              <input
+                id="search-query"
+                type="text"
+                name="search_query"
+                value={@search_query}
+                placeholder="Discover music and artists"
+                phx-debounce="500"
+                class="w-full border-none outline-none text-base-content happy-monkey-bold placeholder:text-base-content"
+              />
+            </section>
+          </form>
+          <section
+            id="search-results"
+            phx-update="stream"
+            class="bg-base-50 min-h-[10rem] max-h-[20rem] py-3 rounded-2xl absolute top-[4rem] left-[-4rem] right-[-4rem] overflow-y-scroll hidden"
+          >
+            <div
+              :for={{dom_id, {search_item, image_number}} <- @search_items}
+              :if={!@no_search_items?}
+              id={dom_id}
+            >
+              <CustomComponents.search_item item={search_item} image={image_number} />
+            </div>
+            <div :if={@no_search_items?} id="no-search-results">
+              <CustomComponents.recent_searches />
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div class="w-[92%] h-[90%] mx-auto border border-blue-400 flex flex-col justify-between">
+        <section class="border border-red-400">songs</section>
+        <section class="h-[15%] border border-red-400 flex justify-center items-center">
+          <div class="w-[60%] flex items-center gap-2 border border-blue-400 song-player">
+            <div class="w-[2.5rem]"><CustomComponents.back_icon /></div>
+            <div class="w-[2.5rem]"><CustomComponents.play_pause_icon /></div>
+            <div class="w-[2.5rem]"><CustomComponents.next_icon /></div>
+            <div class="w-[2.5rem]"><CustomComponents.skip_icon /></div>
           </div>
         </section>
       </div>
-
-      <div class="w-[90%] mx-auto"></div>
     </section>
     """
   end
