@@ -30,6 +30,7 @@ defmodule SongRecommenderWeb.AuthLive.SignIn do
               action={~p"/sign-in"}
               phx-update="ignore"
               class="relative py-2"
+              autocomplete="off"
             >
               <div class="form-control">
                 <CustomComponents.label name="Username" />

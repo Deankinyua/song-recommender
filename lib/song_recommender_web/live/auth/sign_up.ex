@@ -33,6 +33,7 @@ defmodule SongRecommenderWeb.AuthLive.SignUp do
               action={~p"/sign-in?_action=registered"}
               method="post"
               class="relative py-2"
+              autocomplete="off"
             >
               <div class="form-control">
                 <CustomComponents.label name="Username" />
