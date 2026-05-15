@@ -35,16 +35,14 @@ defmodule SongRecommenderWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar h-[8vh] px-4 bg-base-200 border-b border-gray-200 sm:px-6">
+    <header class="navbar h-[8vh] px-4 bg-base-200 text-base-100 border-b border-gray-200 sm:px-6">
       <div class="flex-1">
-        <div phx-click={JS.patch(~p"/")} class="w-[3rem] h-[3rem] cursor-pointer">
-          <img src={~p"/images/logo.svg"} class="w-full h-full object-cover" alt="App Logo" />
-        </div>
+        <div phx-click={JS.patch(~p"/")} class="w-[3rem] h-[3rem] cursor-pointer"></div>
       </div>
       <div class="flex-none">
         <ul class="flex flex-column px-1 space-x-6 items-center">
           <li>
-            <.link href={~p"/"} class="btn btn-primary">
+            <.link href={~p"/"} class="btn btn-ghost">
               Generate Wrapped
             </.link>
           </li>
@@ -52,7 +50,7 @@ defmodule SongRecommenderWeb.Layouts do
           <li>
             <.link
               patch={~p"/"}
-              class="btn btn-ghost flex items-center gap-2 underline hover:btn-primary"
+              class="btn btn-ghost flex items-center gap-2 underline"
             >
               <svg
                 viewBox="0 0 24 24"

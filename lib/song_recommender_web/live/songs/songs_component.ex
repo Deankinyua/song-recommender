@@ -14,7 +14,7 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
       <div class="w-full h-[10%] flex items-center border border-blue-400">
         <div
           id="search-bar-container"
-          class="relative bg-base-50 w-[70%] max-w-[25rem] mx-auto py-3 rounded-full border border-gray cursor-text"
+          class="relative bg-base-50 w-[70%] max-w-[25rem] mx-auto py-3 rounded-full text-base-100 border border-gray cursor-text"
           phx-click={
             JS.show(to: "#search-results", transition: "fade-in-scale")
             |> JS.focus(to: "#search-query")
@@ -38,7 +38,7 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
                 value={@search_query}
                 placeholder="Discover music and artists"
                 phx-debounce="500"
-                class="w-full border-none outline-none text-base-content happy-monkey-bold placeholder:text-base-content"
+                class="w-full border-none outline-none happy-monkey-bold placeholder:text-base-100"
               />
             </section>
           </form>
@@ -71,14 +71,19 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
         </div>
       </div>
 
-      <div class="w-[92%] h-[90%] mx-auto border border-blue-400 flex flex-col justify-between">
+      <div class="w-[92%] h-[90%] mx-auto flex flex-col justify-between">
         <section class="border border-red-400">songs</section>
-        <section class="h-[15%] border border-red-400 flex justify-center items-center">
-          <div class="w-[60%] flex items-center gap-2 border border-blue-400 song-player">
-            <div class="w-[2.5rem]"><CustomComponents.back_icon /></div>
-            <div class="w-[2.5rem]"><CustomComponents.play_pause_icon /></div>
-            <div class="w-[2.5rem]"><CustomComponents.next_icon /></div>
-            <div class="w-[2.5rem]"><CustomComponents.skip_icon /></div>
+        <section class="h-[15%] bg-base-50 flex justify-center items-center">
+          <div class="w-[60%] flex justify-center items-center gap-4 song-player">
+            <div class="w-[2.5rem]  flex justify-center">
+              <CustomComponents.back_icon />
+            </div>
+            <div class="w-[2.5rem]  flex justify-center">
+              <CustomComponents.play_pause_icon />
+            </div>
+            <div class="w-[2.5rem]  flex justify-center">
+              <CustomComponents.next_icon />
+            </div>
           </div>
         </section>
       </div>
