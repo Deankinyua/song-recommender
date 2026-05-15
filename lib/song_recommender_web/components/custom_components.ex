@@ -14,7 +14,7 @@ defmodule SongRecommenderWeb.CustomComponents do
   @spec anime(assigns()) :: rendered()
   def anime(assigns) do
     ~H"""
-    <div class="hidden lg:flex flex-col items-center justify-center bg-primary p-12 text-primary-content relative overflow-hidden">
+    <div class="hidden lg:flex flex-col items-center justify-center bg-base-200 p-12 text-primary-content relative overflow-hidden">
       <div class="relative z-10 text-center">
         <div class="avatar mb-8">
           <div class="w-64 h-64 rounded-full ring ring-secondary ring-offset-base-100 ring-offset-2">
@@ -88,7 +88,7 @@ defmodule SongRecommenderWeb.CustomComponents do
   @spec search_item(assigns()) :: rendered()
   def search_item(assigns) do
     ~H"""
-    <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular hover:bg-accent hover:text-base-100 hover:cursor-pointer">
+    <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular text-base-100 hover:bg-accent hover:text-base-100 hover:cursor-pointer">
       <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
         <img src={path_to_image(@image)} alt="cover image" class="w-full h-full object-cover" />
       </section>
@@ -105,7 +105,7 @@ defmodule SongRecommenderWeb.CustomComponents do
       <div class="text-sm">artist</div>
     </section>
     <section>
-      <button class="btn btn-secondary w-[7rem] h-[2rem] !rounded-full">
+      <button class="btn btn-secondary w-[7rem] h-[2rem] text-base-50 !rounded-full">
         Follow
       </button>
     </section>
@@ -136,7 +136,7 @@ defmodule SongRecommenderWeb.CustomComponents do
   def back_icon(assigns) do
     ~H"""
     <svg
-      fill="#000000"
+      fill="#ffffff"
       width="20px"
       version="1.1"
       xmlns="http://www.w3.org/2000/svg"
@@ -162,7 +162,7 @@ defmodule SongRecommenderWeb.CustomComponents do
   def next_icon(assigns) do
     ~H"""
     <svg
-      fill="#000000"
+      fill="#ffffff"
       width="20px"
       version="1.1"
       xmlns="http://www.w3.org/2000/svg"
@@ -219,7 +219,7 @@ defmodule SongRecommenderWeb.CustomComponents do
             15,26
             11,26
           "
-        fill="currentColor"
+        fill="white"
       />
 
       <polygon
@@ -230,7 +230,7 @@ defmodule SongRecommenderWeb.CustomComponents do
             25,26
             21,26
           "
-        fill="currentColor"
+        fill="white"
       />
     </svg>
     """
