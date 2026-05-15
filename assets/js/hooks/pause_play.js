@@ -36,8 +36,8 @@ PausePlayHooks.PausePlay = {
 
     const buildShapeTransition = (isStopped) => {
       // when stopped is true, we move from pause to play
-      const from = isStopped ? "pause" : "play";
-      const to = isStopped ? "play" : "pause";
+      const from = isStopped ? "play" : "pause";
+      const to = isStopped ? "pause" : "play";
 
       return Object.keys(shapes[from]).reduce((acc, key) => {
         acc[`start_shape_${key}`] = shapes[from][key];

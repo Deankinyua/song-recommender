@@ -214,10 +214,10 @@ defmodule SongRecommenderWeb.CustomComponents do
       <polygon
         id="polygon-1"
         points="
-            11,10
-            15,10
-            15,26
-            11,26
+           11, 10
+           11, 18
+           11, 18
+           11, 26
           "
         fill="white"
       />
@@ -225,10 +225,10 @@ defmodule SongRecommenderWeb.CustomComponents do
       <polygon
         id="polygon-2"
         points="
-            21,10
-            25,10
-            25,26
-            21,26
+            11, 10
+            28, 18
+            28, 18
+            11, 26
           "
         fill="white"
       />
