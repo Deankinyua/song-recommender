@@ -76,17 +76,33 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
         <section
           id="song-player"
           phx-hook="SongPlayer"
-          class="h-[15%] bg-base-50 flex flex-col gap-2 justify-center items-center song-player text-base-100"
+          class="h-[18%] bg-base-50 flex flex-col gap-2 justify-center items-center song-player text-base-100"
         >
           <div class="w-[60%] flex justify-center items-center gap-4">
-            <div class="w-[2.5rem] flex justify-center">
+            <div id="back-icon" class="control-icon">
               <CustomComponents.back_icon />
+              <div class="top-[-1.8rem] left-[-1.4rem] tooltip">
+                Back
+              </div>
             </div>
-            <div class="w-[2.5rem] flex justify-center">
+            <div id="play-icon" class="control-icon">
               <CustomComponents.play_pause_icon />
+              <div class="top-[-1.8rem] left-[-0.4rem] tooltip">
+                Pause
+              </div>
             </div>
-            <div class="w-[2.5rem] flex justify-center">
+            <div id="next-icon" class="control-icon">
               <CustomComponents.next_icon />
+              <div class="top-[-1.8rem] left-[-0.4rem] tooltip">
+                Next
+              </div>
+            </div>
+            <div id="skip-icon" class="control-icon">
+              <CustomComponents.skip_icon />
+
+              <div class="top-[-1.3rem] left-[-0.4rem] tooltip">
+                Skip
+              </div>
             </div>
           </div>
 

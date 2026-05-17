@@ -1,0 +1,23 @@
+.tooltip {
+  @apply bg-accent absolute px-2 py-1 rounded text-xs hidden;
+}
+
+.control-icon {
+  @apply w-[2.5rem] flex justify-center relative;
+}
+
+#back-icon:hover .tooltip {
+  display: block;
+}
+
+#play-icon:hover .tooltip {
+  display: block;
+}
+
+#next-icon:hover .tooltip {
+  display: block;
+}
+
+#skip-icon:hover .tooltip {
+  display: block;
+}

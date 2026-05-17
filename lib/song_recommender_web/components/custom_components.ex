@@ -214,13 +214,13 @@ defmodule SongRecommenderWeb.CustomComponents do
       <g id="SVGRepo_bgCarrier_3" stroke-width="0"></g>
       <g id="SVGRepo_tracerCarrier_3" stroke-linecap="round" stroke-linejoin="round"></g>
       <g id="SVGRepo_iconCarrier_3">
-        <path d="M2 18.3429L10.7429 12.1714L2 6V18.3429Z" fill="#000000"></path>
+        <path d="M2 18.3429L10.7429 12.1714L2 6V18.3429Z" fill="#ffffff"></path>
 
         <path
           fill-rule="evenodd"
           clip-rule="evenodd"
           d="M20 12.1714L11.2571 18.3429V6L20 12.1714ZM20 12.1714V6H22V18H20V12.1714Z"
-          fill="#000000"
+          fill="#ffffff"
         >
         </path>
       </g>
