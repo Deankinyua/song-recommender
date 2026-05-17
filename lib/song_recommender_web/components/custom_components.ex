@@ -146,7 +146,7 @@ defmodule SongRecommenderWeb.CustomComponents do
           max="240"
           step="0.01"
           value="0"
-          class="w-full"
+          class="w-full cursor-pointer"
         />
       </div>
 
