@@ -37,7 +37,6 @@ config :boltx, Bolt,
   pool_size: 15,
   max_overflow: 3,
   prefix: :default,
-  show_sensitive_data_on_connection_error: true,
   name: Bolt
 
 # For development, we disable any cache and enable
