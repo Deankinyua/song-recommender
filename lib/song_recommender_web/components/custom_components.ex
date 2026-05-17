@@ -132,6 +132,29 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
+  @spec song_progress_bar(assigns()) :: rendered()
+  def song_progress_bar(assigns) do
+    ~H"""
+    <div class="w-[85%] flex items-center gap-3 mx-auto">
+      <div id="song-played-time">0:00</div>
+
+      <div class="w-[80%] flex justify-center">
+        <input
+          id="song-progress"
+          type="range"
+          min="0"
+          max="240"
+          step="0.01"
+          value="0"
+          class="w-full"
+        />
+      </div>
+
+      <div id="song-duration">4:00</div>
+    </div>
+    """
+  end
+
   @spec back_icon(assigns()) :: rendered()
   def back_icon(assigns) do
     ~H"""
@@ -208,7 +231,7 @@ defmodule SongRecommenderWeb.CustomComponents do
   @spec play_pause_icon(assigns()) :: rendered()
   def play_pause_icon(assigns) do
     ~H"""
-    <svg id="pause-play" width="36" viewBox="0 0 36 36" phx-hook="PausePlay" fill="white">
+    <svg id="pause-play" width="36" viewBox="0 0 36 36" fill="white">
       <circle cx="18" cy="18" r="17" class="play-btn-circle" />
 
       <polygon

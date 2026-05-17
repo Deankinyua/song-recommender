@@ -73,18 +73,24 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
 
       <div class="w-[92%] h-[90%] mx-auto flex flex-col justify-between">
         <section class="border border-red-400">songs</section>
-        <section class="h-[15%] bg-base-50 flex justify-center items-center">
-          <div class="w-[60%] flex justify-center items-center gap-4 song-player">
-            <div class="w-[2.5rem]  flex justify-center">
+        <section
+          id="song-player"
+          phx-hook="SongPlayer"
+          class="h-[15%] bg-base-50 flex flex-col gap-2 justify-center items-center song-player text-base-100"
+        >
+          <div class="w-[60%] flex justify-center items-center gap-4">
+            <div class="w-[2.5rem] flex justify-center">
               <CustomComponents.back_icon />
             </div>
-            <div class="w-[2.5rem]  flex justify-center">
+            <div class="w-[2.5rem] flex justify-center">
               <CustomComponents.play_pause_icon />
             </div>
-            <div class="w-[2.5rem]  flex justify-center">
+            <div class="w-[2.5rem] flex justify-center">
               <CustomComponents.next_icon />
             </div>
           </div>
+
+          <CustomComponents.song_progress_bar />
         </section>
       </div>
     </section>

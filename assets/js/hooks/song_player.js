@@ -5,10 +5,11 @@ import {
   returnPolygonPoints,
 } from "js/helpers/animation_helpers.js";
 
-let PausePlayHooks = {};
+let SongPlayerHooks = {};
 
-PausePlayHooks.PausePlay = {
+SongPlayerHooks.SongPlayer = {
   mounted() {
+    const playBtn = document.getElementById("pause-play");
     const polygon_1 = document.getElementById("polygon-1");
     const polygon_2 = document.getElementById("polygon-2");
 
@@ -19,7 +20,7 @@ PausePlayHooks.PausePlay = {
 
     let isStopped = true;
 
-    this.el.addEventListener("click", () => {
+    playBtn.addEventListener("click", () => {
       requestAnimationFrame(playOrStop);
     });
 
@@ -61,4 +62,4 @@ PausePlayHooks.PausePlay = {
   },
 };
 
-export default PausePlayHooks;
+export default SongPlayerHooks;
