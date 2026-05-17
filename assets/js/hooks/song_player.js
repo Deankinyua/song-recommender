@@ -16,6 +16,7 @@ SongPlayerHooks.SongPlayer = {
     const playedTimeEl = document.getElementById("song-played-time");
     const songProgress = document.getElementById("song-progress");
     const songDurationEl = document.getElementById("song-duration");
+    const playPauseTooltipEl = document.getElementById("pause-play-tooltip");
 
     const time = {
       start: null,
@@ -79,6 +80,7 @@ SongPlayerHooks.SongPlayer = {
     playBtn.addEventListener("click", () => {
       requestAnimationFrame(playOrStop);
       player.isPlaying = !player.isPlaying;
+      playPauseTooltipEl.textContent = player.isPlaying ? "Pause" : "Play";
     });
 
     const playOrStop = (now) => {

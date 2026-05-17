@@ -87,8 +87,8 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
             </div>
             <div id="play-icon" class="control-icon">
               <CustomComponents.play_pause_icon />
-              <div class="top-[-1.8rem] left-[-0.4rem] tooltip">
-                Pause
+              <div id="pause-play-tooltip" class="top-[-1.8rem] left-0 tooltip">
+                Play
               </div>
             </div>
             <div id="next-icon" class="control-icon">
