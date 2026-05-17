@@ -16,9 +16,10 @@ defmodule SongRecommenderWeb.SongsLive.Index do
         <.live_component
           id="songs-component"
           module={SongsComponent}
+          empty_search?={@empty_search?}
           search_items={@streams.search_items}
-          no_search_items?={@search_items_empty?}
           search_query={@search_query}
+          show_recent_searches?={@show_recent_searches?}
         />
 
         <section class="w-[25%] border border-red-400"></section>
@@ -29,12 +30,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
-    {:ok,
-     socket
-     |> assign(:search_items_empty?, true)
-     |> assign(:search_query, "")
-     |> stream_configure(:search_items, dom_id: &"search-item-#{elem(&1, 0).id}")
-     |> stream(:search_items, [])}
+    {:ok, stream_configure(socket, :search_items, dom_id: &"search-item-#{elem(&1, 0).id}")}
   end
 
   @impl Phoenix.LiveView
@@ -44,7 +40,6 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     case search_query != "" do
       true ->
         search_items = Search.search_query(search_query)
-
         search_items_empty? = Enum.empty?(search_items)
 
         search_items_with_images =
@@ -52,15 +47,19 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
         {:noreply,
          socket
-         |> assign(:search_items_empty?, search_items_empty?)
+         |> assign(:empty_search?, search_items_empty?)
          |> assign(:search_query, search_query)
+         |> assign(:show_recent_searches?, false)
          |> stream(:search_items, search_items_with_images, reset: true)}
 
       false ->
+        # later on we will refactor to fetch recent searches to replace the []
         {:noreply,
          socket
-         |> assign(:search_items_empty?, true)
-         |> assign(:search_query, "")}
+         |> assign(:empty_search?, true)
+         |> assign(:show_recent_searches?, true)
+         |> assign(:search_query, "")
+         |> stream(:search_items, [], reset: true)}
     end
   end
 

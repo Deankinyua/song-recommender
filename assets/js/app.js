@@ -23,10 +23,12 @@ import "phoenix_html";
 import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import { hooks as ColocatedHooks } from "phoenix-colocated/song_recommender";
+import SongPlayerHooks from "./hooks/song_player.js";
 import topbar from "../vendor/topbar";
 
 let Hooks = {
   ...ColocatedHooks,
+  ...SongPlayerHooks,
 };
 
 const csrfToken = document
