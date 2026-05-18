@@ -38,24 +38,6 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
-  @spec genre(assigns()) :: rendered()
-  def genre(assigns) do
-    ~H"""
-    <div>
-      <section class="flex items-center">
-        <section class="w-[18%]">Hip-hop</section>
-        <section class="w-[18%]">100030</section>
-        <section>
-          <.button class="btn btn-secondary-200 text-sm p-5">
-            Follow
-          </.button>
-        </section>
-      </section>
-    </div>
-    <div class="divider max-w-[90%] my-0"></div>
-    """
-  end
-
   @spec search(assigns()) :: rendered()
   def search(assigns) do
     ~H"""

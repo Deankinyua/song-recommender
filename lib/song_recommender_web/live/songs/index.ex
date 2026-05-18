@@ -3,6 +3,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
   alias SongRecommender.Search
   alias SongRecommenderWeb.Songs.SongsComponent
+  alias SongRecommenderWeb.Songs.GenresPopupComponent
 
   @image_list 1..15
 
@@ -10,8 +11,14 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} class="bg-base-50" username={@current_user.name}>
-      <div class="h-[92vh] flex">
-        <section class="w-[25%]"></section>
+      <div class="h-[92vh] flex text-base-100">
+        <section class="w-[25%] relative">
+          <.live_component
+            id="genres-popup-component"
+            module={GenresPopupComponent}
+            user={@current_user}
+          />
+        </section>
 
         <.live_component
           id="songs-component"
