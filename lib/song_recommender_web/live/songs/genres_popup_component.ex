@@ -23,7 +23,9 @@ defmodule SongRecommenderWeb.Songs.GenresPopupComponent do
         <div>
           <.checkgroup field={@form[:genres]} options={@genres} />
         </div>
-        <div class="mt-2 flex justify-end">
+        <div class="mt-2 flex justify-between">
+          <section :if={@show_error?} class="text-error">You must select at least one genre.</section>
+
           <button class="btn btn-primary h-[2rem] !rounded-full">
             Set Preferences
           </button>
@@ -39,14 +41,20 @@ defmodule SongRecommenderWeb.Songs.GenresPopupComponent do
      socket
      |> assign_form(user)
      |> assign(:genres, @genres)
+     |> assign(:show_error?, false)
      |> assign(assigns)}
   end
 
   @impl Phoenix.LiveComponent
   def handle_event("submit_genres", params, socket) do
-    dbg(params)
+    case Enum.empty?(params) do
+      true ->
+        {:noreply, assign(socket, :show_error?, true)}
 
-    {:noreply, socket}
+      false ->
+        %{"user" => %{"genres" => genres}} = params
+        {:noreply, socket}
+    end
   end
 
   defp assign_form(socket, user) do
