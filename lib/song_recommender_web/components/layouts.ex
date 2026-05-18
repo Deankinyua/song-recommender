@@ -66,28 +66,9 @@ defmodule SongRecommenderWeb.Layouts do
           <li>
             <.link
               patch={~p"/"}
-              class="btn btn-ghost flex items-center gap-2 underline"
+              class="btn btn-ghost flex items-center gap-2"
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-[1rem] h-[1rem]"
-              >
-                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                <g id="SVGRepo_iconCarrier">
-                  <path
-                    d="M16.6725 16.6412L21 21M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                  </path>
-                </g>
-              </svg>
-              <p>Discover Artists</p>
+              <p>Your Favourite Artists</p>
             </.link>
           </li>
 

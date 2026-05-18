@@ -134,10 +134,6 @@
   background: var(--color-base-50);
 }
 
-.border-gray {
-  border-color: var(--color-gray);
-}
-
 .btn-primary:is(.btn-disabled, [disabled], :disabled) {
   background-color: var(--color-primary-100);
   color: var(--color-primary-content);
@@ -145,6 +141,11 @@
 
 .btn {
   @apply rounded-xl;
+}
+
+.btn-ghost:hover {
+  color: var(--color-base-100);
+  background: var(--color-base-300);
 }
 
 .btn-primary:hover {
