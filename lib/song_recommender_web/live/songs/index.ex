@@ -9,9 +9,9 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   @impl Phoenix.LiveView
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} class="bg-base-50">
+    <Layouts.app flash={@flash} class="bg-base-50" username={@current_user.name}>
       <div class="h-[92vh] flex">
-        <section class="w-[25%] border border-red-400"></section>
+        <section class="w-[25%]"></section>
 
         <.live_component
           id="songs-component"
@@ -22,7 +22,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           show_recent_searches?={@show_recent_searches?}
         />
 
-        <section class="w-[25%] border border-red-400"></section>
+        <section class="w-[25%]"></section>
       </div>
     </Layouts.app>
     """

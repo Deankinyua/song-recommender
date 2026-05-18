@@ -32,13 +32,28 @@ defmodule SongRecommenderWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
 
+  attr :username, :string
+
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
-    <header class="navbar h-[8vh] px-4 bg-base-200 text-base-100 sm:px-6">
-      <div class="flex-1">
-        <div phx-click={JS.patch(~p"/")} class="w-[3rem] h-[3rem] cursor-pointer"></div>
+    <header class="navbar relative h-[8vh] px-4 bg-base-200 text-base-100 header-gradient sm:px-6">
+      <div id="cartoon-parent" class="flex-1">
+        <div
+          id="cartoon"
+          phx-hook="CartoonAnimation"
+          phx-update="ignore"
+          class="w-[25%] mt-20 absolute top-[-7rem] left-0"
+        >
+          <.cartoon flash={@flash} class={@class}>
+            {render_slot(@inner_block)}
+          </.cartoon>
+        </div>
+
+        <div class="cartoon-tooltip absolute top-[2.5rem] left-[5rem] text-xs happy-monkey-bold hidden">
+          Hey {@username}
+        </div>
       </div>
       <div class="flex-none">
         <ul class="flex flex-column px-1 space-x-6 items-center">
@@ -156,6 +171,41 @@ defmodule SongRecommenderWeb.Layouts do
         <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
       </.flash>
     </div>
+    """
+  end
+
+  def cartoon(assigns) do
+    ~H"""
+    <svg width="180" id="person-cartoon" viewBox="0 0 200 200">
+      <filter
+        id="motion-blur"
+        x="-25%"
+        width="150%"
+        color-interpolation-filters="sRGB"
+      >
+        <feGaussianBlur in="SourceGraphic" />
+      </filter>
+
+      <circle
+        id="cartoon-face"
+        cx="220"
+        cy="70"
+        r="10"
+        filter="url(#motion-blur)"
+      />
+      <circle id="eye-1" cx="210" cy="67.5" r="0.5" fill="white" />
+      <circle id="eye-2" cx="210" cy="67.5" r="0.5" fill="white" />
+
+      <line class="line-1" />
+
+      <line class="line-2" />
+
+      <line class="line-3" />
+
+      <line class="line-4" />
+
+      <line class="line-5" />
+    </svg>
     """
   end
 end
