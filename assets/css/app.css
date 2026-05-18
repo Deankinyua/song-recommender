@@ -149,11 +149,14 @@
 }
 
 .btn-primary:hover {
-  background-color: var(--color-primary-100);
   border-color: var(--color-primary-100);
 }
 
 .btn-secondary-200 {
   background-color: var(--color-secondary-200);
   color: var(--color-primary-content);
+}
+
+.genre-label:has(input:checked) {
+  border: 1px solid var(--color-secondary);
 }

@@ -273,6 +273,30 @@ defmodule SongRecommenderWeb.CoreComponents do
     """
   end
 
+  def input(%{type: "checkgroup"} = assigns) do
+    ~H"""
+    <div class="grid grid-cols-4 items-center content-center gap-2">
+      <div :for={value <- @options}>
+        <label
+          for={"#{@name}-#{value}"}
+          class="genre-label border border-base-100 rounded-full cursor-pointer flex justify-center happy-monkey-bold"
+        >
+          <input
+            type="checkbox"
+            id={"#{@name}-#{value}"}
+            name={@name}
+            value={value}
+            checked={value in @value}
+            class="hidden"
+            {@rest}
+          />
+          {value}
+        </label>
+      </div>
+    </div>
+    """
+  end
+
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
@@ -295,6 +319,27 @@ defmodule SongRecommenderWeb.CoreComponents do
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
+  end
+
+  @doc """
+  Generate a checkbox group for multi-select.
+  """
+  attr :id, :any
+  attr :name, :any
+  attr :label, :string, default: nil
+  attr :field, Phoenix.HTML.FormField, doc: "..."
+  attr :required, :boolean, default: false
+  attr :options, :list, doc: "..."
+  attr :rest, :global, include: ~w(disabled form readonly)
+  attr :class, :string, default: nil
+
+  def checkgroup(assigns) do
+    new_assigns =
+      assigns
+      |> assign(:multiple, true)
+      |> assign(:type, "checkgroup")
+
+    input(new_assigns)
   end
 
   # Helper used by inputs to generate form errors
