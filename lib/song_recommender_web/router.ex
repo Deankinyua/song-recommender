@@ -43,7 +43,10 @@ defmodule SongRecommenderWeb.Router do
     pipe_through [:browser, :require_authenticated_user]
 
     live_session :require_authenticated_user,
-      on_mount: [{SongRecommenderWeb.UserAuth, :ensure_authenticated}] do
+      on_mount: [
+        {SongRecommenderWeb.LiveHelpers, :maybe_capture_user_preferences},
+        {SongRecommenderWeb.UserAuth, :ensure_authenticated}
+      ] do
       live "/", SongsLive.Index, :index
     end
   end
