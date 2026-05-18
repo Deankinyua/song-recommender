@@ -25,6 +25,7 @@ defmodule SongRecommenderWeb.Layouts do
       </Layouts.app>
 
   """
+  attr :class, :string, default: ""
   attr :flash, :map, required: true, doc: "the map of flash messages"
 
   attr :current_scope, :map,
@@ -88,12 +89,13 @@ defmodule SongRecommenderWeb.Layouts do
       </div>
     </header>
 
-    <.main flash={@flash}>
+    <.main flash={@flash} class={@class}>
       {render_slot(@inner_block)}
     </.main>
     """
   end
 
+  attr :class, :string, default: ""
   attr :flash, :map, required: true, doc: "the map of flash messages"
 
   attr :current_scope, :map,
@@ -104,7 +106,7 @@ defmodule SongRecommenderWeb.Layouts do
 
   def main(assigns) do
     ~H"""
-    <main class="montserrat-regular bg-base-100">
+    <main class={["montserrat-regular", @class]}>
       <div>
         {render_slot(@inner_block)}
       </div>
