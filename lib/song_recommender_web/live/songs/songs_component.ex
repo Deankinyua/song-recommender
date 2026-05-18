@@ -10,11 +10,11 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
   @impl Phoenix.LiveComponent
   def render(assigns) do
     ~H"""
-    <section class="flex-1 flex flex-col items-center gap-2">
-      <div class="w-full h-[10%] flex items-center border border-blue-400">
+    <section class="flex-1 flex flex-col items-center gap-2 text-base-100">
+      <div class="w-full h-[10%] flex items-center">
         <div
           id="search-bar-container"
-          class="relative bg-base-50 w-[70%] max-w-[25rem] mx-auto py-3 rounded-full text-base-100 border border-gray cursor-text"
+          class="relative bg-base-300 w-[70%] max-w-[25rem] mx-auto py-3 rounded-full cursor-text"
           phx-click={
             JS.show(to: "#search-results", transition: "fade-in-scale")
             |> JS.focus(to: "#search-query")
@@ -44,7 +44,7 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
           </form>
           <section
             id="search-results"
-            class="bg-base-50 min-h-[10rem] max-h-[20rem] py-3 rounded-2xl absolute top-[4rem] left-[-4rem] right-[-4rem] overflow-y-scroll hidden"
+            class="bg-base-300 min-h-[10rem] max-h-[20rem] py-3 rounded-2xl absolute top-[4rem] left-[-4rem] right-[-4rem] overflow-y-scroll hidden"
           >
             <div :if={@show_recent_searches?}>
               <div class="rounded-md py-2 px-2 mx-3 happy-monkey-regular">
@@ -72,7 +72,7 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
       </div>
 
       <div class="w-[92%] h-[90%] mx-auto flex flex-col justify-between">
-        <section class="border border-red-400">songs</section>
+        <section class="">songs</section>
         <section
           id="song-player"
           phx-hook="SongPlayer"

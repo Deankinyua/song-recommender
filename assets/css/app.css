@@ -5,6 +5,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Happy+Monkey&display=swap");
 
 @import "./song_player.css";
+@import "./cartoon.css";
 
 @import "tailwindcss";
 @source "../css";
@@ -35,7 +36,7 @@
   --color-base-50: oklch(0.1597 0.0247 243.37);
   --color-base-100: oklch(98% 0 0);
   --color-base-200: oklch(0.5379 0.0808 236.65);
-  --color-base-300: oklch(92% 0.004 286.32);
+  --color-base-300: oklch(0.2597 0.0247 243.37);
   --color-base-content: oklch(21% 0.006 285.885);
   --color-primary: oklch(0.5379 0.0808 236.65);
   --color-primary-100: oklch(0.7379 0.0808 236.65);
@@ -133,10 +134,6 @@
   background: var(--color-base-50);
 }
 
-.border-gray {
-  border-color: var(--color-gray);
-}
-
 .btn-primary:is(.btn-disabled, [disabled], :disabled) {
   background-color: var(--color-primary-100);
   color: var(--color-primary-content);
@@ -144,6 +141,11 @@
 
 .btn {
   @apply rounded-xl;
+}
+
+.btn-ghost:hover {
+  color: var(--color-base-100);
+  background: var(--color-base-300);
 }
 
 .btn-primary:hover {

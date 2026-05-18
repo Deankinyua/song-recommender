@@ -25,19 +25,35 @@ defmodule SongRecommenderWeb.Layouts do
       </Layouts.app>
 
   """
+  attr :class, :string, default: ""
   attr :flash, :map, required: true, doc: "the map of flash messages"
 
   attr :current_scope, :map,
     default: nil,
     doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
 
+  attr :username, :string
+
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
-    <header class="navbar h-[8vh] px-4 bg-base-200 text-base-100 border-b border-gray-200 sm:px-6">
-      <div class="flex-1">
-        <div phx-click={JS.patch(~p"/")} class="w-[3rem] h-[3rem] cursor-pointer"></div>
+    <header class="navbar relative h-[8vh] px-4 bg-base-200 text-base-100 header-gradient sm:px-6">
+      <div id="cartoon-parent" class="flex-1">
+        <div
+          id="cartoon"
+          phx-hook="CartoonAnimation"
+          phx-update="ignore"
+          class="w-[25%] mt-20 absolute top-[-7rem] left-0"
+        >
+          <.cartoon flash={@flash} class={@class}>
+            {render_slot(@inner_block)}
+          </.cartoon>
+        </div>
+
+        <div class="cartoon-tooltip absolute top-[2.5rem] left-[5rem] text-xs happy-monkey-bold hidden">
+          Hey {@username}
+        </div>
       </div>
       <div class="flex-none">
         <ul class="flex flex-column px-1 space-x-6 items-center">
@@ -50,28 +66,9 @@ defmodule SongRecommenderWeb.Layouts do
           <li>
             <.link
               patch={~p"/"}
-              class="btn btn-ghost flex items-center gap-2 underline"
+              class="btn btn-ghost flex items-center gap-2"
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-[1rem] h-[1rem]"
-              >
-                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                <g id="SVGRepo_iconCarrier">
-                  <path
-                    d="M16.6725 16.6412L21 21M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                  </path>
-                </g>
-              </svg>
-              <p>Discover Artists</p>
+              <p>Your Favourite Artists</p>
             </.link>
           </li>
 
@@ -88,12 +85,13 @@ defmodule SongRecommenderWeb.Layouts do
       </div>
     </header>
 
-    <.main flash={@flash}>
+    <.main flash={@flash} class={@class}>
       {render_slot(@inner_block)}
     </.main>
     """
   end
 
+  attr :class, :string, default: ""
   attr :flash, :map, required: true, doc: "the map of flash messages"
 
   attr :current_scope, :map,
@@ -104,7 +102,7 @@ defmodule SongRecommenderWeb.Layouts do
 
   def main(assigns) do
     ~H"""
-    <main class="montserrat-regular bg-base-100">
+    <main class={["montserrat-regular", @class]}>
       <div>
         {render_slot(@inner_block)}
       </div>
@@ -154,6 +152,41 @@ defmodule SongRecommenderWeb.Layouts do
         <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
       </.flash>
     </div>
+    """
+  end
+
+  def cartoon(assigns) do
+    ~H"""
+    <svg width="180" id="person-cartoon" viewBox="0 0 200 200">
+      <filter
+        id="motion-blur"
+        x="-25%"
+        width="150%"
+        color-interpolation-filters="sRGB"
+      >
+        <feGaussianBlur in="SourceGraphic" />
+      </filter>
+
+      <circle
+        id="cartoon-face"
+        cx="220"
+        cy="70"
+        r="10"
+        filter="url(#motion-blur)"
+      />
+      <circle id="eye-1" cx="210" cy="67.5" r="0.5" fill="white" />
+      <circle id="eye-2" cx="210" cy="67.5" r="0.5" fill="white" />
+
+      <line class="line-1" />
+
+      <line class="line-2" />
+
+      <line class="line-3" />
+
+      <line class="line-4" />
+
+      <line class="line-5" />
+    </svg>
     """
   end
 end
