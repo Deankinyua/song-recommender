@@ -5,6 +5,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Happy+Monkey&display=swap");
 
 @import "./song_player.css";
+@import "./cartoon.css";
 
 @import "tailwindcss";
 @source "../css";
