@@ -9,7 +9,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   @impl Phoenix.LiveView
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} class="bg-base-50">
       <div class="h-[92vh] flex">
         <section class="w-[25%] border border-red-400"></section>
 

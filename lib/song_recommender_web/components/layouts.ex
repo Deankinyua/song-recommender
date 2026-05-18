@@ -36,7 +36,7 @@ defmodule SongRecommenderWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar h-[8vh] px-4 bg-base-200 text-base-100 border-b border-gray-200 sm:px-6">
+    <header class="navbar h-[8vh] px-4 bg-base-200 text-base-100 sm:px-6">
       <div class="flex-1">
         <div phx-click={JS.patch(~p"/")} class="w-[3rem] h-[3rem] cursor-pointer"></div>
       </div>
