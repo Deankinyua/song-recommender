@@ -165,7 +165,7 @@ defmodule SongRecommenderWeb.CoreComponents do
   attr :type, :string,
     default: "text",
     values: ~w(checkbox color date datetime-local email file month number password
-               search select tel text textarea time url week hidden)
+               search select tel text textarea time url week hidden checkgroup)
 
   attr :field, HTML.FormField,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
@@ -327,9 +327,9 @@ defmodule SongRecommenderWeb.CoreComponents do
   attr :id, :any
   attr :name, :any
   attr :label, :string, default: nil
-  attr :field, Phoenix.HTML.FormField, doc: "..."
+  attr :field, Phoenix.HTML.FormField
   attr :required, :boolean, default: false
-  attr :options, :list, doc: "..."
+  attr :options, :list
   attr :rest, :global, include: ~w(disabled form readonly)
   attr :class, :string, default: nil
 

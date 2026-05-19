@@ -7,6 +7,8 @@ defmodule SongRecommender.Accounts.User do
 
   import Ecto.Changeset
 
+  @valid_genres Application.compile_env!(:song_recommender, :genres)
+
   @type attrs :: map()
   @type changeset :: Ecto.Changeset.t()
   @type t :: %__MODULE__{}
@@ -24,5 +26,6 @@ defmodule SongRecommender.Accounts.User do
     |> cast(attrs, [:genres, :name])
     |> validate_required([:name])
     |> validate_length(:name, min: 4, message: "Your name must be at least 4 characters long")
+    |> validate_subset(:genres, @valid_genres, message: "You selected an invalid entry")
   end
 end

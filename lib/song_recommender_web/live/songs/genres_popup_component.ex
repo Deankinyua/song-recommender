@@ -46,13 +46,16 @@ defmodule SongRecommenderWeb.Songs.GenresPopupComponent do
   end
 
   @impl Phoenix.LiveComponent
-  def handle_event("submit_genres", params, socket) do
+  def handle_event("submit_genres", params, %{assigns: %{user: user}} = socket) do
     case Enum.empty?(params) do
       true ->
         {:noreply, assign(socket, :show_error?, true)}
 
       false ->
         %{"user" => %{"genres" => genres}} = params
+
+        changeset = Accounts.change_user_registration(user, params)
+
         {:noreply, socket}
     end
   end
