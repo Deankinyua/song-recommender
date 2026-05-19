@@ -16,6 +16,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           <.live_component
             id="genres-popup-component"
             module={GenresPopupComponent}
+            show_modal?={@capture_user_preferences?}
             user={@current_user}
           />
         </section>
