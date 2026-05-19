@@ -7,6 +7,8 @@ defmodule SongRecommender.Genres do
 
   @type bolt_response :: Boltx.Response.t()
   @type genre :: String.t()
+  @type genre_and_listening_time :: [genre() | listening_time()]
+  @type listening_time :: integer()
   @type user :: User.t()
   @type username :: String.t()
 
@@ -45,8 +47,8 @@ defmodule SongRecommender.Genres do
 
   ## Examples
 
-      iex> get_user_genres("Dean")
-        ["acoustic", "hip-hop"]
+      iex> prefer_genres("Dean", ["hip-hop"])
+        %User{genres: ["hip-hop"], name: "Dean"}
 
   """
 
@@ -69,6 +71,36 @@ defmodule SongRecommender.Genres do
     )
     |> Boltx.Response.first()
     |> process_preferred_genres()
+  end
+
+  @doc """
+  Creates a LISTENED_TO_GENRE relationship between a user and some genres.
+  This function has a deeper purpose. It can be used in the wrapped feature
+  and also checking the totalListeningTime for the user computed by going
+  through all the genres of music the user has listened to.
+
+  ## Examples
+
+      iex> listen_to_genres("Dean", [ ["hip-hop", 3213], ["house", 1293] ])
+       %Boltx.Response{}
+
+  """
+
+  @spec listen_to_genres(username(), [genre_and_listening_time()]) :: bolt_response()
+  def listen_to_genres(username, genres_and_listening_times) do
+    Boltx.query!(
+      Bolt,
+      """
+      MATCH (u:User {name: $name})
+      UNWIND $genres_and_listening_times AS genre_and_listening_time
+      WITH u, genre_and_listening_time[0] AS genre, genre_and_listening_time[1] AS durationListened
+      MATCH (g:Genre {name: genre})
+      MERGE (u)-[lg:LISTENED_TO_GENRE]->(g)
+      ON CREATE SET lg.totalListeningTime = durationListened
+      ON MATCH SET lg.totalListeningTime = lg.totalListeningTime + durationListened
+      """,
+      %{name: username, genres_and_listening_times: genres_and_listening_times}
+    )
   end
 
   defp process_preferred_genres(%{"preferred_genres" => genres, "user" => %{"name" => name}}),
