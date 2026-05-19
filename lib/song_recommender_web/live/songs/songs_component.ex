@@ -10,7 +10,7 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
   @impl Phoenix.LiveComponent
   def render(assigns) do
     ~H"""
-    <section class="flex-1 flex flex-col items-center gap-2 text-base-100">
+    <section class="flex-1 flex flex-col items-center gap-2">
       <div class="w-full h-[10%] flex items-center">
         <div
           id="search-bar-container"

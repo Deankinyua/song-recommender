@@ -2,6 +2,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   use SongRecommenderWeb, :live_view
 
   alias SongRecommender.Search
+  alias SongRecommenderWeb.Songs.GenresPopupComponent
   alias SongRecommenderWeb.Songs.SongsComponent
 
   @image_list 1..15
@@ -10,8 +11,15 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} class="bg-base-50" username={@current_user.name}>
-      <div class="h-[92vh] flex">
-        <section class="w-[25%]"></section>
+      <div class="h-[92vh] flex text-base-100">
+        <section class="w-[25%] relative">
+          <.live_component
+            id="genres-popup-component"
+            module={GenresPopupComponent}
+            show_modal?={@capture_user_preferences?}
+            user={@current_user}
+          />
+        </section>
 
         <.live_component
           id="songs-component"
@@ -75,6 +83,11 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     else
       {:noreply, push_patch(socket, to: ~p"/")}
     end
+  end
+
+  @impl Phoenix.LiveView
+  def handle_info({:updated_user, user}, socket) do
+    {:noreply, assign(socket, :current_user, user)}
   end
 
   defp add_image_numbers(items) do

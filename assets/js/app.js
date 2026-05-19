@@ -24,21 +24,37 @@ import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import { hooks as ColocatedHooks } from "phoenix-colocated/song_recommender";
 import CartoonAnimationHooks from "./hooks/cartoon_animation.js";
+import GenrePreferencesPopupHooks from "./hooks/genre_preferences_popup.js";
 import SongPlayerHooks from "./hooks/song_player.js";
 import topbar from "../vendor/topbar";
 
 let Hooks = {
   ...CartoonAnimationHooks,
   ...ColocatedHooks,
+  ...GenrePreferencesPopupHooks,
   ...SongPlayerHooks,
+};
+
+let showOrHideGenrePreferencesPopup = () => {
+  if (localStorage.getItem("show-genre-preferences-popup") === null) {
+    localStorage.setItem("show-genre-preferences-popup", true);
+  }
+
+  return localStorage.getItem("show-genre-preferences-popup");
 };
 
 const csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
+
+let params = {
+  _csrf_token: csrfToken,
+  capture_user_preferences: showOrHideGenrePreferencesPopup(),
+};
+
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: { _csrf_token: csrfToken },
+  params: params,
   hooks: Hooks,
 });
 

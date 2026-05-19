@@ -60,6 +60,22 @@ defmodule SongRecommender.GraphHelpers do
     |> user_listened_to_song?()
   end
 
+  @spec create_genres([genre()]) :: bolt_response()
+  def create_genres(genres) do
+    Bolt
+    |> Boltx.query!(
+      """
+       UNWIND $genres AS genre
+       CREATE (g:Genre {name: genre})
+       RETURN collect(g.name) AS genres
+      """,
+      %{genres: genres}
+    )
+    |> Boltx.Response.first()
+    |> return_genres()
+  end
+
+  defp return_genres(%{"genres" => genres}), do: genres
   defp return_song_ids(%{"songs" => song_ids}), do: song_ids
   defp user_listened_to_song?(%{"listened_status" => status}), do: status
 end
