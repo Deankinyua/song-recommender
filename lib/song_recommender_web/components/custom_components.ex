@@ -241,5 +241,55 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
+  attr :favourite_genre, :string, required: true
+
+  @spec chat_bubble(assigns()) :: rendered()
+  def chat_bubble(assigns) do
+    ~H"""
+    <svg
+      width="22rem"
+      viewBox="0 0 420 260"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="
+        M120 70
+        C100 30, 180 20, 210 60
+        C240 20, 320 30, 300 80
+        C360 80, 380 150, 320 170
+        C320 210, 230 230, 200 190
+        C150 230, 90 210, 100 170
+        C40 160, 50 90, 120 90
+        Z
+      "
+        fill="#1a252f"
+        stroke="white"
+        stroke-width="3"
+      />
+
+      <circle cx="80" cy="190" r="10" fill="#1a252f" stroke="#111" stroke-width="3" />
+      <circle cx="55" cy="215" r="6" fill="#1a252f" stroke="#111" stroke-width="3" />
+
+      <text
+        x="210"
+        y="120"
+        text-anchor="middle"
+        font-size="14"
+        fill="white"
+      >
+        <tspan x="210" dy="0">
+          I see that you listen
+        </tspan>
+        <tspan x="210" dy="24">
+          to some {@favourite_genre} music.
+        </tspan>
+        <tspan x="210" dy="24">
+          Just like me :)
+        </tspan>
+      </text>
+    </svg>
+    """
+  end
+
   defp path_to_image(num), do: ~p"/images/songs/" <> "image_#{num}.jpeg"
 end

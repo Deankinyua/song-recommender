@@ -56,8 +56,9 @@ defmodule SongRecommender.Genres do
     |> Boltx.query!(
       """
       MATCH (u:User {name: $name})
-      MATCH (u)-[r:PREFERS]->()
+      OPTIONAL MATCH (u)-[r:PREFERS]->()
       DELETE r
+      WITH u
       UNWIND $genres AS genre
       MATCH (g:Genre {name: genre})
       MERGE (u)-[:PREFERS]->(g)
@@ -70,9 +71,8 @@ defmodule SongRecommender.Genres do
     |> process_preferred_genres()
   end
 
-  defp process_preferred_genres(%{"preferred_genres" => genres, "user" => %{"name" => name}}) do
-    %User{name: name, genres: genres}
-  end
+  defp process_preferred_genres(%{"preferred_genres" => genres, "user" => %{"name" => name}}),
+    do: %User{name: name, genres: genres}
 
   defp process_genre(%{"genre" => name}), do: name
 end

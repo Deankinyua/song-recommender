@@ -5,7 +5,7 @@ GenrePreferencesPopupHooks.GenrePreferencesPopup = {
     const genrePreferencesPopup = this.el;
 
     genrePreferencesPopup.addEventListener(
-      "hide-genre-preferences-popup",
+      "hide_genre_preferences_popup",
       () => {
         localStorage.setItem("show-genre-preferences-popup", false);
       },

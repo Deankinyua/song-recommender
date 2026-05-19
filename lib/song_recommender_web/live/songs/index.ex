@@ -85,6 +85,12 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     end
   end
 
+  @impl Phoenix.LiveView
+  def handle_info({:updated_user, user}, socket) do
+    dbg(user)
+    {:noreply, assign(socket, :current_user, user)}
+  end
+
   defp add_image_numbers(items) do
     item_count = Enum.count(items)
 
