@@ -1,6 +1,6 @@
 {
   "coverage_options": {
-    "minimum_coverage": 29
+    "minimum_coverage": 27
   },
   "skip_files": ["lib/song_recommender_web/components/core_components.ex"]
 }

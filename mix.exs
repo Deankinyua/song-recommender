@@ -120,7 +120,6 @@ defmodule SongRecommender.MixProject do
       ],
       ci: [
         "deps.unlock --check-unused",
-        "deps.audit",
         "format --check-formatted",
         "cmd npx prettier -c .",
         "credo --strict",

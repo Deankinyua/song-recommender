@@ -2,8 +2,8 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   use SongRecommenderWeb, :live_view
 
   alias SongRecommender.Search
-  alias SongRecommenderWeb.Songs.SongsComponent
   alias SongRecommenderWeb.Songs.GenresPopupComponent
+  alias SongRecommenderWeb.Songs.SongsComponent
 
   @image_list 1..15
 
@@ -87,7 +87,6 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
   @impl Phoenix.LiveView
   def handle_info({:updated_user, user}, socket) do
-    dbg(user)
     {:noreply, assign(socket, :current_user, user)}
   end
 
