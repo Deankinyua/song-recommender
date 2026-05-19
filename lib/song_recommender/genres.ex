@@ -103,6 +103,33 @@ defmodule SongRecommender.Genres do
     )
   end
 
+  @doc """
+  Calculates the totalListeningTime in milliseconds.
+
+  ## Examples
+
+      iex> calculate_total_listening_time("Dean")
+      0
+
+  """
+
+  @spec calculate_total_listening_time(username()) :: bolt_response()
+  def calculate_total_listening_time(username) do
+    Boltx.query!(
+      Bolt,
+      """
+      MATCH (u:User {name: $name})-[lg:LISTENED_TO_GENRE]->(g:Genre)
+      RETURN sum(lg.totalListeningTimeMs) AS lifetime_listening_ms
+      """,
+      %{name: username}
+    )
+    |> Boltx.Response.first()
+    |> process_listening_time()
+  end
+
+  defp process_listening_time(%{"lifetime_listening_ms" => total_listening_time}),
+    do: total_listening_time
+
   defp process_preferred_genres(%{"preferred_genres" => genres, "user" => %{"name" => name}}),
     do: %User{name: name, genres: genres}
 
