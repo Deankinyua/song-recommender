@@ -96,8 +96,8 @@ defmodule SongRecommender.Genres do
       WITH u, genre_and_listening_time[0] AS genre, genre_and_listening_time[1] AS durationListened
       MATCH (g:Genre {name: genre})
       MERGE (u)-[lg:LISTENED_TO_GENRE]->(g)
-      ON CREATE SET lg.totalListeningTime = durationListened
-      ON MATCH SET lg.totalListeningTime = lg.totalListeningTime + durationListened
+      ON CREATE SET lg.totalListeningTimeMs = durationListened
+      ON MATCH SET lg.totalListeningTimeMs = lg.totalListeningTimeMs + durationListened
       """,
       %{name: username, genres_and_listening_times: genres_and_listening_times}
     )
