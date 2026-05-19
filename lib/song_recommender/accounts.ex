@@ -4,6 +4,7 @@ defmodule SongRecommender.Accounts do
   """
 
   alias SongRecommender.Accounts.User
+  alias SongRecommender.Genres
 
   @type attrs :: map()
   @type bolt_response :: Boltx.Response.t()
@@ -33,7 +34,7 @@ defmodule SongRecommender.Accounts do
 
       %{"user" => %{"name" => name}} = create_user(username)
 
-      genres = get_user_genres(name)
+      genres = Genres.get_user_genres(name)
       {:ok, %User{genres: genres, name: name}}
     else
       {:error, changeset}
@@ -128,7 +129,7 @@ defmodule SongRecommender.Accounts do
   @spec get_user_by_session_token(name()) :: user() | nil
   def get_user_by_session_token(token) do
     with {:ok, user} <- get_user_by_token(token),
-         genres <- get_user_genres(user.name) do
+         genres <- Genres.get_user_genres(user.name) do
       Map.put(user, :genres, genres)
     else
       nil ->
@@ -159,26 +160,6 @@ defmodule SongRecommender.Accounts do
     )
     |> Boltx.Response.first()
   end
-
-  defp get_user_genres(username) do
-    %Boltx.Response{results: genres} =
-      Boltx.query!(
-        Bolt,
-        """
-        MATCH (u:User {name: $name})-[:PREFERS]->(g:Genre)
-        RETURN g.name AS genre
-        """,
-        %{name: username}
-      )
-
-    if Enum.empty?(genres) do
-      []
-    else
-      Enum.map(genres, &process_genre(&1))
-    end
-  end
-
-  defp process_genre(%{"genre" => name}), do: name
 
   @doc """
   Deletes a user token, effectively logging out the user

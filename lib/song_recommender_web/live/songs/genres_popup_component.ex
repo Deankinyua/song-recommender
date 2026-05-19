@@ -6,6 +6,7 @@ defmodule SongRecommenderWeb.Songs.GenresPopupComponent do
   use SongRecommenderWeb, :live_component
 
   alias SongRecommender.Accounts
+  alias SongRecommender.Genres
 
   @genres Application.compile_env!(:song_recommender, :genres)
 
@@ -56,9 +57,15 @@ defmodule SongRecommenderWeb.Songs.GenresPopupComponent do
 
         changeset = Accounts.change_user_registration(user, params)
 
+        maybe_prefer_some_genres(changeset.valid?, user, genres)
+
         {:noreply, socket}
     end
   end
+
+  defp maybe_prefer_some_genres(true, user, genres), do: Genres.prefer_genres(user.name, genres)
+
+  defp maybe_prefer_some_genres(false, user, _genres), do: user
 
   defp assign_form(socket, user) do
     form =
