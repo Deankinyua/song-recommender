@@ -115,8 +115,8 @@ defmodule SongRecommender.Genres do
 
   @spec calculate_total_listening_time(username()) :: listening_time()
   def calculate_total_listening_time(username) do
-    Boltx.query!(
-      Bolt,
+    Bolt
+    |> Boltx.query!(
       """
       MATCH (u:User {name: $name})-[lg:LISTENED_TO_GENRE]->(g:Genre)
       RETURN sum(lg.totalListeningTimeMs) AS lifetime_listening_ms
