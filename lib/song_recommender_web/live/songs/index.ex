@@ -114,8 +114,9 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
   defp setup_recommendation_engine(%{assigns: %{current_user: user}} = socket) do
     if connected?(socket) do
-      engine_name = engine_name(user.name)
-      EngineSupervisor.start_engine(engine_name)
+      username = user.name
+      engine_name = engine_name(username)
+      EngineSupervisor.start_engine(engine_name, username)
       assign(socket, :engine_name, engine_name)
     else
       socket

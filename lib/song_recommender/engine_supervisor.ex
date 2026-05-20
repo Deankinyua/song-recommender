@@ -10,6 +10,7 @@ defmodule SongRecommender.EngineSupervisor do
   alias SongRecommender.RecommendationEngine
 
   @type engine_name :: String.t()
+  @type username :: String.t()
 
   @spec start_link(any()) :: {:ok, pid()} | {:error, any()}
   def start_link(init_arg) do
@@ -21,11 +22,11 @@ defmodule SongRecommender.EngineSupervisor do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 
-  @spec start_engine(engine_name()) :: DynamicSupervisor.on_start_child()
-  def start_engine(engine_name) do
+  @spec start_engine(engine_name(), username()) :: DynamicSupervisor.on_start_child()
+  def start_engine(engine_name, username) do
     DynamicSupervisor.start_child(
       {:via, PartitionSupervisor, {__MODULE__, self()}},
-      {RecommendationEngine, name: via_registry(engine_name)}
+      {RecommendationEngine, name: via_registry(engine_name), username: username}
     )
   end
 

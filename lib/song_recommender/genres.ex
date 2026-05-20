@@ -113,7 +113,7 @@ defmodule SongRecommender.Genres do
 
   """
 
-  @spec calculate_total_listening_time(username()) :: bolt_response()
+  @spec calculate_total_listening_time(username()) :: listening_time()
   def calculate_total_listening_time(username) do
     Boltx.query!(
       Bolt,
