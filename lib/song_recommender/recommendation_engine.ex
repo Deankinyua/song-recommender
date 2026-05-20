@@ -10,9 +10,12 @@ defmodule SongRecommender.RecommendationEngine do
 
   use GenServer, restart: :transient
 
-  # alias SongRecommender.EngineQueueRegistry
+  alias SongRecommender.Artists
+  alias SongRecommender.EngineQueueRegistry
   alias SongRecommender.EngineQueueSupervisor
   alias SongRecommender.Genres
+
+  @type engine :: String.t()
 
   @threshold_listening_time_ms 3_600_000
   @timeout 1_200_000
@@ -33,14 +36,27 @@ defmodule SongRecommender.RecommendationEngine do
       |> Genres.calculate_total_listening_time()
       |> determine_recommendation_strategy()
 
+    taste_profile = fetch_recommendation_utility_data(recommendation_strategy, username)
+
     queue_name = queue_name(username)
 
     new_state =
       state
-      |> Map.put(:strategy, recommendation_strategy)
       |> Map.put(:queue_name, queue_name)
+      |> Map.put(:strategy, recommendation_strategy)
+      |> Map.put(:taste_profile, taste_profile)
 
     {:noreply, new_state, @timeout}
+  end
+
+  @spec get_initial_songs(engine()) :: :ok
+  def get_initial_songs(engine),
+    do: make_engine_request(engine, :cast, :get_initial_songs)
+
+  @impl GenServer
+  def handle_cast(:get_initial_songs, state) do
+    dbg(state)
+    {:noreply, state}
   end
 
   @impl GenServer
@@ -55,7 +71,28 @@ defmodule SongRecommender.RecommendationEngine do
       else: :genre_based
   end
 
-  defp queue_name(username), do: "#{username}_song_queue"
+  defp fetch_recommendation_utility_data(:genre_based, username) do
+    genres = Genres.get_user_genres(username)
+    artists = Artists.get_followed_artists(username)
 
-  # defp via_registry(name), do: {:via, Registry, {EngineQueueRegistry, name}}
+    %{genres: genres, artists: artists}
+  end
+
+  defp fetch_recommendation_utility_data(:hybrid, _username), do: %{}
+
+  defp make_engine_request(engine, request_type, message) when request_type == :call do
+    engine
+    |> via_registry()
+    |> GenServer.call(message)
+  end
+
+  defp make_engine_request(engine, _request_type, message) do
+    engine
+    |> via_registry()
+    |> GenServer.cast(message)
+  end
+
+  defp via_registry(name), do: {:via, Registry, {EngineQueueRegistry, name}}
+
+  defp queue_name(username), do: "#{username}_song_queue"
 end
