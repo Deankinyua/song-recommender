@@ -3,7 +3,9 @@ defmodule SongRecommender.Artists do
   Utilities to manage artists
   """
 
+  @type artist :: String.t()
   @type bolt_response :: Boltx.Response.t()
+  @type username :: String.t()
 
   @doc """
   If this was in production, you would filter with the LISTENED_TO property
@@ -24,4 +26,38 @@ defmodule SongRecommender.Artists do
       """
     )
   end
+
+  @doc """
+  Gets the artists a user has followed. Returns an empty list if the user hasn't
+  followed any artists.
+
+  ## Examples
+
+      iex> get_user_genres("Dean")
+        ["Drake", "Taylor Swift"]
+
+  """
+
+  @spec get_followed_artists(username()) :: [artist()]
+  def get_followed_artists(username) do
+    %Boltx.Response{results: artists} =
+      Boltx.query!(
+        Bolt,
+        """
+        MATCH (u:User {name: $name})-[:FOLLOWS]->(a:Artist)
+        RETURN a.name AS artist
+        ORDER BY a.monthlyListeners DESC
+        LIMIT 5
+        """,
+        %{name: username}
+      )
+
+    if Enum.empty?(artists) do
+      []
+    else
+      Enum.map(artists, &process_artist(&1))
+    end
+  end
+
+  defp process_artist(%{"artist" => name}), do: name
 end

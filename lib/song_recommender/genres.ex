@@ -31,6 +31,7 @@ defmodule SongRecommender.Genres do
         """
         MATCH (u:User {name: $name})-[:PREFERS]->(g:Genre)
         RETURN g.name AS genre
+        LIMIT 5
         """,
         %{name: username}
       )
