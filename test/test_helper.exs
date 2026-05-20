@@ -8,7 +8,7 @@ wait_for_bolt = Testcontainers.LogWaitStrategy.new(~r/.*Bolt enabled on .*:7687/
 config = %Testcontainers.Container{
   image: "neo4j:2026.04.0-community",
   environment: %{NEO4J_AUTH: "neo4j/test_password"},
-  exposed_ports: [{7474, 7474}, {7687, 7688}],
+  exposed_ports: [{7474, 7474}, {7687, 7687}],
   wait_strategies: [wait_for_bolt]
 }
 
