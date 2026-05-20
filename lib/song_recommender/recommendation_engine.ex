@@ -32,7 +32,12 @@ defmodule SongRecommender.RecommendationEngine do
       |> Genres.calculate_total_listening_time()
       |> determine_recommendation_strategy()
 
-    new_state = Map.put(state, :strategy, recommendation_strategy)
+    queue_name = queue_name(username)
+
+    new_state =
+      state
+      |> Map.put(:strategy, recommendation_strategy)
+      |> Map.put(:queue_name, queue_name)
 
     {:noreply, new_state, @timeout}
   end
@@ -47,6 +52,8 @@ defmodule SongRecommender.RecommendationEngine do
       do: :hybrid,
       else: :genre_based
   end
+
+  defp queue_name(username), do: "#{username}_song_queue"
 
   # defp via_registry(name), do: {:via, Registry, {EngineQueueRegistry, name}}
 end
