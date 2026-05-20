@@ -1,4 +1,5 @@
 alias SongRecommender.Accounts
 alias SongRecommender.Accounts.User
+alias SongRecommender.EngineQueueRegistry
 alias SongRecommender.Genres
 alias SongRecommender.Songs

@@ -11,6 +11,7 @@ defmodule SongRecommender.RecommendationEngine do
   use GenServer, restart: :transient
 
   # alias SongRecommender.EngineQueueRegistry
+  alias SongRecommender.EngineQueueSupervisor
   alias SongRecommender.Genres
 
   @threshold_listening_time_ms 3_600_000
@@ -43,7 +44,8 @@ defmodule SongRecommender.RecommendationEngine do
   end
 
   @impl GenServer
-  def handle_info(:timeout, state) do
+  def handle_info(:timeout, %{queue_name: queue_name} = state) do
+    EngineQueueSupervisor.stop_queue(queue_name)
     {:stop, :normal, state}
   end
 
