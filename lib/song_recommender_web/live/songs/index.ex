@@ -1,6 +1,7 @@
 defmodule SongRecommenderWeb.SongsLive.Index do
   use SongRecommenderWeb, :live_view
 
+  alias SongRecommender.EngineSupervisor
   alias SongRecommender.Search
   alias SongRecommenderWeb.Songs.GenresPopupComponent
   alias SongRecommenderWeb.Songs.SongsComponent
@@ -38,7 +39,10 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
-    {:ok, stream_configure(socket, :search_items, dom_id: &"search-item-#{elem(&1, 0).id}")}
+    {:ok,
+     socket
+     |> setup_recommendation_engine()
+     |> stream_configure(:search_items, dom_id: &"search-item-#{elem(&1, 0).id}")}
   end
 
   @impl Phoenix.LiveView
@@ -107,4 +111,16 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     end)
     |> Enum.reverse()
   end
+
+  defp setup_recommendation_engine(%{assigns: %{current_user: user}} = socket) do
+    if connected?(socket) do
+      engine_name = engine_name(user.name)
+      EngineSupervisor.start_engine(engine_name)
+      assign(socket, :engine_name, engine_name)
+    else
+      socket
+    end
+  end
+
+  defp engine_name(username), do: "#{username}_recommendation_engine"
 end

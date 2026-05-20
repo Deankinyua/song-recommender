@@ -29,12 +29,5 @@ defmodule SongRecommender.EngineSupervisor do
     )
   end
 
-  @spec stop_engine(engine_name()) :: :ok
-  def stop_engine(engine_name) do
-    engine_name
-    |> via_registry()
-    |> GenServer.stop(:normal, 5000)
-  end
-
   defp via_registry(name), do: {:via, Registry, {EngineRegistry, name}}
 end
