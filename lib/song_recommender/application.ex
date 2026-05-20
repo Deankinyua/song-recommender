@@ -20,7 +20,7 @@ defmodule SongRecommender.Application do
         {Oban, Application.fetch_env!(:song_recommender, Oban)},
         {Registry, keys: :unique, name: SongRecommender.EngineRegistry},
         {PartitionSupervisor,
-         child_spec: DynamicSupervisor, name: SongRecommender.EngineSupervisor},
+         child_spec: DynamicSupervisor, name: SongRecommender.EngineQueueSupervisor},
         SongRecommenderWeb.Endpoint
       ] ++ bolt_child()
 

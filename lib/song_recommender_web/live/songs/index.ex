@@ -1,7 +1,7 @@
 defmodule SongRecommenderWeb.SongsLive.Index do
   use SongRecommenderWeb, :live_view
 
-  alias SongRecommender.EngineSupervisor
+  alias SongRecommender.EngineQueueSupervisor
   alias SongRecommender.Search
   alias SongRecommenderWeb.Songs.GenresPopupComponent
   alias SongRecommenderWeb.Songs.SongsComponent
@@ -116,7 +116,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     if connected?(socket) do
       username = user.name
       engine_name = engine_name(username)
-      EngineSupervisor.start_engine(engine_name, username)
+      EngineQueueSupervisor.start_engine(engine_name, username)
       assign(socket, :engine_name, engine_name)
     else
       socket

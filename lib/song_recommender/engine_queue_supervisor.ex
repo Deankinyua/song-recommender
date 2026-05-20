@@ -1,7 +1,7 @@
-defmodule SongRecommender.EngineSupervisor do
+defmodule SongRecommender.EngineQueueSupervisor do
   @moduledoc """
-  Responsible for starting a recommendation engine instance.
-  Each user gets their own instance of the recommendation engine.
+  Responsible for starting recommendation engines and song queues per user.
+  Each user gets an instance each of the respective resources.
   """
 
   use DynamicSupervisor
