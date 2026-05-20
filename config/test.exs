@@ -14,7 +14,7 @@ config :song_recommender, SongRecommender.Repo,
   pool_size: System.schedulers_online() * 2
 
 config :boltx, Bolt,
-  uri: "bolt://localhost:7687",
+  uri: "bolt://localhost:7688",
   auth: [username: "neo4j", password: "test_password"],
   user_agent: "boltxTest/1",
   pool_size: 15,
