@@ -6,10 +6,12 @@ defmodule SongRecommender.EngineQueueSupervisor do
 
   use DynamicSupervisor
 
-  alias SongRecommender.EngineRegistry
+  alias SongRecommender.EngineQueueRegistry
   alias SongRecommender.RecommendationEngine
+  alias SongRecommender.SongQueue
 
   @type engine_name :: String.t()
+  @type queue_name :: String.t()
   @type username :: String.t()
 
   @spec start_link(any()) :: {:ok, pid()} | {:error, any()}
@@ -30,5 +32,13 @@ defmodule SongRecommender.EngineQueueSupervisor do
     )
   end
 
-  defp via_registry(name), do: {:via, Registry, {EngineRegistry, name}}
+  @spec start_song_queue(queue_name(), username()) :: DynamicSupervisor.on_start_child()
+  def start_song_queue(queue_name, username) do
+    DynamicSupervisor.start_child(
+      {:via, PartitionSupervisor, {__MODULE__, self()}},
+      {SongQueue, name: via_registry(queue_name), username: username}
+    )
+  end
+
+  defp via_registry(name), do: {:via, Registry, {EngineQueueRegistry, name}}
 end

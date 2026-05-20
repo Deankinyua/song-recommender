@@ -10,7 +10,7 @@ defmodule SongRecommender.RecommendationEngine do
 
   use GenServer, restart: :transient
 
-  # alias SongRecommender.EngineRegistry
+  # alias SongRecommender.EngineQueueRegistry
   alias SongRecommender.Genres
 
   @threshold_listening_time_ms 3_600_000
@@ -48,5 +48,5 @@ defmodule SongRecommender.RecommendationEngine do
       else: :genre_based
   end
 
-  # defp via_registry(name), do: {:via, Registry, {EngineRegistry, name}}
+  # defp via_registry(name), do: {:via, Registry, {EngineQueueRegistry, name}}
 end
