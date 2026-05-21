@@ -99,7 +99,7 @@ defmodule SongRecommenderWeb.CustomComponents do
     <section class="w-[90%] flex flex-col justify-center mx-2 gap-0">
       <div class="happy-monkey-bold">{@item.name}</div>
       <div class="text-sm">
-        Song . <span class="happy-monkey-bold">{@item.sang_by}</span>
+        Song . <span class="happy-monkey-bold">{@item.artist.name}</span>
       </div>
     </section>
     """
