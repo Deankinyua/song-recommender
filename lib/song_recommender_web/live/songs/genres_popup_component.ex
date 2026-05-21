@@ -5,7 +5,6 @@ defmodule SongRecommenderWeb.Songs.GenresPopupComponent do
 
   use SongRecommenderWeb, :live_component
 
-  alias SongRecommender.Accounts
   alias SongRecommender.Genres
   alias SongRecommenderWeb.CustomComponents
 
@@ -57,7 +56,6 @@ defmodule SongRecommenderWeb.Songs.GenresPopupComponent do
                 phx-click={
                   hide_modal("capture-user-preferences-modal")
                   |> JS.dispatch("hide_genre_preferences_popup", to: "#genre-preferences-popup")
-                  |> JS.push("complete_preferences_capture", target: @myself)
                 }
                 class="btn btn-primary h-[2rem] !rounded-full"
               >
@@ -72,10 +70,10 @@ defmodule SongRecommenderWeb.Songs.GenresPopupComponent do
   end
 
   @impl Phoenix.LiveComponent
-  def update(%{user: user} = assigns, socket) do
+  def update(%{user_genres: user_genres} = assigns, socket) do
     {:ok,
      socket
-     |> assign_form(user)
+     |> assign_form(user_genres)
      |> assign(:favourite_genre, "")
      |> assign(:genres, @genres)
      |> assign(:show_error?, false)
@@ -90,36 +88,26 @@ defmodule SongRecommenderWeb.Songs.GenresPopupComponent do
         {:noreply, assign(socket, :show_error?, true)}
 
       false ->
-        %{"user" => %{"genres" => genres}} = params
-
+        %{"genres" => %{"genres" => genres}} = params
         [favourite_genre | _other_genres] = genres
 
-        changeset = Accounts.change_user_registration(user, params)
-        updated_user = maybe_prefer_some_genres(changeset.valid?, user, genres)
+        valid_genres? = Enum.all?(genres, fn genre -> Enum.member?(@genres, genre) end)
+
+        _genres = maybe_prefer_some_genres(valid_genres?, user, genres)
 
         {:noreply,
          socket
          |> assign(:favourite_genre, favourite_genre)
-         |> assign(:submitted?, true)
-         |> assign(:user, updated_user)}
+         |> assign(:submitted?, valid_genres?)}
     end
-  end
-
-  def handle_event("complete_preferences_capture", _params, %{assigns: %{user: user}} = socket) do
-    send(self(), {:updated_user, user})
-
-    {:noreply, socket}
   end
 
   defp maybe_prefer_some_genres(true, user, genres), do: Genres.prefer_genres(user.name, genres)
 
   defp maybe_prefer_some_genres(false, user, _genres), do: user
 
-  defp assign_form(socket, user) do
-    form =
-      user
-      |> Accounts.change_user_registration()
-      |> to_form(as: :user)
+  defp assign_form(socket, genres) do
+    form = to_form(%{"genres" => genres}, as: :genres)
 
     assign(socket, :form, form)
   end
