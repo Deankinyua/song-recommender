@@ -4,7 +4,6 @@ defmodule SongRecommender.Accounts do
   """
 
   alias SongRecommender.Accounts.User
-  alias SongRecommender.Genres
 
   @type attrs :: map()
   @type bolt_response :: Boltx.Response.t()
@@ -21,7 +20,7 @@ defmodule SongRecommender.Accounts do
   ## Examples
 
       iex> register_user(%{"name" => "Dean"})
-        {:ok, %User{genres: [], name: "Dean"}}
+        {:ok, %User{name: "Dean"}}
 
   """
 
@@ -34,8 +33,7 @@ defmodule SongRecommender.Accounts do
 
       %{"user" => %{"name" => name}} = create_user(username)
 
-      genres = Genres.get_user_genres(name)
-      {:ok, %User{genres: genres, name: name}}
+      {:ok, %User{name: name}}
     else
       {:error, changeset}
     end
@@ -59,7 +57,7 @@ defmodule SongRecommender.Accounts do
   ## Examples
 
       iex> get_user!("Dean")
-        %User{genres: [], name: "Dean"}
+        %User{name: "Dean"}
 
   """
 
@@ -128,12 +126,9 @@ defmodule SongRecommender.Accounts do
   """
   @spec get_user_by_session_token(name()) :: user() | nil
   def get_user_by_session_token(token) do
-    with {:ok, user} <- get_user_by_token(token),
-         genres <- Genres.get_user_genres(user.name) do
-      Map.put(user, :genres, genres)
-    else
-      nil ->
-        nil
+    case get_user_by_token(token) do
+      nil -> nil
+      {:ok, user} -> user
     end
   end
 

@@ -1,6 +1,6 @@
 defmodule SongRecommender.Songs.Song do
   @moduledoc """
-  A song
+  A song carries data about it's artist and genre
   """
 
   use Ecto.Schema
@@ -17,6 +17,7 @@ defmodule SongRecommender.Songs.Song do
     field :name, :string
     field :popularity, :integer
     field :released, :integer
+
     embeds_one :artist, Artist
     embeds_one :genre, Genre
   end
