@@ -26,10 +26,10 @@ defmodule SongRecommender.Search do
         WITH n, a
         CALL (*) {
           WHEN a IS NULL THEN {
-            RETURN n {.name, .monthlyListeners, id: NULL, artistName: NULL, popularity: NULL} AS searchItem
+            RETURN n {.name, .monthlyListeners, id: NULL, artistName: NULL, popularity: NULL, artistMonthlyListeners: NULL} AS searchItem
           }
           WHEN a IS NOT NULL THEN {
-            RETURN n {.name, .id, .popularity, monthlyListeners: NULL, artistName: a.name} AS searchItem
+            RETURN n {.name, .id, .popularity, artistMonthlyListeners: a.monthlyListeners, artistName: a.name, monthlyListeners: NULL} AS searchItem
           }
         }
         RETURN searchItem
@@ -49,18 +49,25 @@ defmodule SongRecommender.Search do
   defp process_search_item(%{
          "searchItem" => %{
            "artistName" => nil,
-           "monthlyListeners" => monthly_listeners,
            "name" => artist_name
          }
        }),
-       do: %Artist{id: Ecto.UUID.generate(), listeners: monthly_listeners, name: artist_name}
+       do: %Artist{id: Ecto.UUID.generate(), name: artist_name}
 
   defp process_search_item(%{
          "searchItem" => %{
+           "artistMonthlyListeners" => artist_monthly_listeners,
            "artistName" => artist_name,
            "id" => song_id,
            "name" => song_name
          }
-       }),
-       do: %Song{id: song_id, name: song_name, sang_by: artist_name}
+       }) do
+    artist = %Artist{name: artist_name, listeners: artist_monthly_listeners}
+
+    %Song{
+      artist: artist,
+      id: song_id,
+      name: song_name
+    }
+  end
 end
