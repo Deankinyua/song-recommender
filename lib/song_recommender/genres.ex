@@ -4,7 +4,6 @@ defmodule SongRecommender.Genres do
   """
 
   alias SongRecommender.Artists.Artist
-  alias SongRecommender.Accounts.User
   alias SongRecommender.Genres.Genre
   alias SongRecommender.Songs.Song
 
@@ -14,7 +13,6 @@ defmodule SongRecommender.Genres do
   @type limit :: integer()
   @type listening_time :: integer()
   @type song :: Song.t()
-  @type user :: User.t()
   @type username :: String.t()
 
   @doc """
@@ -58,7 +56,7 @@ defmodule SongRecommender.Genres do
 
   """
 
-  @spec prefer_genres(username(), [genre()]) :: user()
+  @spec prefer_genres(username(), [genre()]) :: [genre()]
   def prefer_genres(username, genres) do
     Bolt
     |> Boltx.query!(
@@ -70,8 +68,7 @@ defmodule SongRecommender.Genres do
       UNWIND $genres AS genre
       MATCH (g:Genre {name: genre})
       MERGE (u)-[:PREFERS]->(g)
-      RETURN u { .name } as user,
-      collect(DISTINCT g.name) AS preferred_genres
+      RETURN collect(DISTINCT g.name) AS preferred_genres
       """,
       %{genres: genres, name: username}
     )
@@ -186,8 +183,7 @@ defmodule SongRecommender.Genres do
   defp process_listening_time(%{"lifetime_listening_ms" => total_listening_time}),
     do: total_listening_time
 
-  defp process_preferred_genres(%{"preferred_genres" => genres, "user" => %{"name" => name}}),
-    do: %User{name: name, genres: genres}
+  defp process_preferred_genres(%{"preferred_genres" => genres}), do: genres
 
   defp process_genre(%{"genre" => name}), do: name
 end
