@@ -2,6 +2,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   use SongRecommenderWeb, :live_view
 
   alias SongRecommender.EngineQueueSupervisor
+  alias SongRecommender.Genres
   alias SongRecommender.Search
   alias SongRecommenderWeb.Songs.GenresPopupComponent
   alias SongRecommenderWeb.Songs.SongsComponent
@@ -17,6 +18,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           <.live_component
             id="genres-popup-component"
             module={GenresPopupComponent}
+            user_genres={@genres}
             show_modal?={@capture_user_preferences?}
             user={@current_user}
           />
@@ -41,6 +43,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
+     |> maybe_fetch_genres()
      |> setup_recommendation_engine()
      |> stream_configure(:search_items, dom_id: &"search-item-#{elem(&1, 0).id}")}
   end
@@ -89,11 +92,6 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     end
   end
 
-  @impl Phoenix.LiveView
-  def handle_info({:updated_user, user}, socket) do
-    {:noreply, assign(socket, :current_user, user)}
-  end
-
   defp add_image_numbers(items) do
     item_count = Enum.count(items)
 
@@ -123,6 +121,15 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     else
       socket
     end
+  end
+
+  defp maybe_fetch_genres(
+         %{assigns: %{current_user: user, capture_user_preferences?: capture_preferences?}} =
+           socket
+       ) do
+    genres = if capture_preferences?, do: Genres.get_user_genres(user.name), else: []
+
+    assign(socket, :genres, genres)
   end
 
   defp engine_name(username), do: "#{username}_recommendation_engine"

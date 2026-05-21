@@ -1,6 +1,6 @@
 defmodule SongRecommender.Genres.Genre do
   @moduledoc """
-  A genre
+  A genre must be one of the 35 genres present in our DB.
   """
 
   use Ecto.Schema
