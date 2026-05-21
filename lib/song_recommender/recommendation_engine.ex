@@ -17,6 +17,7 @@ defmodule SongRecommender.RecommendationEngine do
 
   @type engine :: String.t()
 
+  @ideal_song_number 10
   @threshold_listening_time_ms 3_600_000
   @timeout 1_200_000
 
@@ -72,13 +73,33 @@ defmodule SongRecommender.RecommendationEngine do
   end
 
   defp fetch_recommendation_utility_data(:genre_based, username) do
-    genres = Genres.get_user_genres(username)
-    artists = Artists.get_followed_artists(username)
+    artists =
+      username
+      |> Artists.get_followed_artists()
+      |> group_by_limit()
+
+    retrieved_genres = Genres.get_user_genres(username)
+
+    genres =
+      if artists,
+        do: group_by_limit(retrieved_genres),
+        else: group_by_limit(retrieved_genres, @ideal_song_number)
 
     %{genres: genres, artists: artists}
   end
 
   defp fetch_recommendation_utility_data(:hybrid, _username), do: %{}
+
+  defp group_by_limit(node_list, songs_per_node_type \\ @ideal_song_number / 2)
+
+  defp group_by_limit(node_list, _songs_per_node_type) when length(node_list) == 0, do: nil
+
+  defp group_by_limit(node_list, songs_per_node_type) do
+    count = Enum.count(node_list)
+    song_limit = :math.ceil(songs_per_node_type / count) |> trunc()
+
+    %{nodes: node_list, limit: song_limit}
+  end
 
   defp make_engine_request(engine, request_type, message) when request_type == :call do
     engine
