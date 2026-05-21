@@ -5,6 +5,9 @@ defmodule SongRecommender.Songs.Song do
 
   use Ecto.Schema
 
+  alias SongRecommender.Artists.Artist
+  alias SongRecommender.Genres.Genre
+
   @type t :: %__MODULE__{}
 
   @primary_key false
@@ -14,6 +17,7 @@ defmodule SongRecommender.Songs.Song do
     field :name, :string
     field :popularity, :integer
     field :released, :integer
-    field :sang_by, :string
+    embeds_one :artist, Artist
+    embeds_one :genre, Genre
   end
 end

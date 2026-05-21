@@ -18,9 +18,9 @@ defmodule SongRecommender.Application do
         # {SongRecommender.Worker, arg},
         # Start to serve requests, typically the last entry
         {Oban, Application.fetch_env!(:song_recommender, Oban)},
-        {Registry, keys: :unique, name: SongRecommender.EngineRegistry},
+        {Registry, keys: :unique, name: SongRecommender.EngineQueueRegistry},
         {PartitionSupervisor,
-         child_spec: DynamicSupervisor, name: SongRecommender.EngineSupervisor},
+         child_spec: DynamicSupervisor, name: SongRecommender.EngineQueueSupervisor},
         SongRecommenderWeb.Endpoint
       ] ++ bolt_child()
 

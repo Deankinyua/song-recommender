@@ -10,9 +10,14 @@ defmodule SongRecommender.RecommendationEngine do
 
   use GenServer, restart: :transient
 
-  # alias SongRecommender.EngineRegistry
+  alias SongRecommender.Artists
+  alias SongRecommender.EngineQueueRegistry
+  alias SongRecommender.EngineQueueSupervisor
   alias SongRecommender.Genres
 
+  @type engine :: String.t()
+
+  @ideal_song_number 10
   @threshold_listening_time_ms 3_600_000
   @timeout 1_200_000
 
@@ -32,13 +37,32 @@ defmodule SongRecommender.RecommendationEngine do
       |> Genres.calculate_total_listening_time()
       |> determine_recommendation_strategy()
 
-    new_state = Map.put(state, :strategy, recommendation_strategy)
+    taste_profile = fetch_recommendation_utility_data(recommendation_strategy, username)
+
+    queue_name = queue_name(username)
+
+    new_state =
+      state
+      |> Map.put(:queue_name, queue_name)
+      |> Map.put(:strategy, recommendation_strategy)
+      |> Map.put(:taste_profile, taste_profile)
 
     {:noreply, new_state, @timeout}
   end
 
+  @spec get_initial_songs(engine()) :: :ok
+  def get_initial_songs(engine),
+    do: make_engine_request(engine, :cast, :get_initial_songs)
+
   @impl GenServer
-  def handle_info(:timeout, state) do
+  def handle_cast(:get_initial_songs, state) do
+    dbg(state)
+    {:noreply, state}
+  end
+
+  @impl GenServer
+  def handle_info(:timeout, %{queue_name: queue_name} = state) do
+    EngineQueueSupervisor.stop_queue(queue_name)
     {:stop, :normal, state}
   end
 
@@ -48,5 +72,48 @@ defmodule SongRecommender.RecommendationEngine do
       else: :genre_based
   end
 
-  # defp via_registry(name), do: {:via, Registry, {EngineRegistry, name}}
+  defp fetch_recommendation_utility_data(:genre_based, username) do
+    artists =
+      username
+      |> Artists.get_followed_artists()
+      |> group_by_limit()
+
+    retrieved_genres = Genres.get_user_genres(username)
+
+    genres =
+      if artists,
+        do: group_by_limit(retrieved_genres),
+        else: group_by_limit(retrieved_genres, @ideal_song_number)
+
+    %{genres: genres, artists: artists}
+  end
+
+  defp fetch_recommendation_utility_data(:hybrid, _username), do: %{}
+
+  defp group_by_limit(node_list, songs_per_node_type \\ @ideal_song_number / 2)
+
+  defp group_by_limit(node_list, _songs_per_node_type) when length(node_list) == 0, do: nil
+
+  defp group_by_limit(node_list, songs_per_node_type) do
+    count = Enum.count(node_list)
+    song_limit = :math.ceil(songs_per_node_type / count) |> trunc()
+
+    %{nodes: node_list, limit: song_limit}
+  end
+
+  defp make_engine_request(engine, request_type, message) when request_type == :call do
+    engine
+    |> via_registry()
+    |> GenServer.call(message)
+  end
+
+  defp make_engine_request(engine, _request_type, message) do
+    engine
+    |> via_registry()
+    |> GenServer.cast(message)
+  end
+
+  defp via_registry(name), do: {:via, Registry, {EngineQueueRegistry, name}}
+
+  defp queue_name(username), do: "#{username}_song_queue"
 end
