@@ -3,6 +3,7 @@ defmodule SongRecommender.GraphHelpers do
   Helpers to add and clear graph data.
   """
 
+  @type artist :: String.t()
   @type bolt_response :: Boltx.Response.t()
   @type genre :: String.t()
 
@@ -75,6 +76,22 @@ defmodule SongRecommender.GraphHelpers do
     |> return_genres()
   end
 
+  @spec create_artists([artist()]) :: bolt_response()
+  def create_artists(artists) do
+    Bolt
+    |> Boltx.query!(
+      """
+       UNWIND $artists AS artist
+       CREATE (a:Artist {name: artist})
+       RETURN collect(a.name) AS artists
+      """,
+      %{artists: artists}
+    )
+    |> Boltx.Response.first()
+    |> return_artists()
+  end
+
+  defp return_artists(%{"artists" => artists}), do: artists
   defp return_genres(%{"genres" => genres}), do: genres
   defp return_song_ids(%{"songs" => song_ids}), do: song_ids
   defp user_listened_to_song?(%{"listened_status" => status}), do: status

@@ -8,6 +8,22 @@ defmodule SongRecommender.Artists do
   @type username :: String.t()
 
   @doc """
+  Follows an artist
+  """
+
+  @spec follow_artist(username(), artist()) :: bolt_response()
+  def follow_artist(username, artist) do
+    Boltx.query!(
+      Bolt,
+      """
+      MATCH (u:User {name: $username}), (a:Artist {name: $artist_name})
+      MERGE (u)-[:FOLLOWS]->(a)
+      """,
+      %{username: username, artist_name: artist}
+    )
+  end
+
+  @doc """
   If this was in production, you would filter with the LISTENED_TO property
   `lastPlayedDate` to find only the songs that were listened to over the
   past month.You would add a WHERE clause:
