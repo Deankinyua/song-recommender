@@ -1,6 +1,6 @@
 defmodule SongRecommender.Songs.Song do
   @moduledoc """
-  A song carries data about it's artist and genre
+  A song carries data about its artist and genre
   """
 
   use Ecto.Schema

@@ -56,7 +56,6 @@ defmodule SongRecommender.RecommendationEngine do
 
   @impl GenServer
   def handle_cast(:get_initial_songs, state) do
-    dbg(state)
     {:noreply, state}
   end
 
@@ -92,7 +91,7 @@ defmodule SongRecommender.RecommendationEngine do
 
   defp group_by_limit(node_list, songs_per_node_type \\ @ideal_song_number / 2)
 
-  defp group_by_limit(node_list, _songs_per_node_type) when length(node_list) == 0, do: nil
+  defp group_by_limit(node_list, _songs_per_node_type) when node_list == [], do: nil
 
   defp group_by_limit(node_list, songs_per_node_type) do
     count = Enum.count(node_list)
