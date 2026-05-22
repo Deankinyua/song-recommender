@@ -9,7 +9,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     ~H"""
     <Layouts.app flash={@flash} class="bg-base-50" username={@current_user.name}>
       <div class="h-[92vh] flex text-base-100">
-        <section class="w-[25%] relative">
+        <section class="w-[22%] relative">
           <.live_component
             id="genres-popup-component"
             module={GenresPopupComponent}
@@ -39,7 +39,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           />
         </section>
 
-        <section class="w-[25%]"></section>
+        <section class="w-[22%]"></section>
       </div>
     </Layouts.app>
     """
