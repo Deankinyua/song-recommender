@@ -34,7 +34,7 @@ defmodule SongRecommender.Genres do
         """
         MATCH (u:User {name: $name})-[:PREFERS]->(g:Genre)
         RETURN g.name AS genre
-        LIMIT 5
+        LIMIT 20
         """,
         %{name: username}
       )
@@ -42,7 +42,10 @@ defmodule SongRecommender.Genres do
     if Enum.empty?(genres) do
       []
     else
-      Enum.map(genres, &process_genre(&1))
+      genres
+      |> Enum.map(&process_genre(&1))
+      |> Enum.shuffle()
+      |> Enum.take(5)
     end
   end
 
