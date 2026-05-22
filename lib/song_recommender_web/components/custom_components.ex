@@ -68,6 +68,7 @@ defmodule SongRecommenderWeb.CustomComponents do
   end
 
   attr :image, :integer, required: true
+  attr :item, :any, required: true
 
   @spec search_item(assigns()) :: rendered()
   def search_item(assigns) do
@@ -293,29 +294,34 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
-  attr :artist_name, :string, required: true
   attr :image, :integer, required: true
-  attr :song_duration, :integer, required: true
-  attr :song_name, :string, required: true
-  attr :song_number, :integer, required: true
+  attr :song, Song, required: true
 
   @spec song(assigns()) :: rendered()
   def song(assigns) do
     ~H"""
     <section class="rounded-md py-2 px-4 mx-3 flex justify-between items-center hover:bg-neutral hover:cursor-pointer">
       <div class="flex items-center gap-4">
-        <section>{@song_number}</section>
         <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
           <img src={path_to_image(@image)} alt="song image" class="object-cover" />
         </section>
         <section class="flex flex-col">
-          <p>{@song_name}</p>
-          <p class="text-xs">{@artist_name}</p>
+          <p>{@song.name}</p>
+          <p class="text-xs">{@song.artist.name}</p>
         </section>
       </div>
-      <div class="happy-monkey-bold">3:45</div>
+      <div class="happy-monkey-bold">{milliseconds_to_minutes(@song.duration_ms)}</div>
     </section>
     """
+  end
+
+  def milliseconds_to_minutes(milliseconds) do
+    total_seconds = div(milliseconds, 1_000)
+
+    minutes = div(total_seconds, 60)
+    seconds = rem(total_seconds, 60)
+
+    "#{minutes}:#{String.pad_leading("#{seconds}", 2, "0")}"
   end
 
   defp path_to_image(num), do: ~p"/images/songs/" <> "image_#{num}.jpeg"

@@ -31,6 +31,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           <.live_component
             id="songs-component"
             module={SongsComponent}
+            songs={@streams.songs}
           />
 
           <.live_component
@@ -51,7 +52,9 @@ defmodule SongRecommenderWeb.SongsLive.Index do
      socket
      |> maybe_fetch_genres()
      |> setup_recommendation_engine()
-     |> stream_configure(:search_items, dom_id: &"search-item-#{elem(&1, 0).id}")}
+     |> stream_configure(:search_items, dom_id: &"search-item-#{elem(&1, 0).id}")
+     |> stream_configure(:songs, dom_id: &"song-#{elem(&1, 0).id}")
+     |> stream(:songs, [])}
   end
 
   @impl Phoenix.LiveView
@@ -109,8 +112,10 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_async(:get_songs, {:ok, _songs}, socket) do
-    {:noreply, socket}
+  def handle_async(:get_songs, {:ok, songs}, socket) do
+    songs_with_images = add_image_numbers(songs)
+
+    {:noreply, stream(socket, :songs, songs_with_images)}
   end
 
   defp add_image_numbers(items) do
