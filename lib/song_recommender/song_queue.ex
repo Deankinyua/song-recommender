@@ -10,6 +10,11 @@ defmodule SongRecommender.SongQueue do
 
   import SongRecommender.GenserverHelpers
 
+  alias SongRecommender.Songs.Song
+
+  @type queue :: String.t()
+  @type song :: Song.t()
+
   @spec start_link(any()) :: GenServer.on_start()
   def start_link(opts) do
     username = Keyword.get(opts, :username)
@@ -38,10 +43,29 @@ defmodule SongRecommender.SongQueue do
   end
 
   @impl GenServer
-  def handle_call({:recommended_songs, songs}, _from, state) do
-    dbg(songs)
+  def handle_call({:recommended_songs, new_songs}, _from, state) do
+    new_state = update_recommended_songs(new_songs, state)
+    {:reply, :ok, new_state}
+  end
 
-    {:reply, :ok, state}
+  def handle_call(:return_recommended_songs, _from, %{recommended_songs: songs} = state) do
+    {:reply, songs, state}
+  end
+
+  @spec get_recommended_songs(queue()) :: [song()]
+  def get_recommended_songs(queue_name),
+    do: make_genserver_request(queue_name, :call, :return_recommended_songs)
+
+  defp update_recommended_songs(
+         songs,
+         %{recommended_songs: recommended_songs, recommended_songs_count: count} = state
+       ) do
+    new_recommended_songs_count = Enum.count(songs) + count
+    new_recommended_songs = recommended_songs ++ songs
+
+    state
+    |> Map.put(:recommended_songs, new_recommended_songs)
+    |> Map.put(:recommended_songs_count, new_recommended_songs_count)
   end
 
   defp engine_name(username), do: "#{username}_recommendation_engine"

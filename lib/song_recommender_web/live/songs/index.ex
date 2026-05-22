@@ -4,6 +4,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   alias SongRecommender.EngineQueueSupervisor
   alias SongRecommender.Genres
   alias SongRecommender.Search
+  alias SongRecommender.SongQueue
   alias SongRecommenderWeb.Songs.GenresPopupComponent
   alias SongRecommenderWeb.Songs.PlayerComponent
   alias SongRecommenderWeb.Songs.SearchComponent
@@ -105,6 +106,21 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     end
   end
 
+  @impl Phoenix.LiveView
+  def handle_info(:get_initial_songs, %{assigns: %{queue_name: queue}} = socket) do
+    socket =
+      start_async(socket, :get_songs, fn ->
+        SongQueue.get_recommended_songs(queue)
+      end)
+
+    {:noreply, socket}
+  end
+
+  @impl Phoenix.LiveView
+  def handle_async(:get_songs, {:ok, _songs}, socket) do
+    {:noreply, socket}
+  end
+
   defp add_image_numbers(items) do
     item_count = Enum.count(items)
 
@@ -128,8 +144,12 @@ defmodule SongRecommenderWeb.SongsLive.Index do
       username = user.name
       engine_name = engine_name(username)
       queue_name = queue_name(username)
+
       EngineQueueSupervisor.start_engine(engine_name, username)
       EngineQueueSupervisor.start_song_queue(queue_name, username)
+
+      Process.send_after(self(), :get_initial_songs, 800)
+
       assign(socket, :queue_name, queue_name)
     else
       socket

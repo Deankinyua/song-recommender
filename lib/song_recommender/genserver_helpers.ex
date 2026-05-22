@@ -17,7 +17,7 @@ defmodule SongRecommender.GenserverHelpers do
   def make_genserver_request(server_name, request_type, message) when request_type == :call do
     server_name
     |> via_registry()
-    |> GenServer.call(message)
+    |> GenServer.call(message, 8000)
   end
 
   def make_genserver_request(server_name, _request_type, message) do
