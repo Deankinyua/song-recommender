@@ -136,7 +136,10 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     |> Enum.reverse()
   end
 
-  defp setup_recommendation_engine(%{assigns: %{current_user: user}} = socket) do
+  defp setup_recommendation_engine(
+         %{assigns: %{capture_user_preferences?: capture_preferences?, current_user: user}} =
+           socket
+       ) do
     if connected?(socket) do
       username = user.name
       engine_name = engine_name(username)
@@ -145,7 +148,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
       EngineQueueSupervisor.start_engine(engine_name, username)
       EngineQueueSupervisor.start_song_queue(queue_name, username)
 
-      Process.send_after(self(), :get_initial_songs, 800)
+      if !capture_preferences?, do: Process.send_after(self(), :get_initial_songs, 800)
 
       assign(socket, :queue_name, queue_name)
     else
@@ -154,7 +157,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   defp maybe_fetch_genres(
-         %{assigns: %{current_user: user, capture_user_preferences?: capture_preferences?}} =
+         %{assigns: %{capture_user_preferences?: capture_preferences?, current_user: user}} =
            socket
        ) do
     genres = if capture_preferences?, do: Genres.get_user_genres(user.name), else: []
