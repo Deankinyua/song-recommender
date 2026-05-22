@@ -67,10 +67,12 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
+  attr :image, :integer, required: true
+
   @spec search_item(assigns()) :: rendered()
   def search_item(assigns) do
     ~H"""
-    <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular text-base-100 hover:bg-accent hover:cursor-pointer">
+    <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular hover:bg-accent hover:cursor-pointer">
       <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
         <img src={path_to_image(@image)} alt="cover image" class="w-full h-full object-cover" />
       </section>
@@ -288,6 +290,31 @@ defmodule SongRecommenderWeb.CustomComponents do
         </tspan>
       </text>
     </svg>
+    """
+  end
+
+  attr :artist_name, :string, required: true
+  attr :image, :integer, required: true
+  attr :song_duration, :integer, required: true
+  attr :song_name, :string, required: true
+  attr :song_number, :integer, required: true
+
+  @spec song(assigns()) :: rendered()
+  def song(assigns) do
+    ~H"""
+    <section class="rounded-md py-2 px-4 mx-3 flex justify-between items-center hover:bg-neutral hover:cursor-pointer">
+      <div class="flex items-center gap-4">
+        <section>{@song_number}</section>
+        <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
+          <img src={path_to_image(@image)} alt="song image" class="object-cover" />
+        </section>
+        <section class="flex flex-col">
+          <p>{@song_name}</p>
+          <p class="text-xs">{@artist_name}</p>
+        </section>
+      </div>
+      <div class="happy-monkey-bold">3:45</div>
+    </section>
     """
   end
 
