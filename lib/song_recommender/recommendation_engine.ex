@@ -10,12 +10,12 @@ defmodule SongRecommender.RecommendationEngine do
 
   use GenServer, restart: :transient
 
+  import SongRecommender.GenserverHelpers
+
   alias SongRecommender.Artists
-  alias SongRecommender.EngineQueueRegistry
   alias SongRecommender.EngineQueueSupervisor
   alias SongRecommender.Genres
-
-  @type engine :: String.t()
+  alias SongRecommender.QueryEngine
 
   @ideal_song_number 10
   @threshold_listening_time_ms 3_600_000
@@ -50,13 +50,17 @@ defmodule SongRecommender.RecommendationEngine do
     {:noreply, new_state, @timeout}
   end
 
-  @spec get_initial_songs(engine()) :: :ok
-  def get_initial_songs(engine),
-    do: make_engine_request(engine, :cast, :get_initial_songs)
-
   @impl GenServer
-  def handle_cast(:get_initial_songs, state) do
-    {:noreply, state}
+  def handle_cast(
+        :get_initial_songs,
+        %{queue_name: queue_name, strategy: strategy, taste_profile: taste_profile} = state
+      ) do
+    :ok =
+      strategy
+      |> QueryEngine.get_initial_songs(taste_profile)
+      |> send_songs_to_queue(queue_name)
+
+    {:noreply, state, @timeout}
   end
 
   @impl GenServer
@@ -64,6 +68,9 @@ defmodule SongRecommender.RecommendationEngine do
     EngineQueueSupervisor.stop_queue(queue_name)
     {:stop, :normal, state}
   end
+
+  defp send_songs_to_queue(songs, queue_name),
+    do: make_genserver_request(queue_name, :call, {:recommended_songs, songs})
 
   defp determine_recommendation_strategy(total_listening_time) do
     if total_listening_time > @threshold_listening_time_ms,
@@ -99,20 +106,6 @@ defmodule SongRecommender.RecommendationEngine do
 
     %{nodes: node_list, limit: song_limit}
   end
-
-  defp make_engine_request(engine, request_type, message) when request_type == :call do
-    engine
-    |> via_registry()
-    |> GenServer.call(message)
-  end
-
-  defp make_engine_request(engine, _request_type, message) do
-    engine
-    |> via_registry()
-    |> GenServer.cast(message)
-  end
-
-  defp via_registry(name), do: {:via, Registry, {EngineQueueRegistry, name}}
 
   defp queue_name(username), do: "#{username}_song_queue"
 end

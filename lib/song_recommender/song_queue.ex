@@ -37,5 +37,12 @@ defmodule SongRecommender.SongQueue do
     {:noreply, new_state}
   end
 
+  @impl GenServer
+  def handle_call({:recommended_songs, songs}, _from, state) do
+    dbg(songs)
+
+    {:reply, :ok, state}
+  end
+
   defp engine_name(username), do: "#{username}_recommendation_engine"
 end
