@@ -56,6 +56,7 @@ defmodule SongRecommenderWeb.Songs.GenresPopupComponent do
                 phx-click={
                   hide_modal("capture-user-preferences-modal")
                   |> JS.dispatch("hide_genre_preferences_popup", to: "#genre-preferences-popup")
+                  |> JS.push("maybe_refetch_recommended_songs")
                 }
                 class="btn btn-primary h-[2rem] !rounded-full"
               >

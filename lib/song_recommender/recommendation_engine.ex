@@ -64,10 +64,35 @@ defmodule SongRecommender.RecommendationEngine do
   end
 
   @impl GenServer
+  def handle_call(
+        :change_taste_profile,
+        _from,
+        %{queue_name: queue_name, strategy: strategy, username: username} = state
+      )
+      when strategy == :genre_based do
+    taste_profile = fetch_recommendation_utility_data(strategy, username)
+
+    :ok =
+      strategy
+      |> QueryEngine.get_initial_songs(taste_profile)
+      |> send_songs_to_queue(queue_name)
+
+    new_state = Map.put(state, :taste_profile, taste_profile)
+
+    {:reply, {:ok, :profile_changed}, new_state}
+  end
+
+  def handle_call(:change_taste_profile, _from, %{strategy: :hybrid} = state),
+    do: {:reply, {:error, :profile_should_not_change}, state}
+
+  @impl GenServer
   def handle_info(:timeout, %{queue_name: queue_name} = state) do
     EngineQueueSupervisor.stop_queue(queue_name)
     {:stop, :normal, state}
   end
+
+  def maybe_change_taste_profile(engine_name),
+    do: make_genserver_request(engine_name, :call, :change_taste_profile)
 
   defp send_songs_to_queue(songs, queue_name),
     do: make_genserver_request(queue_name, :call, {:recommended_songs, songs})

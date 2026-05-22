@@ -58,14 +58,13 @@ defmodule SongRecommender.SongQueue do
 
   defp update_recommended_songs(
          songs,
-         %{recommended_songs: recommended_songs, recommended_songs_count: count} = state
+         state
        ) do
-    new_recommended_songs_count = Enum.count(songs) + count
-    new_recommended_songs = recommended_songs ++ songs
+    songs_count = Enum.count(songs)
 
     state
-    |> Map.put(:recommended_songs, new_recommended_songs)
-    |> Map.put(:recommended_songs_count, new_recommended_songs_count)
+    |> Map.put(:recommended_songs, songs)
+    |> Map.put(:recommended_songs_count, songs_count)
   end
 
   defp engine_name(username), do: "#{username}_recommendation_engine"

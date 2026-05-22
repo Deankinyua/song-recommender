@@ -101,6 +101,23 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     end
   end
 
+  def handle_event(
+        "maybe_refetch_recommended_songs",
+        _params,
+        %{assigns: %{engine_name: engine}} = socket
+      ) do
+    _result =
+      case RecommendationEngine.maybe_change_taste_profile(engine) do
+        {:ok, :profile_changed} ->
+          send(self(), :get_initial_songs)
+
+        {:error, :profile_should_not_change} ->
+          :ok
+      end
+
+    {:noreply, socket}
+  end
+
   @impl Phoenix.LiveView
   def handle_info(:get_initial_songs, %{assigns: %{queue_name: queue}} = socket) do
     socket =
@@ -115,7 +132,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def handle_async(:get_songs, {:ok, songs}, socket) do
     songs_with_images = add_image_numbers(songs)
 
-    {:noreply, stream(socket, :songs, songs_with_images)}
+    {:noreply, stream(socket, :songs, songs_with_images, reset: true)}
   end
 
   defp add_image_numbers(items) do
@@ -150,7 +167,9 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
       if !capture_preferences?, do: Process.send_after(self(), :get_initial_songs, 800)
 
-      assign(socket, :queue_name, queue_name)
+      socket
+      |> assign(:engine_name, engine_name)
+      |> assign(:queue_name, queue_name)
     else
       socket
     end
