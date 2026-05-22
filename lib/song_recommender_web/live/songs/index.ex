@@ -5,6 +5,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   alias SongRecommender.Genres
   alias SongRecommender.Search
   alias SongRecommenderWeb.Songs.GenresPopupComponent
+  alias SongRecommenderWeb.Songs.SearchComponent
   alias SongRecommenderWeb.Songs.SongsComponent
 
   @image_list 1..15
@@ -23,15 +24,21 @@ defmodule SongRecommenderWeb.SongsLive.Index do
             user={@current_user}
           />
         </section>
+        <section class="flex-1 flex flex-col items-center gap-2 border border-blue-400">
+          <.live_component
+            id="search-component"
+            module={SearchComponent}
+            empty_search?={@empty_search?}
+            search_items={@streams.search_items}
+            search_query={@search_query}
+            show_recent_searches?={@show_recent_searches?}
+          />
 
-        <.live_component
-          id="songs-component"
-          module={SongsComponent}
-          empty_search?={@empty_search?}
-          search_items={@streams.search_items}
-          search_query={@search_query}
-          show_recent_searches?={@show_recent_searches?}
-        />
+          <.live_component
+            id="songs-component"
+            module={SongsComponent}
+          />
+        </section>
 
         <section class="w-[25%]"></section>
       </div>
