@@ -1,14 +1,6 @@
 defmodule SongRecommenderWeb.SongsLive.Index do
   use SongRecommenderWeb, :live_view
-
-  alias SongRecommender.EngineQueueSupervisor
-  alias SongRecommender.Genres
-  alias SongRecommender.Search
-  alias SongRecommender.SongQueue
-  alias SongRecommenderWeb.Songs.GenresPopupComponent
-  alias SongRecommenderWeb.Songs.PlayerComponent
-  alias SongRecommenderWeb.Songs.SearchComponent
-  alias SongRecommenderWeb.Songs.SongsComponent
+  use SongRecommenderWeb, :setup_homepage_aliases
 
   @image_list 1..15
 
