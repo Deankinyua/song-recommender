@@ -5,6 +5,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   alias SongRecommender.Genres
   alias SongRecommender.Search
   alias SongRecommenderWeb.Songs.GenresPopupComponent
+  alias SongRecommenderWeb.Songs.PlayerComponent
   alias SongRecommenderWeb.Songs.SearchComponent
   alias SongRecommenderWeb.Songs.SongsComponent
 
@@ -37,6 +38,11 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           <.live_component
             id="songs-component"
             module={SongsComponent}
+          />
+
+          <.live_component
+            id="player-component"
+            module={PlayerComponent}
           />
         </section>
 
