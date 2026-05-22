@@ -70,7 +70,7 @@ defmodule SongRecommenderWeb.CustomComponents do
   @spec search_item(assigns()) :: rendered()
   def search_item(assigns) do
     ~H"""
-    <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular text-base-100 hover:bg-accent hover:text-base-100 hover:cursor-pointer">
+    <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular text-base-100 hover:bg-accent hover:cursor-pointer">
       <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
         <img src={path_to_image(@image)} alt="cover image" class="w-full h-full object-cover" />
       </section>
