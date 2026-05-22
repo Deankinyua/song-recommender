@@ -13,7 +13,7 @@ defmodule SongRecommenderWeb.Songs.PlayerComponent do
     <section
       id="song-player"
       phx-hook="SongPlayer"
-      class="w-[92%] h-[16%] bg-base-50 flex flex-col gap-2 justify-center items-center song-player text-base-100 border border-red-400"
+      class="w-[92%] h-[16%] bg-base-50 flex flex-col gap-2 justify-center items-center song-player text-base-100"
     >
       <div class="w-[60%] flex justify-center items-center gap-4">
         <div id="back-icon" class="control-icon">

@@ -25,7 +25,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
             user={@current_user}
           />
         </section>
-        <section class="flex-1 flex flex-col items-center gap-2 border border-blue-400">
+        <section class="flex-1 flex flex-col items-center gap-2">
           <.live_component
             id="search-component"
             module={SearchComponent}

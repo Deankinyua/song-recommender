@@ -8,7 +8,7 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
   @impl Phoenix.LiveComponent
   def render(assigns) do
     ~H"""
-    <div class="w-[92%] h-[80%] mx-auto flex flex-col justify-between border border-red-400">
+    <div class="w-[92%] h-[80%] mx-auto mb-3 p-3 bg-base-70 rounded-xl flex flex-col justify-between">
       <section class="">songs</section>
     </div>
     """

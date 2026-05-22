@@ -34,6 +34,7 @@
   prefersdark: false;
   color-scheme: "light";
   --color-base-50: oklch(0.1597 0.0247 243.37);
+  --color-base-70: oklch(0.1843 0.0247 243.37);
   --color-base-100: oklch(98% 0 0);
   --color-base-200: oklch(0.5379 0.0808 236.65);
   --color-base-300: oklch(0.2597 0.0247 243.37);
@@ -56,8 +57,6 @@
   --color-warning-content: oklch(98% 0.022 95.277);
   --color-error: oklch(0.56 0.2073 17.585);
   --color-error-content: oklch(96% 0.015 12.422);
-  --color-gray: oklch(0.7858 0 0);
-  --color-gray-dark: oklch(0.6 0 0);
   --radius-selector: 0.25rem;
   --radius-field: 0.25rem;
   --radius-box: 0.5rem;
@@ -132,6 +131,10 @@
 
 .bg-base-50 {
   background: var(--color-base-50);
+}
+
+.bg-base-70 {
+  background: var(--color-base-70);
 }
 
 .btn-primary:is(.btn-disabled, [disabled], :disabled) {
