@@ -8,7 +8,7 @@ defmodule SongRecommender.SongQueue do
 
   use GenServer, restart: :transient
 
-  alias SongRecommender.RecommendationEngine
+  import SongRecommender.GenserverHelpers
 
   @spec start_link(any()) :: GenServer.on_start()
   def start_link(opts) do
@@ -31,9 +31,8 @@ defmodule SongRecommender.SongQueue do
   @impl GenServer
   def handle_continue(:initialize_queue, %{username: username} = state) do
     engine_name = engine_name(username)
+    :ok = make_genserver_request(engine_name, :cast, :get_initial_songs)
     new_state = Map.put(state, :engine_name, engine_name)
-
-    RecommendationEngine.get_initial_songs(engine_name)
 
     {:noreply, new_state}
   end

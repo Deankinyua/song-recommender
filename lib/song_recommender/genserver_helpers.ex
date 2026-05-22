@@ -9,6 +9,10 @@ defmodule SongRecommender.GenserverHelpers do
   @type request_type :: atom()
   @type server_name :: String.t()
 
+  @doc """
+  Encapsulates making requests to genservers via the registry.
+  """
+
   @spec make_genserver_request(server_name(), request_type(), message()) :: :ok | term()
   def make_genserver_request(server_name, request_type, message) when request_type == :call do
     server_name
