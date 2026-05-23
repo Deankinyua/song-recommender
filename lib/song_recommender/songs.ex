@@ -3,6 +3,8 @@ defmodule SongRecommender.Songs do
   Tracks how users listen to songs
   """
 
+  alias SongRecommender.Artists.Artist
+  alias SongRecommender.Genres.Genre
   alias SongRecommender.Songs.Song
 
   @type bolt_response :: Boltx.Response.t()
@@ -10,6 +12,7 @@ defmodule SongRecommender.Songs do
   @type listening_duration :: integer()
   @type song :: Song.t()
   @type song_id :: String.t()
+  @type taste_profile :: map()
   @type username :: String.t()
 
   @doc """
@@ -121,5 +124,84 @@ defmodule SongRecommender.Songs do
         username: username
       }
     )
+  end
+
+  @doc """
+  Gets songs belonging to some genres and some sang by some artists
+  """
+  @spec get_songs_with_genre_based_strategy(taste_profile()) :: [song()]
+  def get_songs_with_genre_based_strategy(%{artists: artists, genres: genres} = _taste_profile) do
+    %{nodes: artist_names, limit: artists_song_limit} = artists
+    %{nodes: genre_names, limit: genres_song_limit} = genres
+
+    %Boltx.Response{results: song_data} =
+      Boltx.query!(
+        Bolt,
+        """
+        CALL () {
+
+          UNWIND $genres AS genre
+          WITH genre
+          CALL (*) {
+            MATCH (a:Artist)-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre {name: genre})
+            RETURN s AS song, a AS artist, g.name AS genreName
+            ORDER BY s.popularity DESC
+            LIMIT $genres_song_limit
+          }
+          RETURN song, artist, genreName
+
+        UNION
+
+          UNWIND $artists AS artistName
+          WITH artistName
+          CALL (*) {
+            MATCH (a:Artist {name: artistName})-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre)
+            RETURN s AS song, a AS artist, g.name AS genreName
+            ORDER BY s.popularity DESC
+            LIMIT $artists_song_limit
+          }
+          RETURN song, artist, genreName
+
+        }
+
+        RETURN song { .id, .name, .durationMs, .released },
+               artist { .name, .monthlyListeners },
+               genreName
+        """,
+        %{
+          artists: artist_names,
+          artists_song_limit: artists_song_limit,
+          genres: genre_names,
+          genres_song_limit: genres_song_limit
+        }
+      )
+
+    Enum.map(song_data, &process_song_data(&1))
+  end
+
+  defp process_song_data(%{
+         "song" => %{
+           "durationMs" => duration_ms,
+           "id" => song_id,
+           "name" => song_name,
+           "released" => released
+         },
+         "artist" => %{
+           "monthlyListeners" => monthly_listeners,
+           "name" => artist_name
+         },
+         "genreName" => genre
+       }) do
+    genre = %Genre{name: genre}
+    artist = %Artist{name: artist_name, listeners: monthly_listeners}
+
+    %Song{
+      artist: artist,
+      duration_ms: duration_ms,
+      genre: genre,
+      id: song_id,
+      name: song_name,
+      released: released
+    }
   end
 end
