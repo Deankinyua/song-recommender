@@ -16,6 +16,7 @@ defmodule SongRecommender.RecommendationEngine do
   alias SongRecommender.EngineQueueSupervisor
   alias SongRecommender.Genres
   alias SongRecommender.QueryEngine
+  alias SongRecommender.Songs
 
   @ideal_song_number 10
   @threshold_listening_time_ms 3_600_000
@@ -73,8 +74,8 @@ defmodule SongRecommender.RecommendationEngine do
     taste_profile = fetch_recommendation_utility_data(strategy, username)
 
     :ok =
-      strategy
-      |> QueryEngine.get_initial_songs(taste_profile)
+      taste_profile
+      |> Songs.get_songs_with_genre_based_strategy()
       |> send_songs_to_queue(queue_name)
 
     new_state = Map.put(state, :taste_profile, taste_profile)
@@ -104,26 +105,25 @@ defmodule SongRecommender.RecommendationEngine do
   end
 
   defp fetch_recommendation_utility_data(:genre_based, username) do
-    artists =
-      username
-      |> Artists.get_followed_artists()
-      |> group_by_limit()
+    retrieved_artists = Artists.get_followed_artists(username)
+    artists = group_by_limit(retrieved_artists)
 
     retrieved_genres = Genres.get_user_genres(username)
 
     genres =
-      if artists,
-        do: group_by_limit(retrieved_genres),
-        else: group_by_limit(retrieved_genres, @ideal_song_number)
+      if Enum.empty?(retrieved_artists),
+        do: group_by_limit(retrieved_genres, @ideal_song_number),
+        else: group_by_limit(retrieved_genres)
 
-    %{genres: genres, artists: artists}
+    %{artists: artists, genres: genres}
   end
 
   defp fetch_recommendation_utility_data(:hybrid, _username), do: %{}
 
   defp group_by_limit(node_list, songs_per_node_type \\ @ideal_song_number / 2)
 
-  defp group_by_limit(node_list, _songs_per_node_type) when node_list == [], do: nil
+  defp group_by_limit(node_list, _songs_per_node_type) when node_list == [],
+    do: %{nodes: [], limit: 0}
 
   defp group_by_limit(node_list, songs_per_node_type) do
     count = Enum.count(node_list)
