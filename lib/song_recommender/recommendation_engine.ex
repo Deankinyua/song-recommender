@@ -80,11 +80,11 @@ defmodule SongRecommender.RecommendationEngine do
 
     new_state = Map.put(state, :taste_profile, taste_profile)
 
-    {:reply, {:ok, :profile_changed}, new_state}
+    {:reply, {:ok, :profile_changed}, new_state, @timeout}
   end
 
   def handle_call(:change_taste_profile, _from, %{strategy: :hybrid} = state),
-    do: {:reply, {:error, :profile_should_not_change}, state}
+    do: {:reply, {:error, :profile_should_not_change}, state, @timeout}
 
   @impl GenServer
   def handle_info(:timeout, %{queue_name: queue_name} = state) do
