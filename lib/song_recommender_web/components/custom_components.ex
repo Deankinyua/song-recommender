@@ -213,33 +213,48 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
-  @spec play_pause_icon(assigns()) :: rendered()
-  def play_pause_icon(assigns) do
+  @spec play_icon(assigns()) :: rendered()
+  def play_icon(assigns) do
     ~H"""
-    <svg id="pause-play" width="36" viewBox="0 0 36 36" fill="white">
-      <circle cx="18" cy="18" r="17" class="play-btn-circle" />
-
-      <polygon
-        id="polygon-1"
-        points="
+    <polygon
+      id="polygon-1"
+      points="
            11, 10
            11, 18
            11, 18
            11, 26
           "
-        fill="white"
-      />
+      fill="white"
+    />
 
-      <polygon
-        id="polygon-2"
-        points="
+    <polygon
+      id="polygon-2"
+      points="
             11, 10
             28, 18
             28, 18
             11, 26
           "
-        fill="white"
-      />
+      fill="white"
+    />
+    """
+  end
+
+  @spec player_play_icon(assigns()) :: rendered()
+  def player_play_icon(assigns) do
+    ~H"""
+    <svg id="pause-play" width="36" viewBox="0 0 36 36" fill="white">
+      <circle cx="18" cy="18" r="17" class="play-btn-circle" />
+      <.play_icon />
+    </svg>
+    """
+  end
+
+  @spec song_play_icon(assigns()) :: rendered()
+  def song_play_icon(assigns) do
+    ~H"""
+    <svg id="pause-play" width="36" viewBox="0 0 36 36" fill="white">
+      <.play_icon />
     </svg>
     """
   end

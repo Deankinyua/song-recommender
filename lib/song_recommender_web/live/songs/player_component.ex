@@ -23,7 +23,7 @@ defmodule SongRecommenderWeb.Songs.PlayerComponent do
           </div>
         </div>
         <div id="play-icon" class="control-icon">
-          <CustomComponents.play_pause_icon />
+          <CustomComponents.player_play_icon />
           <div id="pause-play-tooltip" class="top-[-1.8rem] left-0 tooltip">
             Play
           </div>
