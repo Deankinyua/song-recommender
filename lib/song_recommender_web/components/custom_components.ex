@@ -272,7 +272,13 @@ defmodule SongRecommenderWeb.CustomComponents do
   @spec song_play_icon(assigns()) :: rendered()
   def song_play_icon(assigns) do
     ~H"""
-    <svg id="pause-play" width="30" viewBox="0 0 36 36" fill="white">
+    <svg
+      id="pause-play"
+      width="30"
+      viewBox="0 0 36 36"
+      fill="white"
+      class="w-full h-full object-cover"
+    >
       <.play_icon />
     </svg>
     """
@@ -357,9 +363,14 @@ defmodule SongRecommenderWeb.CustomComponents do
   @spec song(assigns()) :: rendered()
   def song(assigns) do
     ~H"""
-    <section class="rounded-md py-2 px-4 mx-3 flex justify-between items-center hover:bg-neutral hover:cursor-pointer">
+    <section class="song rounded-md py-2 px-4 mx-3 flex justify-between items-center hover:bg-neutral hover:cursor-pointer">
       <div class="flex items-center gap-4">
-        <section>{@song_number}</section>
+        <section class="w-[1.6rem] flex flex-col items-center">
+          <section class="song-number">{@song_number}</section>
+          <section class="w-[20px] song-play-icon hidden">
+            <.song_play_icon />
+          </section>
+        </section>
         <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
           <img src={path_to_image(@image)} alt="song image" class="object-cover" />
         </section>
