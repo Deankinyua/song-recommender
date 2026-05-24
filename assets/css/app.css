@@ -4,8 +4,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@400;500;600;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Happy+Monkey&display=swap");
 
-@import "./song_player.css";
 @import "./cartoon.css";
+@import "./song.css";
+@import "./song_player.css";
 
 @import "tailwindcss";
 @source "../css";

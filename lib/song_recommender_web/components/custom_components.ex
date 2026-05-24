@@ -38,6 +38,13 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
+  @spec blur_song_image(assigns()) :: rendered()
+  def blur_song_image(assigns) do
+    ~H"""
+    <section class="blur-song-thumbnail"></section>
+    """
+  end
+
   @spec search(assigns()) :: rendered()
   def search(assigns) do
     ~H"""
@@ -73,9 +80,21 @@ defmodule SongRecommenderWeb.CustomComponents do
   @spec search_item(assigns()) :: rendered()
   def search_item(assigns) do
     ~H"""
-    <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular hover:bg-accent hover:cursor-pointer">
-      <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
-        <img src={path_to_image(@image)} alt="cover image" class="w-full h-full object-cover" />
+    <div class="search-item flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular hover:bg-accent hover:cursor-pointer">
+      <section class="w-[3rem] h-[3rem] rounded-md relative overflow-hidden">
+        <img
+          src={path_to_image(@image)}
+          alt="cover image"
+          class="w-full h-full object-cover"
+        />
+        <section
+          :if={check_if_song(@item)}
+          class="play-song-icon"
+        >
+          <.song_play_icon />
+        </section>
+
+        <.blur_song_image />
       </section>
       <.item item={@item} />
     </div>
@@ -253,7 +272,7 @@ defmodule SongRecommenderWeb.CustomComponents do
   @spec song_play_icon(assigns()) :: rendered()
   def song_play_icon(assigns) do
     ~H"""
-    <svg id="pause-play" width="36" viewBox="0 0 36 36" fill="white">
+    <svg id="pause-play" width="30" viewBox="0 0 36 36" fill="white">
       <.play_icon />
     </svg>
     """
@@ -371,6 +390,8 @@ defmodule SongRecommenderWeb.CustomComponents do
 
     "#{minutes}:#{String.pad_leading("#{seconds}", 2, "0")}"
   end
+
+  defp check_if_song(item), do: Map.get(item, :artist)
 
   defp path_to_image(num), do: ~p"/images/songs/" <> "image_#{num}.jpeg"
 end
