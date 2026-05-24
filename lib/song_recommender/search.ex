@@ -26,10 +26,10 @@ defmodule SongRecommender.Search do
         WITH n, a
         CALL (*) {
           WHEN a IS NULL THEN {
-            RETURN n {.name, .monthlyListeners, id: NULL, artistName: NULL, popularity: NULL, artistMonthlyListeners: NULL} AS searchItem
+            RETURN n {.name, .monthlyListeners, artistName: NULL, popularity: NULL} AS searchItem
           }
           WHEN a IS NOT NULL THEN {
-            RETURN n {.name, .id, .popularity, artistMonthlyListeners: a.monthlyListeners, artistName: a.name, monthlyListeners: NULL} AS searchItem
+            RETURN n {.name, .id, .popularity, .durationMs, artistMonthlyListeners: a.monthlyListeners, artistName: a.name, monthlyListeners: NULL} AS searchItem
           }
         }
         RETURN searchItem
@@ -58,6 +58,7 @@ defmodule SongRecommender.Search do
          "searchItem" => %{
            "artistMonthlyListeners" => artist_monthly_listeners,
            "artistName" => artist_name,
+           "durationMs" => song_duration,
            "id" => song_id,
            "name" => song_name
          }
@@ -66,6 +67,7 @@ defmodule SongRecommender.Search do
 
     %Song{
       artist: artist,
+      duration_ms: song_duration,
       id: song_id,
       name: song_name
     }
