@@ -91,7 +91,7 @@ defmodule SongRecommenderWeb.CustomComponents do
           :if={check_if_song(@item)}
           class="play-song-icon"
         >
-          <.song_play_icon />
+          <.song_play_icon id={@item.id} />
         </section>
 
         <.blur_song_image />
@@ -232,11 +232,13 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
+  attr :id, :string, required: true
+
   @spec play_icon(assigns()) :: rendered()
   def play_icon(assigns) do
     ~H"""
     <polygon
-      id="polygon-1"
+      id={"polygon-1-#{@id}"}
       points="
            11, 10
            11, 18
@@ -247,7 +249,7 @@ defmodule SongRecommenderWeb.CustomComponents do
     />
 
     <polygon
-      id="polygon-2"
+      id={"polygon-2-#{@id}"}
       points="
             11, 10
             28, 18
@@ -259,27 +261,31 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
+  attr :id, :string, required: true
+
   @spec player_play_icon(assigns()) :: rendered()
   def player_play_icon(assigns) do
     ~H"""
-    <svg id="pause-play" width="36" viewBox="0 0 36 36" fill="white">
+    <svg phx-hook="SongPlayer" id={@id} width="36" viewBox="0 0 36 36" fill="white">
       <circle cx="18" cy="18" r="17" class="play-btn-circle" />
-      <.play_icon />
+      <.play_icon id={@id} />
     </svg>
     """
   end
+
+  attr :id, :string, required: true
 
   @spec song_play_icon(assigns()) :: rendered()
   def song_play_icon(assigns) do
     ~H"""
     <svg
-      id="pause-play"
+      id={@id}
       width="30"
       viewBox="0 0 36 36"
       fill="white"
       class="w-full h-full object-cover"
     >
-      <.play_icon />
+      <.play_icon id={@id} />
     </svg>
     """
   end
@@ -368,7 +374,7 @@ defmodule SongRecommenderWeb.CustomComponents do
         <section class="w-[1.6rem] flex flex-col items-center">
           <section class="song-number">{@song_number}</section>
           <section class="w-[20px] song-play-icon hidden">
-            <.song_play_icon />
+            <.song_play_icon id={@song.id} />
           </section>
         </section>
         <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">

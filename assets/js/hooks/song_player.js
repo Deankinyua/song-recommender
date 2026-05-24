@@ -9,9 +9,10 @@ let SongPlayerHooks = {};
 
 SongPlayerHooks.SongPlayer = {
   mounted() {
-    const playBtn = document.getElementById("pause-play");
-    const polygon_1 = document.getElementById("polygon-1");
-    const polygon_2 = document.getElementById("polygon-2");
+    const playBtn = this.el;
+    let playBtnId = this.el.id;
+    const polygon_1 = document.getElementById(`polygon-1-${playBtnId}`);
+    const polygon_2 = document.getElementById(`polygon-2-${playBtnId}`);
 
     const playedTimeEl = document.getElementById("song-played-time");
     const songProgress = document.getElementById("song-progress");
