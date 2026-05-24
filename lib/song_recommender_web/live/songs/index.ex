@@ -50,6 +50,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
+     |> assign(:song_count, 0)
      |> maybe_fetch_genres()
      |> setup_recommendation_engine()
      |> stream_configure(:search_items, dom_id: &"search-item-#{elem(&1, 0).id}")
@@ -67,7 +68,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
         search_items_empty? = Enum.empty?(search_items)
 
         search_items_with_images =
-          if search_items_empty?, do: [], else: add_image_numbers(search_items)
+          if search_items_empty?, do: [], else: maybe_add_song_numbers(search_items, :search_item)
 
         {:noreply,
          socket
@@ -129,28 +130,50 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_async(:get_songs, {:ok, songs}, socket) do
-    songs_with_images = add_image_numbers(songs)
+  def handle_async(:get_songs, {:ok, songs}, %{assigns: %{song_count: count}} = socket) do
+    processed_songs = maybe_add_song_numbers(songs, :song, count)
 
-    {:noreply, stream(socket, :songs, songs_with_images, reset: true)}
+    {:noreply, stream(socket, :songs, processed_songs, reset: true)}
   end
 
-  defp add_image_numbers(items) do
-    item_count = Enum.count(items)
+  defp maybe_add_song_numbers(items, item_type, current_song_count \\ 0)
 
-    images =
-      @image_list
-      |> Enum.shuffle()
-      |> Enum.take(item_count)
+  defp maybe_add_song_numbers(search_items, :search_item, _current_song_count) do
+    images = return_thumbnails(search_items)
 
-    items
+    search_items
     |> Enum.with_index()
-    |> Enum.reduce([], fn {item, index}, acc ->
+    |> Enum.reduce([], fn {search_item, index}, acc ->
       image_num = Enum.at(images, index)
 
-      [{item, image_num} | acc]
+      [{search_item, image_num} | acc]
     end)
     |> Enum.reverse()
+  end
+
+  defp maybe_add_song_numbers(songs, :song, current_song_count) do
+    images = return_thumbnails(songs)
+
+    starting_number = current_song_count + 1
+
+    songs
+    |> Enum.with_index()
+    |> Enum.reduce([], fn {song, index}, acc ->
+      image_num = Enum.at(images, index)
+
+      song_number = starting_number + index
+
+      [{song, image_num, song_number} | acc]
+    end)
+    |> Enum.reverse()
+  end
+
+  defp return_thumbnails(items) do
+    item_count = Enum.count(items)
+
+    @image_list
+    |> Enum.shuffle()
+    |> Enum.take(item_count)
   end
 
   defp setup_recommendation_engine(

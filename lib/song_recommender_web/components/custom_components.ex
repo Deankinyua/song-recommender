@@ -352,12 +352,14 @@ defmodule SongRecommenderWeb.CustomComponents do
 
   attr :image, :integer, required: true
   attr :song, Song, required: true
+  attr :song_number, :integer, required: true
 
   @spec song(assigns()) :: rendered()
   def song(assigns) do
     ~H"""
     <section class="rounded-md py-2 px-4 mx-3 flex justify-between items-center hover:bg-neutral hover:cursor-pointer">
       <div class="flex items-center gap-4">
+        <section>{@song_number}</section>
         <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
           <img src={path_to_image(@image)} alt="song image" class="object-cover" />
         </section>
