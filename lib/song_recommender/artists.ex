@@ -63,7 +63,7 @@ defmodule SongRecommender.Artists do
         MATCH (u:User {name: $name})-[:FOLLOWS]->(a:Artist)
         RETURN a.name AS artist
         ORDER BY a.monthlyListeners DESC
-        LIMIT 5
+        LIMIT 30
         """,
         %{name: username}
       )
@@ -71,7 +71,10 @@ defmodule SongRecommender.Artists do
     if Enum.empty?(artists) do
       []
     else
-      Enum.map(artists, &process_artist(&1))
+      artists
+      |> Enum.map(&process_artist(&1))
+      |> Enum.shuffle()
+      |> Enum.take(5)
     end
   end
 

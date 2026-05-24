@@ -67,10 +67,13 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
+  attr :image, :integer, required: true
+  attr :item, :any, required: true
+
   @spec search_item(assigns()) :: rendered()
   def search_item(assigns) do
     ~H"""
-    <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular text-base-100 hover:bg-accent hover:text-base-100 hover:cursor-pointer">
+    <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular hover:bg-accent hover:cursor-pointer">
       <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
         <img src={path_to_image(@image)} alt="cover image" class="w-full h-full object-cover" />
       </section>
@@ -289,6 +292,69 @@ defmodule SongRecommenderWeb.CustomComponents do
       </text>
     </svg>
     """
+  end
+
+  @spec spotify_logo(assigns()) :: rendered()
+  def spotify_logo(assigns) do
+    ~H"""
+    <svg
+      width="17"
+      fill="#ffffff"
+      viewBox="0 0 256 256"
+      xmlns="http://www.w3.org/2000/svg"
+      stroke="#ffffff"
+    >
+      <g stroke-width="0"></g>
+      <g stroke-linecap="round" stroke-linejoin="round"></g>
+      <g>
+        <path d="M224,128a96,96,0,1,1-96-96A95.99991,95.99991,0,0,1,224,128Z" opacity="0.2"></path>
+
+        <path d="M128,24A104,104,0,1,0,232,128,104.1179,104.1179,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.09957,88.09957,0,0,1,128,216Zm58.24805-104.01368a8.00024,8.00024,0,0,1-10.77246,3.458,104.1903,104.1903,0,0,0-95.03614.04492,8,8,0,1,1-7.3291-14.22265,120.19311,120.19311,0,0,1,109.68066-.05274A7.99973,7.99973,0,0,1,186.24805,111.98629Zm-14.82666,28.36426a8.00153,8.00153,0,0,1-10.76221,3.49024,71.9412,71.9412,0,0,0-65.40234.042,7.99976,7.99976,0,1,1-7.29-14.24219,87.94,87.94,0,0,1,79.96484-.05176A7.9994,7.9994,0,0,1,171.42139,140.35055ZM156.624,168.65719a8.00044,8.00044,0,0,1-10.73633,3.56641,39.98258,39.98258,0,0,0-35.85156.04,7.99966,7.99966,0,1,1-7.20117-14.28711,55.97479,55.97479,0,0,1,50.22217-.05566A7.99977,7.99977,0,0,1,156.624,168.65719Z">
+        </path>
+      </g>
+    </svg>
+    """
+  end
+
+  attr :image, :integer, required: true
+  attr :song, Song, required: true
+
+  @spec song(assigns()) :: rendered()
+  def song(assigns) do
+    ~H"""
+    <section class="rounded-md py-2 px-4 mx-3 flex justify-between items-center hover:bg-neutral hover:cursor-pointer">
+      <div class="flex items-center gap-4">
+        <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
+          <img src={path_to_image(@image)} alt="song image" class="object-cover" />
+        </section>
+        <section class="flex flex-col">
+          <p>{@song.name}</p>
+          <p class="text-xs">{@song.artist.name}</p>
+        </section>
+      </div>
+
+      <div class="flex gap-6 items-center">
+        <section class="happy-monkey-bold">{milliseconds_to_minutes(@song.duration_ms)}</section>
+
+        <.link
+          href={"https://open.spotify.com/track/#{@song.id}"}
+          target="_blank"
+          referrerpolicy="noreferrer"
+        >
+          <.spotify_logo />
+        </.link>
+      </div>
+    </section>
+    """
+  end
+
+  def milliseconds_to_minutes(milliseconds) do
+    total_seconds = div(milliseconds, 1_000)
+
+    minutes = div(total_seconds, 60)
+    seconds = rem(total_seconds, 60)
+
+    "#{minutes}:#{String.pad_leading("#{seconds}", 2, "0")}"
   end
 
   defp path_to_image(num), do: ~p"/images/songs/" <> "image_#{num}.jpeg"

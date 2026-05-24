@@ -3,16 +3,10 @@ defmodule SongRecommender.Genres do
   Utilities to manage genres
   """
 
-  alias SongRecommender.Artists.Artist
-  alias SongRecommender.Genres.Genre
-  alias SongRecommender.Songs.Song
-
   @type bolt_response :: Boltx.Response.t()
   @type genre :: String.t()
   @type genre_and_listening_time :: [genre() | listening_time()]
-  @type limit :: integer()
   @type listening_time :: integer()
-  @type song :: Song.t()
   @type username :: String.t()
 
   @doc """
@@ -34,7 +28,7 @@ defmodule SongRecommender.Genres do
         """
         MATCH (u:User {name: $name})-[:PREFERS]->(g:Genre)
         RETURN g.name AS genre
-        LIMIT 5
+        LIMIT 20
         """,
         %{name: username}
       )
@@ -42,7 +36,10 @@ defmodule SongRecommender.Genres do
     if Enum.empty?(genres) do
       []
     else
-      Enum.map(genres, &process_genre(&1))
+      genres
+      |> Enum.map(&process_genre(&1))
+      |> Enum.shuffle()
+      |> Enum.take(5)
     end
   end
 
@@ -128,56 +125,6 @@ defmodule SongRecommender.Genres do
     )
     |> Boltx.Response.first()
     |> process_listening_time()
-  end
-
-  @spec get_songs_from_genre([genre()], limit()) :: [song()]
-  def get_songs_from_genre(genres, limit) do
-    %Boltx.Response{results: song_data} =
-      Boltx.query!(
-        Bolt,
-        """
-        UNWIND $genres AS genre
-        WITH genre
-        CALL (*) {
-          MATCH (a:Artist)-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre {name: genre})
-          RETURN s AS song, a AS artist, g.name AS genreName
-          ORDER BY s.popularity DESC
-          LIMIT $limit
-        }
-        RETURN song { .id, .name, .durationMs, .released },
-               artist { .name, .monthlyListeners },
-               genreName
-        """,
-        %{genres: genres, limit: limit}
-      )
-
-    Enum.map(song_data, &process_song_data(&1))
-  end
-
-  defp process_song_data(%{
-         "song" => %{
-           "durationMs" => duration_ms,
-           "id" => song_id,
-           "name" => song_name,
-           "released" => released
-         },
-         "artist" => %{
-           "monthlyListeners" => monthly_listeners,
-           "name" => artist_name
-         },
-         "genreName" => genre
-       }) do
-    genre = %Genre{name: genre}
-    artist = %Artist{name: artist_name, listeners: monthly_listeners}
-
-    %Song{
-      artist: artist,
-      duration_ms: duration_ms,
-      genre: genre,
-      id: song_id,
-      name: song_name,
-      released: released
-    }
   end
 
   defp process_listening_time(%{"lifetime_listening_ms" => total_listening_time}),

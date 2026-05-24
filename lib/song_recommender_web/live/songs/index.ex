@@ -1,11 +1,6 @@
 defmodule SongRecommenderWeb.SongsLive.Index do
   use SongRecommenderWeb, :live_view
-
-  alias SongRecommender.EngineQueueSupervisor
-  alias SongRecommender.Genres
-  alias SongRecommender.Search
-  alias SongRecommenderWeb.Songs.GenresPopupComponent
-  alias SongRecommenderWeb.Songs.SongsComponent
+  use SongRecommenderWeb, :setup_homepage_aliases
 
   @image_list 1..15
 
@@ -14,7 +9,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     ~H"""
     <Layouts.app flash={@flash} class="bg-base-50" username={@current_user.name}>
       <div class="h-[92vh] flex text-base-100">
-        <section class="w-[25%] relative">
+        <section class="w-[22%] relative">
           <.live_component
             id="genres-popup-component"
             module={GenresPopupComponent}
@@ -23,17 +18,29 @@ defmodule SongRecommenderWeb.SongsLive.Index do
             user={@current_user}
           />
         </section>
+        <section class="flex-1 flex flex-col items-center gap-2">
+          <.live_component
+            id="search-component"
+            module={SearchComponent}
+            empty_search?={@empty_search?}
+            search_items={@streams.search_items}
+            search_query={@search_query}
+            show_recent_searches?={@show_recent_searches?}
+          />
 
-        <.live_component
-          id="songs-component"
-          module={SongsComponent}
-          empty_search?={@empty_search?}
-          search_items={@streams.search_items}
-          search_query={@search_query}
-          show_recent_searches?={@show_recent_searches?}
-        />
+          <.live_component
+            id="songs-component"
+            module={SongsComponent}
+            songs={@streams.songs}
+          />
 
-        <section class="w-[25%]"></section>
+          <.live_component
+            id="player-component"
+            module={PlayerComponent}
+          />
+        </section>
+
+        <section class="w-[22%]"></section>
       </div>
     </Layouts.app>
     """
@@ -45,7 +52,9 @@ defmodule SongRecommenderWeb.SongsLive.Index do
      socket
      |> maybe_fetch_genres()
      |> setup_recommendation_engine()
-     |> stream_configure(:search_items, dom_id: &"search-item-#{elem(&1, 0).id}")}
+     |> stream_configure(:search_items, dom_id: &"search-item-#{elem(&1, 0).id}")
+     |> stream_configure(:songs, dom_id: &"song-#{elem(&1, 0).id}")
+     |> stream(:songs, [])}
   end
 
   @impl Phoenix.LiveView
@@ -92,6 +101,40 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     end
   end
 
+  def handle_event(
+        "maybe_refetch_recommended_songs",
+        _params,
+        %{assigns: %{engine_name: engine}} = socket
+      ) do
+    _result =
+      case RecommendationEngine.maybe_change_taste_profile(engine) do
+        {:ok, :profile_changed} ->
+          send(self(), :get_initial_songs)
+
+        {:error, :profile_should_not_change} ->
+          :ok
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl Phoenix.LiveView
+  def handle_info(:get_initial_songs, %{assigns: %{queue_name: queue}} = socket) do
+    socket =
+      start_async(socket, :get_songs, fn ->
+        SongQueue.get_recommended_songs(queue)
+      end)
+
+    {:noreply, socket}
+  end
+
+  @impl Phoenix.LiveView
+  def handle_async(:get_songs, {:ok, songs}, socket) do
+    songs_with_images = add_image_numbers(songs)
+
+    {:noreply, stream(socket, :songs, songs_with_images, reset: true)}
+  end
+
   defp add_image_numbers(items) do
     item_count = Enum.count(items)
 
@@ -110,21 +153,30 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     |> Enum.reverse()
   end
 
-  defp setup_recommendation_engine(%{assigns: %{current_user: user}} = socket) do
+  defp setup_recommendation_engine(
+         %{assigns: %{capture_user_preferences?: capture_preferences?, current_user: user}} =
+           socket
+       ) do
     if connected?(socket) do
       username = user.name
       engine_name = engine_name(username)
       queue_name = queue_name(username)
+
       EngineQueueSupervisor.start_engine(engine_name, username)
       EngineQueueSupervisor.start_song_queue(queue_name, username)
-      assign(socket, :queue_name, queue_name)
+
+      if !capture_preferences?, do: Process.send_after(self(), :get_initial_songs, 800)
+
+      socket
+      |> assign(:engine_name, engine_name)
+      |> assign(:queue_name, queue_name)
     else
       socket
     end
   end
 
   defp maybe_fetch_genres(
-         %{assigns: %{current_user: user, capture_user_preferences?: capture_preferences?}} =
+         %{assigns: %{capture_user_preferences?: capture_preferences?, current_user: user}} =
            socket
        ) do
     genres = if capture_preferences?, do: Genres.get_user_genres(user.name), else: []

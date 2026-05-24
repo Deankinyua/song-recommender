@@ -104,6 +104,20 @@ defmodule SongRecommenderWeb do
     end
   end
 
+  def setup_homepage_aliases do
+    quote do
+      alias SongRecommender.EngineQueueSupervisor
+      alias SongRecommender.Genres
+      alias SongRecommender.RecommendationEngine
+      alias SongRecommender.Search
+      alias SongRecommender.SongQueue
+      alias SongRecommenderWeb.Songs.GenresPopupComponent
+      alias SongRecommenderWeb.Songs.PlayerComponent
+      alias SongRecommenderWeb.Songs.SearchComponent
+      alias SongRecommenderWeb.Songs.SongsComponent
+    end
+  end
+
   def verified_routes do
     quote do
       use Phoenix.VerifiedRoutes,
