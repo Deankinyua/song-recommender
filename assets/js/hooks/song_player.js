@@ -6,7 +6,7 @@ let SongPlayerHooks = {};
 SongPlayerHooks.SongPlayer = {
   mounted() {
     const playBtn = this.el;
-    let playBtnId = this.el.id;
+    let playBtnId = playBtn.id;
     const playerPolygon1 = document.getElementById(`polygon-1-${playBtnId}`);
     const playerPolygon2 = document.getElementById(`polygon-2-${playBtnId}`);
 
@@ -72,7 +72,11 @@ SongPlayerHooks.SongPlayer = {
         return_song_icon_polygons(previous_song_id);
 
       if (!isPaused) {
-        await animatePausePlayButton(false, songIconPolygon1, songIconPolygon2);
+        await animatePausePlayButton(
+          isPaused,
+          songIconPolygon1,
+          songIconPolygon2,
+        );
       }
     });
 
