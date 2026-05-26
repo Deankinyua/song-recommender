@@ -128,18 +128,24 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           "id" => id,
           "song_name" => song_name
         },
-        socket
+        %{assigns: %{currently_playing_song: current_song}} = socket
       ) do
-    artist = %Artist{name: artist_name, listeners: artist_listeners}
+    case id == current_song.id do
+      true ->
+        {:noreply, push_event(socket, "play_or_pause_song", %{})}
 
-    current_song = %Song{artist: artist, duration_ms: duration_ms, id: id, name: song_name}
+      false ->
+        artist = %Artist{name: artist_name, listeners: artist_listeners}
 
-    song_player_data = return_song_player_data(current_song, true)
+        new_song = %Song{artist: artist, duration_ms: duration_ms, id: id, name: song_name}
 
-    {:noreply,
-     socket
-     |> assign(:currently_playing_song, current_song)
-     |> push_event("current_song_data", song_player_data)}
+        song_player_data = return_song_player_data(new_song, true)
+
+        {:noreply,
+         socket
+         |> assign(:currently_playing_song, new_song)
+         |> push_event("maybe_play_song", song_player_data)}
+    end
   end
 
   @impl Phoenix.LiveView
@@ -163,7 +169,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     {:noreply,
      socket
      |> assign(:currently_playing_song, initial_song)
-     |> push_event("current_song_data", song_player_data)
+     |> push_event("maybe_play_song", song_player_data)
      |> stream(:songs, processed_songs, reset: true)}
   end
 

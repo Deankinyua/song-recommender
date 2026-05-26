@@ -20,7 +20,7 @@ SongPlayerHooks.SongPlayer = {
     let lastPlayedTime = null;
 
     this.handleEvent(
-      "current_song_data",
+      "maybe_play_song",
       async ({ current_song_duration, current_time, should_play }) => {
         player = {
           songDuration: current_song_duration,
@@ -43,6 +43,12 @@ SongPlayerHooks.SongPlayer = {
         songDurationEl.textContent = formatTime(player.songDuration);
       },
     );
+
+    this.handleEvent("play_or_pause_song", async () => {
+      isStopped = await animatePausePlayButton(isStopped, polygon_1, polygon_2);
+      player.isPlaying = !player.isPlaying;
+      playPauseTooltipEl.textContent = player.isPlaying ? "Pause" : "Play";
+    });
 
     function renderSongData() {
       if (player) {
