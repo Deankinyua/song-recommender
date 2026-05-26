@@ -120,7 +120,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   def handle_event(
-        "play_song",
+        "play_or_pause_song",
         %{
           "artist" => artist_name,
           "artist_monthly_listeners" => artist_listeners,

@@ -232,6 +232,11 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
+  @doc """
+  This is the smallest component in the play button and is the
+  only part that is animated. It is the inner part without the circle.
+  """
+
   attr :id, :string, required: true
 
   @spec play_icon(assigns()) :: rendered()
@@ -261,6 +266,11 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
+  @doc """
+  This is the player icon. It is a full blown SVG and it has the inner part as well as
+  the circle. Notice that it is the only one that has a hook `SongPlayer` attached.
+  """
+
   attr :id, :string, required: true
 
   @spec player_play_icon(assigns()) :: rendered()
@@ -273,6 +283,12 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
+  @doc """
+  This is the icon placed on the left side of a song row for both searches and recommended songs.
+  It is a full blown SVG but it only has the inner part (it does not have the circle).
+  When you click it, an event will be sent to either pause/play the current song or play a new song.
+  """
+
   attr :song, Song, required: true
 
   @spec song_play_icon(assigns()) :: rendered()
@@ -280,7 +296,7 @@ defmodule SongRecommenderWeb.CustomComponents do
     ~H"""
     <svg
       phx-click={
-        JS.push("play_song",
+        JS.push("play_or_pause_song",
           value: %{
             artist: @song.artist.name,
             artist_monthly_listeners: @song.artist.listeners,
