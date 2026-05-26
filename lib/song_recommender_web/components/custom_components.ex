@@ -281,7 +281,13 @@ defmodule SongRecommenderWeb.CustomComponents do
     <svg
       phx-click={
         JS.push("play_song",
-          value: %{id: @song.id, duration: @song.duration_ms, artist: @song.artist.name}
+          value: %{
+            artist: @song.artist.name,
+            artist_monthly_listeners: @song.artist.listeners,
+            duration: @song.duration_ms,
+            id: @song.id,
+            song_name: @song.name
+          }
         )
       }
       id={@song.id}

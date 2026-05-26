@@ -119,6 +119,29 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     {:noreply, socket}
   end
 
+  def handle_event(
+        "play_song",
+        %{
+          "artist" => artist_name,
+          "artist_monthly_listeners" => artist_listeners,
+          "duration" => duration_ms,
+          "id" => id,
+          "song_name" => song_name
+        },
+        socket
+      ) do
+    artist = %Artist{name: artist_name, listeners: artist_listeners}
+
+    current_song = %Song{artist: artist, duration_ms: duration_ms, id: id, name: song_name}
+
+    song_player_data = return_song_player_data(current_song, true)
+
+    {:noreply,
+     socket
+     |> assign(:currently_playing_song, current_song)
+     |> push_event("current_song_data", song_player_data)}
+  end
+
   @impl Phoenix.LiveView
   def handle_info(:get_initial_songs, %{assigns: %{queue_name: queue}} = socket) do
     socket =
@@ -131,9 +154,22 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
   @impl Phoenix.LiveView
   def handle_async(:get_songs, {:ok, songs}, %{assigns: %{song_count: count}} = socket) do
+    initial_song = Enum.at(songs, 0)
+
+    song_player_data = return_song_player_data(initial_song, false)
+
     processed_songs = maybe_add_song_numbers(songs, :song, count)
 
-    {:noreply, stream(socket, :songs, processed_songs, reset: true)}
+    {:noreply,
+     socket
+     |> assign(:currently_playing_song, initial_song)
+     |> push_event("current_song_data", song_player_data)
+     |> stream(:songs, processed_songs, reset: true)}
+  end
+
+  defp return_song_player_data(song, should_play, current_time \\ 0) do
+    duration_sec = div(song.duration_ms, 1000)
+    %{current_song_duration: duration_sec, current_time: current_time, should_play: should_play}
   end
 
   defp maybe_add_song_numbers(items, item_type, current_song_count \\ 0)
