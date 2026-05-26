@@ -167,9 +167,12 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
     processed_songs = maybe_add_song_numbers(songs, :song, count)
 
+    {_last_song, _last_song_image, new_song_count} = Enum.at(processed_songs, -1)
+
     {:noreply,
      socket
      |> assign(:currently_playing_song, initial_song)
+     |> assign(:song_count, new_song_count)
      |> push_event("maybe_play_song", song_player_data)
      |> stream(:songs, processed_songs, reset: true)}
   end
