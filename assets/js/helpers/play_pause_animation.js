@@ -3,7 +3,7 @@ import {
   easeInOut,
   buildShapeTransition,
   returnPolygonPoints,
-} from "./animation_helpers.js";
+} from "./animation.js";
 
 const animatePausePlayButton = (isStopped, polygon_1, polygon_2) => {
   return new Promise((resolve) => {
