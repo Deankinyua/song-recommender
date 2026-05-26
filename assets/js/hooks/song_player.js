@@ -37,7 +37,7 @@ SongPlayerHooks.SongPlayer = {
           );
         }
 
-        playPauseTooltipEl.textContent = player.isPlaying ? "Pause" : "Play";
+        toogleTooltip();
 
         songProgressEl.max = player.songDuration;
         songDurationEl.textContent = formatTime(player.songDuration);
@@ -47,8 +47,12 @@ SongPlayerHooks.SongPlayer = {
     this.handleEvent("play_or_pause_song", async () => {
       isStopped = await animatePausePlayButton(isStopped, polygon_1, polygon_2);
       player.isPlaying = !player.isPlaying;
-      playPauseTooltipEl.textContent = player.isPlaying ? "Pause" : "Play";
+      toogleTooltip();
     });
+
+    function toogleTooltip() {
+      playPauseTooltipEl.textContent = player.isPlaying ? "Pause" : "Play";
+    }
 
     function renderSongData() {
       if (player) {
@@ -86,7 +90,7 @@ SongPlayerHooks.SongPlayer = {
     playBtn.addEventListener("click", async () => {
       isStopped = await animatePausePlayButton(isStopped, polygon_1, polygon_2);
       player.isPlaying = !player.isPlaying;
-      playPauseTooltipEl.textContent = player.isPlaying ? "Pause" : "Play";
+      toogleTooltip();
     });
 
     requestAnimationFrame(updateSongPlayedTime);
