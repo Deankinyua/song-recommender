@@ -144,7 +144,8 @@ defmodule SongRecommenderWeb.SongsLive.Index do
         {:noreply,
          socket
          |> assign(:currently_playing_song, new_song)
-         |> push_event("maybe_play_song", song_player_data)}
+         |> push_event("maybe_play_song", song_player_data)
+         |> push_event("pause_previous_song", %{previous_song_id: current_song.id})}
     end
   end
 
@@ -175,7 +176,13 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
   defp return_song_player_data(song, should_play, current_time \\ 0) do
     duration_sec = div(song.duration_ms, 1000)
-    %{current_song_duration: duration_sec, current_time: current_time, should_play: should_play}
+
+    %{
+      current_song_duration: duration_sec,
+      current_song_id: song.id,
+      current_time: current_time,
+      should_play: should_play
+    }
   end
 
   defp maybe_add_song_numbers(items, item_type, current_song_count \\ 0)

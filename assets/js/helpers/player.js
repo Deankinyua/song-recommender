@@ -7,4 +7,12 @@ function formatTime(sec) {
   return `${minutes}:${seconds}`;
 }
 
-export { formatTime };
+function return_song_icon_polygons(song_id) {
+  let songIconPolygon1 = document.getElementById(`polygon-1-${song_id}`);
+
+  let songIconPolygon2 = document.getElementById(`polygon-2-${song_id}`);
+
+  return { songIconPolygon1, songIconPolygon2 };
+}
+
+export { formatTime, return_song_icon_polygons };
