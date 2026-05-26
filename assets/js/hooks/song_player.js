@@ -7,8 +7,8 @@ SongPlayerHooks.SongPlayer = {
   mounted() {
     const playBtn = this.el;
     let playBtnId = this.el.id;
-    const polygon_1 = document.getElementById(`polygon-1-${playBtnId}`);
-    const polygon_2 = document.getElementById(`polygon-2-${playBtnId}`);
+    const playerPolygon1 = document.getElementById(`polygon-1-${playBtnId}`);
+    const playerPolgon2 = document.getElementById(`polygon-2-${playBtnId}`);
 
     const playedTimeEl = document.getElementById("song-played-time");
     const songProgressEl = document.getElementById("song-progress");
@@ -32,8 +32,8 @@ SongPlayerHooks.SongPlayer = {
         if (should_play && isPaused) {
           isPaused = await animatePausePlayButton(
             isPaused,
-            polygon_1,
-            polygon_2,
+            playerPolygon1,
+            playerPolgon2,
           );
         }
 
@@ -45,7 +45,7 @@ SongPlayerHooks.SongPlayer = {
     );
 
     this.handleEvent("play_or_pause_song", async () => {
-      isPaused = await animatePausePlayButton(isPaused, polygon_1, polygon_2);
+      isPaused = await animatePausePlayButton(isPaused, playerPolygon1, playerPolgon2);
       player.isPlaying = !player.isPlaying;
       toogleTooltip();
     });
@@ -88,7 +88,7 @@ SongPlayerHooks.SongPlayer = {
     });
 
     playBtn.addEventListener("click", async () => {
-      isPaused = await animatePausePlayButton(isPaused, polygon_1, polygon_2);
+      isPaused = await animatePausePlayButton(isPaused, playerPolygon1, playerPolgon2);
       player.isPlaying = !player.isPlaying;
       toogleTooltip();
     });
