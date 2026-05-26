@@ -15,7 +15,7 @@ SongPlayerHooks.SongPlayer = {
     const songDurationEl = document.getElementById("song-duration");
     const playPauseTooltipEl = document.getElementById("pause-play-tooltip");
 
-    let isStopped = true;
+    let isPaused = true;
     let player = null;
     let lastPlayedTime = null;
 
@@ -29,9 +29,9 @@ SongPlayerHooks.SongPlayer = {
           playbackRate: 1,
         };
 
-        if (should_play && isStopped) {
-          isStopped = await animatePausePlayButton(
-            isStopped,
+        if (should_play && isPaused) {
+          isPaused = await animatePausePlayButton(
+            isPaused,
             polygon_1,
             polygon_2,
           );
@@ -45,7 +45,7 @@ SongPlayerHooks.SongPlayer = {
     );
 
     this.handleEvent("play_or_pause_song", async () => {
-      isStopped = await animatePausePlayButton(isStopped, polygon_1, polygon_2);
+      isPaused = await animatePausePlayButton(isPaused, polygon_1, polygon_2);
       player.isPlaying = !player.isPlaying;
       toogleTooltip();
     });
@@ -88,7 +88,7 @@ SongPlayerHooks.SongPlayer = {
     });
 
     playBtn.addEventListener("click", async () => {
-      isStopped = await animatePausePlayButton(isStopped, polygon_1, polygon_2);
+      isPaused = await animatePausePlayButton(isPaused, polygon_1, polygon_2);
       player.isPlaying = !player.isPlaying;
       toogleTooltip();
     });

@@ -5,7 +5,7 @@ import {
   returnPolygonPoints,
 } from "./animation.js";
 
-const animatePausePlayButton = (isStopped, polygon_1, polygon_2) => {
+const animatePausePlayButton = (isPaused, polygon_1, polygon_2) => {
   return new Promise((resolve) => {
     const time = {
       start: performance.now(),
@@ -22,7 +22,7 @@ const animatePausePlayButton = (isStopped, polygon_1, polygon_2) => {
         end_shape_polygon_1,
         start_shape_polygon_2,
         end_shape_polygon_2,
-      } = buildShapeTransition(isStopped);
+      } = buildShapeTransition(isPaused);
 
       const polygon_1_points = returnPolygonPoints(
         start_shape_polygon_1,
@@ -41,8 +41,8 @@ const animatePausePlayButton = (isStopped, polygon_1, polygon_2) => {
 
       if (progress < 1) requestAnimationFrame(playOrPause);
       if (progress >= 1) {
-        isStopped = !isStopped;
-        resolve(isStopped);
+        isPaused = !isPaused;
+        resolve(isPaused);
       }
     };
 
