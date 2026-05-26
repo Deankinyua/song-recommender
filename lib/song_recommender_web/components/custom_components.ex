@@ -91,7 +91,7 @@ defmodule SongRecommenderWeb.CustomComponents do
           :if={check_if_song(@item)}
           class="play-song-icon"
         >
-          <.song_play_icon id={@item.id} />
+          <.song_play_icon song={@item} />
         </section>
 
         <.blur_song_image />
@@ -140,7 +140,7 @@ defmodule SongRecommenderWeb.CustomComponents do
   def song_progress_bar(assigns) do
     ~H"""
     <div class="w-[85%] flex items-center gap-3 mx-auto">
-      <div id="song-played-time">0:00</div>
+      <div id="song-played-time">---</div>
 
       <div class="w-[80%] flex justify-center">
         <input
@@ -154,7 +154,7 @@ defmodule SongRecommenderWeb.CustomComponents do
         />
       </div>
 
-      <div id="song-duration">4:00</div>
+      <div id="song-duration">---</div>
     </div>
     """
   end
@@ -273,19 +273,24 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
-  attr :id, :string, required: true
+  attr :song, Song, required: true
 
   @spec song_play_icon(assigns()) :: rendered()
   def song_play_icon(assigns) do
     ~H"""
     <svg
-      id={@id}
+      phx-click={
+        JS.push("play_song",
+          value: %{id: @song.id, duration: @song.duration_ms, artist: @song.artist.name}
+        )
+      }
+      id={@song.id}
       width="30"
       viewBox="0 0 36 36"
       fill="white"
       class="w-full h-full object-cover"
     >
-      <.play_icon id={@id} />
+      <.play_icon id={@song.id} />
     </svg>
     """
   end
@@ -374,7 +379,7 @@ defmodule SongRecommenderWeb.CustomComponents do
         <section class="w-[1.6rem] flex flex-col items-center">
           <section class="song-number">{@song_number}</section>
           <section class="w-[20px] song-play-icon hidden">
-            <.song_play_icon id={@song.id} />
+            <.song_play_icon song={@song} />
           </section>
         </section>
         <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
