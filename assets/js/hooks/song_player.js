@@ -1,4 +1,5 @@
 import { animatePausePlayButton } from "../helpers/play_pause_animation.js";
+import { formatTime } from "../helpers/player.js";
 
 let SongPlayerHooks = {};
 
@@ -10,38 +11,35 @@ SongPlayerHooks.SongPlayer = {
     const polygon_2 = document.getElementById(`polygon-2-${playBtnId}`);
 
     const playedTimeEl = document.getElementById("song-played-time");
-    const songProgress = document.getElementById("song-progress");
+    const songProgressEl = document.getElementById("song-progress");
     const songDurationEl = document.getElementById("song-duration");
     const playPauseTooltipEl = document.getElementById("pause-play-tooltip");
 
     let isStopped = true;
+    let player = null;
+    let lastPlayedTime = null;
 
-    const player = {
-      songDuration: 240,
-      currentTime: 0,
-      isPlaying: false,
-      playbackRate: 1,
-    };
+    this.handleEvent(
+      "current_song_data",
+      ({ current_song_duration, current_time }) => {
+        player = {
+          songDuration: current_song_duration,
+          currentTime: current_time,
+          isPlaying: false,
+          playbackRate: 1,
+        };
 
-    songProgress.max = player.songDuration;
-
-    function formatTime(sec) {
-      const minutes = Math.floor(sec / 60);
-      const seconds = Math.floor(sec % 60)
-        .toString()
-        .padStart(2, "0");
-
-      return `${minutes}:${seconds}`;
-    }
-
-    songDurationEl.textContent = formatTime(player.songDuration);
+        songProgressEl.max = player.songDuration;
+        songDurationEl.textContent = formatTime(player.songDuration);
+      },
+    );
 
     function renderSongData() {
-      songProgress.value = player.currentTime;
-      playedTimeEl.textContent = formatTime(player.currentTime);
+      if (player) {
+        songProgressEl.value = player.currentTime;
+        playedTimeEl.textContent = formatTime(player.currentTime);
+      }
     }
-
-    let lastPlayedTime = null;
 
     function updateSongPlayedTime(timestamp) {
       if (!lastPlayedTime) lastPlayedTime = timestamp;
@@ -49,22 +47,23 @@ SongPlayerHooks.SongPlayer = {
       const delta = (timestamp - lastPlayedTime) / 1000;
       lastPlayedTime = timestamp;
 
-      if (player.isPlaying) {
+      if (player?.isPlaying) {
         player.currentTime += delta * player.playbackRate;
 
         if (player.currentTime >= player.songDuration) {
           player.currentTime = player.songDuration;
+          // At this point we can send an event to the server
+          console.log("next song please");
           player.isPlaying = false;
         }
       }
 
       renderSongData();
+
       requestAnimationFrame(updateSongPlayedTime);
     }
 
-    requestAnimationFrame(updateSongPlayedTime);
-
-    songProgress.addEventListener("input", (e) => {
+    songProgressEl.addEventListener("input", (e) => {
       player.currentTime = Number(e.target.value);
     });
 
@@ -73,6 +72,8 @@ SongPlayerHooks.SongPlayer = {
       player.isPlaying = !player.isPlaying;
       playPauseTooltipEl.textContent = player.isPlaying ? "Pause" : "Play";
     });
+
+    requestAnimationFrame(updateSongPlayedTime);
   },
 };
 
