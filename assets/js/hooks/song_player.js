@@ -1,56 +1,111 @@
-import {
-  getProgress,
-  easeInOut,
-  buildShapeTransition,
-  returnPolygonPoints,
-} from "js/helpers/animation_helpers.js";
+import { animatePausePlayButton } from "../helpers/play_pause_animation.js";
+import { formatTime, return_song_icon_polygons } from "../helpers/player.js";
 
 let SongPlayerHooks = {};
 
 SongPlayerHooks.SongPlayer = {
   mounted() {
-    const playBtn = document.getElementById("pause-play");
-    const polygon_1 = document.getElementById("polygon-1");
-    const polygon_2 = document.getElementById("polygon-2");
+    const playBtn = this.el;
+    let playBtnId = playBtn.id;
+    const playerPolygon1 = document.getElementById(`polygon-1-${playBtnId}`);
+    const playerPolygon2 = document.getElementById(`polygon-2-${playBtnId}`);
 
     const playedTimeEl = document.getElementById("song-played-time");
-    const songProgress = document.getElementById("song-progress");
+    const songProgressEl = document.getElementById("song-progress");
     const songDurationEl = document.getElementById("song-duration");
     const playPauseTooltipEl = document.getElementById("pause-play-tooltip");
 
-    const time = {
-      start: null,
-      total: 500,
-    };
+    let isPaused = true;
+    let player = null;
+    let lastPlayedTime = null;
 
-    let isStopped = true;
+    this.handleEvent(
+      "maybe_play_song",
+      async ({
+        current_song_duration,
+        current_song_id,
+        current_time,
+        should_play,
+      }) => {
+        const { songIconPolygon1, songIconPolygon2 } =
+          return_song_icon_polygons(current_song_id);
+        this.currentSongIconPolygon1 = songIconPolygon1;
+        this.currentSongIconPolygon2 = songIconPolygon2;
 
-    const player = {
-      songDuration: 240,
-      currentTime: 0,
-      isPlaying: false,
-      playbackRate: 1,
-    };
+        player = {
+          songDuration: current_song_duration,
+          currentTime: current_time,
+          isPlaying: should_play,
+          playbackRate: 1,
+        };
 
-    songProgress.max = player.songDuration;
+        if (should_play) {
+          if (isPaused) {
+            await Promise.all([
+              animatePausePlayButton(
+                isPaused,
+                songIconPolygon1,
+                songIconPolygon2,
+              ),
+              animatePausePlayButton(isPaused, playerPolygon1, playerPolygon2),
+            ]);
+          } else {
+            await animatePausePlayButton(
+              true,
+              songIconPolygon1,
+              songIconPolygon2,
+            );
+          }
 
-    function formatTime(sec) {
-      const minutes = Math.floor(sec / 60);
-      const seconds = Math.floor(sec % 60)
-        .toString()
-        .padStart(2, "0");
+          isPaused = false;
+        }
 
-      return `${minutes}:${seconds}`;
+        toogleTooltip();
+
+        songProgressEl.max = player.songDuration;
+        songDurationEl.textContent = formatTime(player.songDuration);
+      },
+    );
+
+    this.handleEvent("pause_previous_song", async ({ previous_song_id }) => {
+      const { songIconPolygon1, songIconPolygon2 } =
+        return_song_icon_polygons(previous_song_id);
+
+      if (!isPaused) {
+        await animatePausePlayButton(
+          isPaused,
+          songIconPolygon1,
+          songIconPolygon2,
+        );
+      }
+    });
+
+    this.handleEvent("play_or_pause_song", async () => {
+      const [, newPausedState] = await Promise.all([
+        animatePausePlayButton(
+          isPaused,
+          this.currentSongIconPolygon1,
+          this.currentSongIconPolygon2,
+        ),
+        animatePausePlayButton(isPaused, playerPolygon1, playerPolygon2),
+      ]);
+
+      isPaused = newPausedState;
+
+      player.isPlaying = !player.isPlaying;
+      toogleTooltip();
+    });
+
+    function toogleTooltip() {
+      playPauseTooltipEl.textContent = player.isPlaying ? "Pause" : "Play";
     }
-
-    songDurationEl.textContent = formatTime(player.songDuration);
 
     function renderSongData() {
-      songProgress.value = player.currentTime;
-      playedTimeEl.textContent = formatTime(player.currentTime);
+      if (player) {
+        songProgressEl.value = player.currentTime;
+        playedTimeEl.textContent = formatTime(player.currentTime);
+      }
     }
-
-    let lastPlayedTime = null;
 
     function updateSongPlayedTime(timestamp) {
       if (!lastPlayedTime) lastPlayedTime = timestamp;
@@ -58,66 +113,43 @@ SongPlayerHooks.SongPlayer = {
       const delta = (timestamp - lastPlayedTime) / 1000;
       lastPlayedTime = timestamp;
 
-      if (player.isPlaying) {
+      if (player?.isPlaying) {
         player.currentTime += delta * player.playbackRate;
 
         if (player.currentTime >= player.songDuration) {
           player.currentTime = player.songDuration;
+          // At this point we can send an event to the server
+          console.log("next song please");
           player.isPlaying = false;
         }
       }
 
       renderSongData();
+
       requestAnimationFrame(updateSongPlayedTime);
     }
 
-    requestAnimationFrame(updateSongPlayedTime);
-
-    songProgress.addEventListener("input", (e) => {
+    songProgressEl.addEventListener("input", (e) => {
       player.currentTime = Number(e.target.value);
     });
 
-    playBtn.addEventListener("click", () => {
-      requestAnimationFrame(playOrStop);
+    playBtn.addEventListener("click", async () => {
+      const [, newPausedState] = await Promise.all([
+        animatePausePlayButton(
+          isPaused,
+          this.currentSongIconPolygon1,
+          this.currentSongIconPolygon2,
+        ),
+        animatePausePlayButton(isPaused, playerPolygon1, playerPolygon2),
+      ]);
+
+      isPaused = newPausedState;
+
       player.isPlaying = !player.isPlaying;
-      playPauseTooltipEl.textContent = player.isPlaying ? "Pause" : "Play";
+      toogleTooltip();
     });
 
-    const playOrStop = (now) => {
-      if (!time.start) time.start = now;
-      time.elapsed = now - time.start;
-
-      const progress = getProgress(time);
-      const easing = easeInOut(progress);
-
-      let {
-        start_shape_polygon_1,
-        end_shape_polygon_1,
-        start_shape_polygon_2,
-        end_shape_polygon_2,
-      } = buildShapeTransition(isStopped);
-
-      const polygon_1_points = returnPolygonPoints(
-        start_shape_polygon_1,
-        end_shape_polygon_1,
-        easing,
-      );
-
-      const polygon_2_points = returnPolygonPoints(
-        start_shape_polygon_2,
-        end_shape_polygon_2,
-        easing,
-      );
-
-      polygon_1.setAttribute("points", polygon_1_points.join(" "));
-      polygon_2.setAttribute("points", polygon_2_points.join(" "));
-
-      if (progress < 1) requestAnimationFrame(playOrStop);
-      if (progress >= 1) {
-        isStopped = !isStopped;
-        time.start = null;
-      }
-    };
+    requestAnimationFrame(updateSongPlayedTime);
   },
 };
 

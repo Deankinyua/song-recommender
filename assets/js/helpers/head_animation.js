@@ -4,7 +4,7 @@ import {
   changeFaceSizeAndPosition,
   easeInOut,
   easeOut,
-} from "./animation_helpers.js";
+} from "./animation.js";
 
 import { animateCartoonEyes } from "./eyes_animation.js";
 

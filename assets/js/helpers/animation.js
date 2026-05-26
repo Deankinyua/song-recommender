@@ -63,10 +63,10 @@ const changeFaceSizeAndPosition = (
   });
 };
 
-const buildShapeTransition = (isStopped) => {
-  // when stopped is true, we move from play to pause
-  const from = isStopped ? "play" : "pause";
-  const to = isStopped ? "pause" : "play";
+const buildShapeTransition = (isPaused) => {
+  // when the song is paused, we change from a play icon to a pause icon
+  const from = isPaused ? "play" : "pause";
+  const to = isPaused ? "pause" : "play";
 
   return Object.keys(shapes[from]).reduce((acc, key) => {
     acc[`start_shape_${key}`] = shapes[from][key];

@@ -50,6 +50,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
+     |> assign(:song_count, 0)
      |> maybe_fetch_genres()
      |> setup_recommendation_engine()
      |> stream_configure(:search_items, dom_id: &"search-item-#{elem(&1, 0).id}")
@@ -67,7 +68,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
         search_items_empty? = Enum.empty?(search_items)
 
         search_items_with_images =
-          if search_items_empty?, do: [], else: add_image_numbers(search_items)
+          if search_items_empty?, do: [], else: maybe_add_song_numbers(search_items, :search_item)
 
         {:noreply,
          socket
@@ -118,6 +119,36 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     {:noreply, socket}
   end
 
+  def handle_event(
+        "play_or_pause_song",
+        %{
+          "artist" => artist_name,
+          "artist_monthly_listeners" => artist_listeners,
+          "duration" => duration_ms,
+          "id" => id,
+          "song_name" => song_name
+        },
+        %{assigns: %{currently_playing_song: current_song}} = socket
+      ) do
+    case id == current_song.id do
+      true ->
+        {:noreply, push_event(socket, "play_or_pause_song", %{})}
+
+      false ->
+        artist = %Artist{name: artist_name, listeners: artist_listeners}
+
+        new_song = %Song{artist: artist, duration_ms: duration_ms, id: id, name: song_name}
+
+        song_player_data = return_song_player_data(new_song, true)
+
+        {:noreply,
+         socket
+         |> assign(:currently_playing_song, new_song)
+         |> push_event("maybe_play_song", song_player_data)
+         |> push_event("pause_previous_song", %{previous_song_id: current_song.id})}
+    end
+  end
+
   @impl Phoenix.LiveView
   def handle_info(:get_initial_songs, %{assigns: %{queue_name: queue}} = socket) do
     socket =
@@ -129,28 +160,72 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_async(:get_songs, {:ok, songs}, socket) do
-    songs_with_images = add_image_numbers(songs)
+  def handle_async(:get_songs, {:ok, songs}, %{assigns: %{song_count: count}} = socket) do
+    initial_song = Enum.at(songs, 0)
 
-    {:noreply, stream(socket, :songs, songs_with_images, reset: true)}
+    song_player_data = return_song_player_data(initial_song, false)
+
+    processed_songs = maybe_add_song_numbers(songs, :song, count)
+
+    {_last_song, _last_song_image, new_song_count} = Enum.at(processed_songs, -1)
+
+    {:noreply,
+     socket
+     |> assign(:currently_playing_song, initial_song)
+     |> assign(:song_count, new_song_count)
+     |> push_event("maybe_play_song", song_player_data)
+     |> stream(:songs, processed_songs, reset: true)}
   end
 
-  defp add_image_numbers(items) do
-    item_count = Enum.count(items)
+  defp return_song_player_data(song, should_play, current_time \\ 0) do
+    duration_sec = div(song.duration_ms, 1000)
 
-    images =
-      @image_list
-      |> Enum.shuffle()
-      |> Enum.take(item_count)
+    %{
+      current_song_duration: duration_sec,
+      current_song_id: song.id,
+      current_time: current_time,
+      should_play: should_play
+    }
+  end
 
-    items
+  defp maybe_add_song_numbers(items, item_type, current_song_count \\ 0)
+
+  defp maybe_add_song_numbers(search_items, :search_item, _current_song_count) do
+    images = return_thumbnails(search_items)
+
+    search_items
     |> Enum.with_index()
-    |> Enum.reduce([], fn {item, index}, acc ->
+    |> Enum.reduce([], fn {search_item, index}, acc ->
       image_num = Enum.at(images, index)
 
-      [{item, image_num} | acc]
+      [{search_item, image_num} | acc]
     end)
     |> Enum.reverse()
+  end
+
+  defp maybe_add_song_numbers(songs, :song, current_song_count) do
+    images = return_thumbnails(songs)
+
+    starting_number = current_song_count + 1
+
+    songs
+    |> Enum.with_index()
+    |> Enum.reduce([], fn {song, index}, acc ->
+      image_num = Enum.at(images, index)
+
+      song_number = starting_number + index
+
+      [{song, image_num, song_number} | acc]
+    end)
+    |> Enum.reverse()
+  end
+
+  defp return_thumbnails(items) do
+    item_count = Enum.count(items)
+
+    @image_list
+    |> Enum.shuffle()
+    |> Enum.take(item_count)
   end
 
   defp setup_recommendation_engine(

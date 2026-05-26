@@ -1,0 +1,33 @@
+.blur-song-thumbnail {
+  backdrop-filter: blur(0.5px);
+  z-index: 10;
+  background-image: linear-gradient(
+    to top,
+    oklch(0 0 0 / 40%) 10%,
+    oklch(0 0 0 / 30%) 95%
+  );
+}
+
+.play-song-icon {
+  @apply absolute top-[0.6rem] left-[0.6rem] z-[50] hidden;
+}
+
+.blur-song-thumbnail {
+  @apply w-full h-full absolute top-0 left-0 right-0 hidden;
+}
+
+.search-item:hover .blur-song-thumbnail {
+  display: block;
+}
+
+.search-item:hover .play-song-icon {
+  display: block;
+}
+
+.song:hover .song-number {
+  display: none;
+}
+
+.song:hover .song-play-icon {
+  display: block;
+}

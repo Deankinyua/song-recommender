@@ -12,7 +12,6 @@ defmodule SongRecommenderWeb.Songs.PlayerComponent do
     ~H"""
     <section
       id="song-player"
-      phx-hook="SongPlayer"
       class="w-[92%] h-[16%] bg-base-50 flex flex-col gap-2 justify-center items-center song-player text-base-100"
     >
       <div class="w-[60%] flex justify-center items-center gap-4">
@@ -23,7 +22,7 @@ defmodule SongRecommenderWeb.Songs.PlayerComponent do
           </div>
         </div>
         <div id="play-icon" class="control-icon">
-          <CustomComponents.play_pause_icon />
+          <CustomComponents.player_play_icon id="pause-play" />
           <div id="pause-play-tooltip" class="top-[-1.8rem] left-0 tooltip">
             Play
           </div>

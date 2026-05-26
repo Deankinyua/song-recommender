@@ -1,5 +1,5 @@
-import { getProgress, getCX, easeInOut } from "../helpers/animation_helpers.js";
-import { setLineCoordinates } from "../helpers/body_animation_helpers.js";
+import { getProgress, getCX, easeInOut } from "../helpers/animation.js";
+import { setLineCoordinates } from "../helpers/body_animation.js";
 import {
   animateCartoonHead,
   animateFacePeriodically,

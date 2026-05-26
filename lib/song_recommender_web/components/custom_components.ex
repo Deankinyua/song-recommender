@@ -38,6 +38,13 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
+  @spec blur_song_image(assigns()) :: rendered()
+  def blur_song_image(assigns) do
+    ~H"""
+    <section class="blur-song-thumbnail"></section>
+    """
+  end
+
   @spec search(assigns()) :: rendered()
   def search(assigns) do
     ~H"""
@@ -73,9 +80,21 @@ defmodule SongRecommenderWeb.CustomComponents do
   @spec search_item(assigns()) :: rendered()
   def search_item(assigns) do
     ~H"""
-    <div class="flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular hover:bg-accent hover:cursor-pointer">
-      <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
-        <img src={path_to_image(@image)} alt="cover image" class="w-full h-full object-cover" />
+    <div class="search-item flex items-center gap-2 rounded-md py-2 px-2 mx-3 happy-monkey-regular hover:bg-accent hover:cursor-pointer">
+      <section class="w-[3rem] h-[3rem] rounded-md relative overflow-hidden">
+        <img
+          src={path_to_image(@image)}
+          alt="cover image"
+          class="w-full h-full object-cover"
+        />
+        <section
+          :if={check_if_song(@item)}
+          class="play-song-icon"
+        >
+          <.song_play_icon song={@item} />
+        </section>
+
+        <.blur_song_image />
       </section>
       <.item item={@item} />
     </div>
@@ -121,7 +140,7 @@ defmodule SongRecommenderWeb.CustomComponents do
   def song_progress_bar(assigns) do
     ~H"""
     <div class="w-[85%] flex items-center gap-3 mx-auto">
-      <div id="song-played-time">0:00</div>
+      <div id="song-played-time">---</div>
 
       <div class="w-[80%] flex justify-center">
         <input
@@ -135,7 +154,7 @@ defmodule SongRecommenderWeb.CustomComponents do
         />
       </div>
 
-      <div id="song-duration">4:00</div>
+      <div id="song-duration">---</div>
     </div>
     """
   end
@@ -213,33 +232,87 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
-  @spec play_pause_icon(assigns()) :: rendered()
-  def play_pause_icon(assigns) do
-    ~H"""
-    <svg id="pause-play" width="36" viewBox="0 0 36 36" fill="white">
-      <circle cx="18" cy="18" r="17" class="play-btn-circle" />
+  @doc """
+  This is the smallest component in the play button and is the
+  only part that is animated. It is the inner part without the circle.
+  """
 
-      <polygon
-        id="polygon-1"
-        points="
+  attr :id, :string, required: true
+
+  @spec play_icon(assigns()) :: rendered()
+  def play_icon(assigns) do
+    ~H"""
+    <polygon
+      id={"polygon-1-#{@id}"}
+      points="
            11, 10
            11, 18
            11, 18
            11, 26
           "
-        fill="white"
-      />
+      fill="white"
+    />
 
-      <polygon
-        id="polygon-2"
-        points="
+    <polygon
+      id={"polygon-2-#{@id}"}
+      points="
             11, 10
             28, 18
             28, 18
             11, 26
           "
-        fill="white"
-      />
+      fill="white"
+    />
+    """
+  end
+
+  @doc """
+  This is the player icon. It is a full blown SVG and it has the inner part as well as
+  the circle. Notice that it is the only one that has a hook `SongPlayer` attached.
+  """
+
+  attr :id, :string, required: true
+
+  @spec player_play_icon(assigns()) :: rendered()
+  def player_play_icon(assigns) do
+    ~H"""
+    <svg phx-hook="SongPlayer" id={@id} width="36" viewBox="0 0 36 36" fill="white">
+      <circle cx="18" cy="18" r="17" class="play-btn-circle" />
+      <.play_icon id={@id} />
+    </svg>
+    """
+  end
+
+  @doc """
+  This is the icon placed on the left side of a song row for both searches and recommended songs.
+  It is a full blown SVG but it only has the inner part (it does not have the circle).
+  When you click it, an event will be sent to either pause/play the current song or play a new song.
+  """
+
+  attr :song, Song, required: true
+
+  @spec song_play_icon(assigns()) :: rendered()
+  def song_play_icon(assigns) do
+    ~H"""
+    <svg
+      phx-click={
+        JS.push("play_or_pause_song",
+          value: %{
+            artist: @song.artist.name,
+            artist_monthly_listeners: @song.artist.listeners,
+            duration: @song.duration_ms,
+            id: @song.id,
+            song_name: @song.name
+          }
+        )
+      }
+      id={@song.id}
+      width="30"
+      viewBox="0 0 36 36"
+      fill="white"
+      class="w-full h-full object-cover"
+    >
+      <.play_icon id={@song.id} />
     </svg>
     """
   end
@@ -318,12 +391,19 @@ defmodule SongRecommenderWeb.CustomComponents do
 
   attr :image, :integer, required: true
   attr :song, Song, required: true
+  attr :song_number, :integer, required: true
 
   @spec song(assigns()) :: rendered()
   def song(assigns) do
     ~H"""
-    <section class="rounded-md py-2 px-4 mx-3 flex justify-between items-center hover:bg-neutral hover:cursor-pointer">
+    <section class="song rounded-md py-2 px-4 mx-3 flex justify-between items-center hover:bg-neutral hover:cursor-pointer">
       <div class="flex items-center gap-4">
+        <section class="w-[1.6rem] flex flex-col items-center">
+          <section class="song-number">{@song_number}</section>
+          <section class="w-[20px] song-play-icon hidden">
+            <.song_play_icon song={@song} />
+          </section>
+        </section>
         <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
           <img src={path_to_image(@image)} alt="song image" class="object-cover" />
         </section>
@@ -356,6 +436,8 @@ defmodule SongRecommenderWeb.CustomComponents do
 
     "#{minutes}:#{String.pad_leading("#{seconds}", 2, "0")}"
   end
+
+  defp check_if_song(item), do: Map.get(item, :artist)
 
   defp path_to_image(num), do: ~p"/images/songs/" <> "image_#{num}.jpeg"
 end

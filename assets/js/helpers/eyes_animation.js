@@ -1,4 +1,4 @@
-import { getProgress, easeOut } from "./animation_helpers.js";
+import { getProgress, easeOut } from "./animation.js";
 
 const closeOrShutEyes = (closing, eyeSize, easingFunc) => {
   let eyeSizeDifference = eyeSize * easingFunc;

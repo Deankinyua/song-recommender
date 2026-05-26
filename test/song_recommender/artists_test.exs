@@ -23,7 +23,7 @@ defmodule SongRecommender.ArtistsTest do
 
       followed_artists = Artists.get_followed_artists(user.name)
 
-      assert followed_artists == ["Drake", "Alkaline"]
+      assert Enum.sort(followed_artists) == ["Alkaline", "Drake"]
     end
 
     test "returns an empty list if the user does not follow any artists", %{user: user} do
