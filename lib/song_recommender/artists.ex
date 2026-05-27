@@ -20,7 +20,7 @@ defmodule SongRecommender.Artists do
     |> Boltx.query!(
       """
       MATCH (u:User {name: $username}), (a:Artist {name: $artist_name})
-      RETURN exists {(u)-[:FOLLOWS]->(a)} AS following
+      RETURN EXISTS { (u)-[:FOLLOWS]->(a) } AS following
       """,
       %{username: username, artist_name: artist}
     )

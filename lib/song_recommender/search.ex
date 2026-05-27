@@ -27,7 +27,7 @@ defmodule SongRecommender.Search do
         OPTIONAL MATCH (n)<-[:SANG]-(a:Artist)
         CALL (*) {
           WHEN a IS NULL THEN {
-            WITH exists {(u)-[:FOLLOWS]->(n)} AS following
+            WITH EXISTS { (u)-[:FOLLOWS]->(n) } AS following
             RETURN n {.name, .monthlyListeners, following: following, artistName: NULL, popularity: NULL} AS searchItem
           }
           WHEN a IS NOT NULL THEN {

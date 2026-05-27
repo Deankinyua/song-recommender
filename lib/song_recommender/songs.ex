@@ -98,7 +98,7 @@ defmodule SongRecommender.Songs do
       MATCH (user:User {name: $username})
       MATCH (genre:Genre {name: $genre})
       OPTIONAL MATCH (song:Song)-[:BELONGS_TO]->(genre)
-      WHERE NOT exists( (user)-[:LISTENED_TO]->(song) )
+      WHERE NOT EXISTS { (user)-[:LISTENED_TO]->(song) }
       WITH song, user, genre
         ORDER BY song.popularity DESC
         LIMIT 1
