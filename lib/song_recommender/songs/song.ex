@@ -12,7 +12,7 @@ defmodule SongRecommender.Songs.Song do
 
   @primary_key false
   embedded_schema do
-    field :duration_ms, :integer, default: 0
+    field :duration_ms, :integer
     field :id, :string
     field :name, :string, default: ""
     field :popularity, :integer

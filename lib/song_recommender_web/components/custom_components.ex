@@ -143,7 +143,7 @@ defmodule SongRecommenderWeb.CustomComponents do
   def item(%{item: %Song{} = _song} = assigns) do
     ~H"""
     <section class="w-[90%] flex flex-col justify-center mx-2 gap-0">
-      <div class="happy-monkey-bold">{@item.name}</div>
+      <div class="happy-monkey-bold">{maybe_trim_song_title(@item.name)}</div>
       <div class="text-sm">
         Song . <span class="happy-monkey-bold">{@item.artist.name}</span>
       </div>
@@ -489,15 +489,20 @@ defmodule SongRecommenderWeb.CustomComponents do
     "#{minutes}:#{String.pad_leading("#{seconds}", 2, "0")}"
   end
 
-  defp check_if_song(item), do: Map.get(item, :artist)
-
-  defp path_to_image(num), do: ~p"/images/songs/" <> "image_#{num}.jpeg"
-
-  defp artist_image(image), do: ~p"/images/artists/artist_" <> "#{image}.jpeg"
-
   defp toggle_follow_buttons(js, id) do
     js
     |> JS.toggle(to: "#follow-#{id}")
     |> JS.toggle(to: "#unfollow-#{id}")
   end
+
+  defp maybe_trim_song_title(<<title::binary-size(40), _rest::binary>>),
+    do: title <> "..."
+
+  defp maybe_trim_song_title(title), do: title
+
+  defp check_if_song(item), do: Map.get(item, :artist)
+
+  defp path_to_image(num), do: ~p"/images/songs/" <> "image_#{num}.jpeg"
+
+  defp artist_image(image), do: ~p"/images/artists/artist_" <> "#{image}.jpeg"
 end
