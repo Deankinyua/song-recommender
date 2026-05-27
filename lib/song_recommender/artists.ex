@@ -57,6 +57,22 @@ defmodule SongRecommender.Artists do
   end
 
   @doc """
+  Unfollows an artist
+  """
+
+  @spec unfollow_artist(username(), artist()) :: bolt_response()
+  def unfollow_artist(username, artist) do
+    Boltx.query!(
+      Bolt,
+      """
+      MATCH (u:User {name: $username})-[f:FOLLOWS]->(a:Artist {name: $artist_name})
+      DELETE f
+      """,
+      %{username: username, artist_name: artist}
+    )
+  end
+
+  @doc """
   If this was in production, you would filter with the LISTENED_TO property
   `lastPlayedDate` to find only the songs that were listened to over the
   past month.You would add a WHERE clause:

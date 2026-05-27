@@ -165,6 +165,24 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     end
   end
 
+  def handle_event(
+        "follow_artist",
+        %{"artist" => artist_name},
+        %{assigns: %{current_user: user}} = socket
+      ) do
+    Artists.follow_artist(user.name, artist_name)
+    {:noreply, socket}
+  end
+
+  def handle_event(
+        "unfollow_artist",
+        %{"artist" => artist_name},
+        %{assigns: %{current_user: user}} = socket
+      ) do
+    Artists.unfollow_artist(user.name, artist_name)
+    {:noreply, socket}
+  end
+
   @impl Phoenix.LiveView
   def handle_info(:get_initial_songs, %{assigns: %{queue_name: queue}} = socket) do
     socket =

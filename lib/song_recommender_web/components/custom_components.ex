@@ -110,15 +110,29 @@ defmodule SongRecommenderWeb.CustomComponents do
     </section>
     <section>
       <button
-        :if={!@item.following}
-        class="btn btn-secondary w-[7rem] h-[2rem] text-base-50 !rounded-full"
+        id={"follow-#{@item.id}"}
+        class={[
+          "btn btn-secondary w-[7rem] h-[2rem] !rounded-full text-base-50",
+          @item.following && "hidden"
+        ]}
+        phx-click={
+          JS.push("follow_artist", value: %{artist: @item.name})
+          |> toggle_follow_buttons(@item.id)
+        }
       >
         Follow
       </button>
 
       <button
-        :if={@item.following}
-        class="btn btn-secondary w-[7rem] h-[2rem] text-base-50 !rounded-full"
+        id={"unfollow-#{@item.id}"}
+        class={[
+          "btn btn-secondary w-[7rem] h-[2rem] !rounded-full text-base-50",
+          !@item.following && "hidden"
+        ]}
+        phx-click={
+          JS.push("unfollow_artist", value: %{artist: @item.name})
+          |> toggle_follow_buttons(@item.id)
+        }
       >
         Unfollow
       </button>
@@ -451,4 +465,10 @@ defmodule SongRecommenderWeb.CustomComponents do
   defp check_if_song(item), do: Map.get(item, :artist)
 
   defp path_to_image(num), do: ~p"/images/songs/" <> "image_#{num}.jpeg"
+
+  defp toggle_follow_buttons(js, id) do
+    js
+    |> JS.toggle(to: "#follow-#{id}")
+    |> JS.toggle(to: "#unfollow-#{id}")
+  end
 end
