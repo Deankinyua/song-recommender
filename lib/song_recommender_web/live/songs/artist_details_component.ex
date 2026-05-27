@@ -11,17 +11,14 @@ defmodule SongRecommenderWeb.Songs.ArtistDetailsComponent do
   def render(assigns) do
     ~H"""
     <div class="flex flex-col justify-center gap-4 h-full">
-      <section class="rounded-md overflow-hidden h-[60%]">
+      <section :if={@song.id} class="rounded-md overflow-hidden h-[60%]">
         <img
-          src={~p"/images/artists/artist_1.jpeg"}
+          src={artist_image(@artist_image)}
           alt="artist image"
           class="w-full h-full object-cover"
         />
       </section>
-      <section
-        :if={@song.id}
-        class="flex flex-col gap-2"
-      >
+      <section :if={@song.id} class="flex flex-col gap-2">
         <div class="px-2 montserrat-bold">{@song.artist.name}</div>
         <div class="flex gap-2 justify-between px-2 text-sm items-center">
           <section>
@@ -84,4 +81,6 @@ defmodule SongRecommenderWeb.Songs.ArtistDetailsComponent do
 
     {:noreply, assign(socket, :song, updated_song)}
   end
+
+  defp artist_image(image), do: ~p"/images/artists/artist_" <> "#{image}.jpeg"
 end

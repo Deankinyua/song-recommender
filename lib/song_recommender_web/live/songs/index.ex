@@ -3,6 +3,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   use SongRecommenderWeb, :setup_homepage_aliases
 
   @image_list 1..15
+  @no_playing_song_images 10
 
   @impl Phoenix.LiveView
   def render(assigns) do
@@ -45,6 +46,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
             id="artist-details-component"
             module={ArtistDetailsComponent}
             current_user={@current_user}
+            artist_image={@currently_playing_artist_image}
             song={@currently_playing_song}
           />
         </section>
@@ -58,6 +60,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     {:ok,
      socket
      |> assign(:currently_playing_song, %Song{})
+     |> assign(:currently_playing_artist_image, nil)
      |> assign(:song_count, 0)
      |> maybe_fetch_genres()
      |> setup_recommendation_engine()
@@ -166,6 +169,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
         {:noreply,
          socket
+         |> set_playing_song_image()
          |> assign(:currently_playing_song, new_song)
          |> push_event("maybe_play_song", song_player_data)
          |> push_event("pause_previous_song", %{previous_song_id: current_song.id})}
@@ -219,6 +223,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
     {:noreply,
      socket
+     |> set_playing_song_image()
      |> assign(:currently_playing_song, initial_song)
      |> assign(:song_count, new_song_count)
      |> push_event("maybe_play_song", song_player_data)
@@ -305,6 +310,11 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     genres = if capture_preferences?, do: Genres.get_user_genres(user.name), else: []
 
     assign(socket, :genres, genres)
+  end
+
+  defp set_playing_song_image(socket) do
+    image_num = :rand.uniform(@no_playing_song_images)
+    assign(socket, :currently_playing_artist_image, image_num)
   end
 
   defp engine_name(username), do: "#{username}_recommendation_engine"
