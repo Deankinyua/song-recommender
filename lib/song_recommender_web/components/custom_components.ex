@@ -453,7 +453,7 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
-  def milliseconds_to_minutes(milliseconds) do
+  defp milliseconds_to_minutes(milliseconds) do
     total_seconds = div(milliseconds, 1_000)
 
     minutes = div(total_seconds, 60)

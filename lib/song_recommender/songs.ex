@@ -193,7 +193,7 @@ defmodule SongRecommender.Songs do
          "genreName" => genre
        }) do
     genre = %Genre{name: genre}
-    artist = %Artist{name: artist_name, listeners: monthly_listeners}
+    artist = %Artist{id: Ecto.UUID.generate(), name: artist_name, listeners: monthly_listeners}
 
     %Song{
       artist: artist,

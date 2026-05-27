@@ -115,6 +115,7 @@ defmodule SongRecommenderWeb do
       alias SongRecommender.Search
       alias SongRecommender.SongQueue
       alias SongRecommender.Songs.Song
+      alias SongRecommenderWeb.Songs.ArtistDetailsComponent
       alias SongRecommenderWeb.Songs.GenresPopupComponent
       alias SongRecommenderWeb.Songs.PlayerComponent
       alias SongRecommenderWeb.Songs.SearchComponent

@@ -68,7 +68,12 @@ defmodule SongRecommender.Search do
            "name" => song_name
          }
        }) do
-    artist = %Artist{name: artist_name, listeners: artist_monthly_listeners}
+    artist = %Artist{
+      id: Ecto.UUID.generate(),
+      name: artist_name,
+      listeners: artist_monthly_listeners
+    }
+
     genre = %Genre{name: genre}
 
     %Song{
