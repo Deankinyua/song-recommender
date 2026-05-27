@@ -10,7 +10,12 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     ~H"""
     <Layouts.app flash={@flash} class="bg-base-50" username={@current_user.name}>
       <div class="h-[92vh] flex text-base-100">
-        <section class="w-[22%] relative h-[90%] my-6 rounded-xl bg-base-70">
+        <section class="flex flex-col justify-end w-[22%] relative h-[90%] my-6 rounded-xl bg-base-70">
+          <CustomComponents.song_details
+            artist_image={@currently_playing_artist_image}
+            song={@currently_playing_song}
+          />
+
           <.live_component
             id="genres-popup-component"
             module={GenresPopupComponent}

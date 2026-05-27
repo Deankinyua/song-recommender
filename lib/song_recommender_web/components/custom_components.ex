@@ -453,6 +453,33 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
+  attr :artist_image, :integer, required: true
+  attr :song, Song, required: true
+
+  @spec song_details(assigns()) :: rendered()
+  def song_details(assigns) do
+    ~H"""
+    <section>
+      <div
+        :if={@song.id}
+        class="w-[90%] mx-auto flex items-center gap-4 my-4"
+      >
+        <section class="w-[4rem] h-[4rem] rounded-md overflow-hidden">
+          <img
+            src={artist_image(@artist_image)}
+            alt="artist image"
+            class="w-full h-full object-cover"
+          />
+        </section>
+        <section class="flex flex-col gap-1">
+          <div class="montserrat-bold text-sm">{@song.name}</div>
+          <div class="text-xs">{@song.artist.name}</div>
+        </section>
+      </div>
+    </section>
+    """
+  end
+
   defp milliseconds_to_minutes(milliseconds) do
     total_seconds = div(milliseconds, 1_000)
 
@@ -465,6 +492,8 @@ defmodule SongRecommenderWeb.CustomComponents do
   defp check_if_song(item), do: Map.get(item, :artist)
 
   defp path_to_image(num), do: ~p"/images/songs/" <> "image_#{num}.jpeg"
+
+  defp artist_image(image), do: ~p"/images/artists/artist_" <> "#{image}.jpeg"
 
   defp toggle_follow_buttons(js, id) do
     js
