@@ -311,6 +311,7 @@ defmodule SongRecommenderWeb.CustomComponents do
             artist: @song.artist.name,
             artist_monthly_listeners: @song.artist.listeners,
             duration: @song.duration_ms,
+            genre: @song.genre.name,
             id: @song.id,
             song_name: @song.name
           }

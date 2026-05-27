@@ -126,19 +126,34 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           "artist" => artist_name,
           "artist_monthly_listeners" => artist_listeners,
           "duration" => duration_ms,
+          "genre" => genre,
           "id" => id,
           "song_name" => song_name
         },
-        %{assigns: %{currently_playing_song: current_song}} = socket
+        %{assigns: %{currently_playing_song: current_song, current_user: user}} = socket
       ) do
     case id == current_song.id do
       true ->
         {:noreply, push_event(socket, "play_or_pause_song", %{})}
 
       false ->
-        artist = %Artist{name: artist_name, listeners: artist_listeners}
+        following_artist? = Artists.check_following_status(user.name, artist_name)
 
-        new_song = %Song{artist: artist, duration_ms: duration_ms, id: id, name: song_name}
+        artist = %Artist{
+          following: following_artist?,
+          name: artist_name,
+          listeners: artist_listeners
+        }
+
+        genre = %Genre{name: genre}
+
+        new_song = %Song{
+          artist: artist,
+          duration_ms: duration_ms,
+          genre: genre,
+          id: id,
+          name: song_name
+        }
 
         song_player_data = return_song_player_data(new_song, true)
 
@@ -161,8 +176,15 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_async(:get_songs, {:ok, songs}, %{assigns: %{song_count: count}} = socket) do
-    initial_song = Enum.at(songs, 0)
+  def handle_async(
+        :get_songs,
+        {:ok, songs},
+        %{assigns: %{current_user: user, song_count: count}} = socket
+      ) do
+    initial_song =
+      songs
+      |> Enum.at(0)
+      |> Artists.update_song_artist(user.name)
 
     song_player_data = return_song_player_data(initial_song, false)
 

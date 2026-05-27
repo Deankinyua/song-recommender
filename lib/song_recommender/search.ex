@@ -4,6 +4,7 @@ defmodule SongRecommender.Search do
   """
 
   alias SongRecommender.Artists.Artist
+  alias SongRecommender.Genres.Genre
   alias SongRecommender.Songs.Song
 
   @type artist :: Artist.t()
@@ -30,7 +31,8 @@ defmodule SongRecommender.Search do
             RETURN n {.name, .monthlyListeners, following: following, artistName: NULL, popularity: NULL} AS searchItem
           }
           WHEN a IS NOT NULL THEN {
-            RETURN n {.name, .id, .popularity, .durationMs, artistMonthlyListeners: a.monthlyListeners, artistName: a.name, monthlyListeners: NULL} AS searchItem
+            MATCH (n)-[:BELONGS_TO]->(g:Genre)
+            RETURN n {.name, .id, .popularity, .durationMs, artistMonthlyListeners: a.monthlyListeners, artistName: a.name, genre: g.name, monthlyListeners: NULL} AS searchItem
           }
         }
         RETURN searchItem
@@ -61,15 +63,18 @@ defmodule SongRecommender.Search do
            "artistMonthlyListeners" => artist_monthly_listeners,
            "artistName" => artist_name,
            "durationMs" => song_duration,
+           "genre" => genre,
            "id" => song_id,
            "name" => song_name
          }
        }) do
     artist = %Artist{name: artist_name, listeners: artist_monthly_listeners}
+    genre = %Genre{name: genre}
 
     %Song{
       artist: artist,
       duration_ms: song_duration,
+      genre: genre,
       id: song_id,
       name: song_name
     }

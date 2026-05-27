@@ -3,9 +3,42 @@ defmodule SongRecommender.Artists do
   Utilities to manage artists
   """
 
+  alias SongRecommender.Songs.Song
+
   @type artist :: String.t()
   @type bolt_response :: Boltx.Response.t()
+  @type song :: Song.t()
   @type username :: String.t()
+
+  @doc """
+  Checks if a user is following a particular artist
+  """
+
+  @spec check_following_status(username(), artist()) :: boolean()
+  def check_following_status(username, artist) do
+    Bolt
+    |> Boltx.query!(
+      """
+      MATCH (u:User {name: $username}), (a:Artist {name: $artist_name})
+      RETURN exists {(u)-[:FOLLOWS]->(a)} AS following
+      """,
+      %{username: username, artist_name: artist}
+    )
+    |> Boltx.Response.first()
+    |> return_following_status()
+  end
+
+  @doc """
+  Checks if a user is following a particular artist
+  """
+
+  @spec update_song_artist(song(), username()) :: song()
+  def update_song_artist(song, username) do
+    artist_name = song.artist.name
+    following_artist? = check_following_status(username, artist_name)
+    artist = %{song.artist | following: following_artist?}
+    %{song | artist: artist}
+  end
 
   @doc """
   Follows an artist
@@ -79,4 +112,5 @@ defmodule SongRecommender.Artists do
   end
 
   defp process_artist(%{"artist" => name}), do: name
+  defp return_following_status(%{"following" => following}), do: following
 end
