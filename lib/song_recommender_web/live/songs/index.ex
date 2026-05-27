@@ -60,12 +60,12 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_params(params, _url, socket) do
+  def handle_params(params, _url, %{assigns: %{current_user: user}} = socket) do
     search_query = params["q"] || ""
 
     case search_query != "" do
       true ->
-        search_items = Search.search_query(search_query)
+        search_items = Search.search_query(search_query, user.name)
         search_items_empty? = Enum.empty?(search_items)
 
         search_items_with_images =

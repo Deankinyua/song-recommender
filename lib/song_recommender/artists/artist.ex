@@ -8,6 +8,7 @@ defmodule SongRecommender.Artists.Artist do
   @type t :: %__MODULE__{}
 
   embedded_schema do
+    field :following, :boolean
     field :name, :string
     field :listeners, :integer
   end

@@ -9,24 +9,25 @@ defmodule SongRecommender.Search do
   @type artist :: Artist.t()
   @type query :: String.t()
   @type song :: Song.t()
+  @type username :: String.t()
 
   @doc """
   Searches for an item (Artist or Song) using the normalizedName property.
   Returns artists first (most listened_to artist first) then songs.
   """
-  @spec search_query(query()) :: [artist() | song()]
-  def search_query(query) do
+  @spec search_query(query(), username()) :: [artist() | song()]
+  def search_query(query, username) do
     %Boltx.Response{results: search_items} =
       Boltx.query!(
         Bolt,
         """
-        MATCH (n:Artist|Song)
+        MATCH (n:Artist|Song), (u:User {name: $username})
         WHERE n.normalizedName CONTAINS $query
         OPTIONAL MATCH (n)<-[:SANG]-(a:Artist)
-        WITH n, a
         CALL (*) {
           WHEN a IS NULL THEN {
-            RETURN n {.name, .monthlyListeners, artistName: NULL, popularity: NULL} AS searchItem
+            WITH exists {(u)-[:FOLLOWS]->(n)} AS following
+            RETURN n {.name, .monthlyListeners, following: following, artistName: NULL, popularity: NULL} AS searchItem
           }
           WHEN a IS NOT NULL THEN {
             RETURN n {.name, .id, .popularity, .durationMs, artistMonthlyListeners: a.monthlyListeners, artistName: a.name, monthlyListeners: NULL} AS searchItem
@@ -36,7 +37,7 @@ defmodule SongRecommender.Search do
         ORDER BY labels(n), n.popularity DESC, n.monthlyListeners DESC
         LIMIT 15
         """,
-        %{query: String.downcase(query)}
+        %{query: String.downcase(query), username: username}
       )
 
     if Enum.empty?(search_items) do
@@ -49,10 +50,11 @@ defmodule SongRecommender.Search do
   defp process_search_item(%{
          "searchItem" => %{
            "artistName" => nil,
+           "following" => following,
            "name" => artist_name
          }
        }),
-       do: %Artist{id: Ecto.UUID.generate(), name: artist_name}
+       do: %Artist{id: Ecto.UUID.generate(), following: following, name: artist_name}
 
   defp process_search_item(%{
          "searchItem" => %{
