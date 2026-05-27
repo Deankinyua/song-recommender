@@ -110,7 +110,7 @@ defmodule SongRecommender.Songs do
           ORDER BY finalSong.popularity DESC
           LIMIT 1
         }
-        WHEN song IS NOT NULL THEN {
+        ELSE {
           RETURN song AS finalSong
         }
       }

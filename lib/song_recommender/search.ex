@@ -30,7 +30,7 @@ defmodule SongRecommender.Search do
             WITH EXISTS { (u)-[:FOLLOWS]->(n) } AS following
             RETURN n {.name, .monthlyListeners, following: following, artistName: NULL, popularity: NULL} AS searchItem
           }
-          WHEN a IS NOT NULL THEN {
+          ELSE {
             MATCH (n)-[:BELONGS_TO]->(g:Genre)
             RETURN n {.name, .id, .popularity, .durationMs, artistMonthlyListeners: a.monthlyListeners, artistName: a.name, genre: g.name, monthlyListeners: NULL} AS searchItem
           }
