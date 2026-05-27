@@ -50,6 +50,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
+     |> assign(:currently_playing_song, %Song{})
      |> assign(:song_count, 0)
      |> maybe_fetch_genres()
      |> setup_recommendation_engine()

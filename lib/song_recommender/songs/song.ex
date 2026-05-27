@@ -12,13 +12,13 @@ defmodule SongRecommender.Songs.Song do
 
   @primary_key false
   embedded_schema do
-    field :duration_ms, :integer
+    field :duration_ms, :integer, default: 0
     field :id, :string
-    field :name, :string
+    field :name, :string, default: ""
     field :popularity, :integer
     field :released, :integer
 
-    embeds_one :artist, Artist
+    embeds_one :artist, Artist, defaults_to_struct: true
     embeds_one :genre, Genre
   end
 end
