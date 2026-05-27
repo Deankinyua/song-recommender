@@ -109,8 +109,18 @@ defmodule SongRecommenderWeb.CustomComponents do
       <div class="text-sm">artist</div>
     </section>
     <section>
-      <button class="btn btn-secondary w-[7rem] h-[2rem] text-base-50 !rounded-full">
+      <button
+        :if={!@item.following}
+        class="btn btn-secondary w-[7rem] h-[2rem] text-base-50 !rounded-full"
+      >
         Follow
+      </button>
+
+      <button
+        :if={@item.following}
+        class="btn btn-secondary w-[7rem] h-[2rem] text-base-50 !rounded-full"
+      >
+        Unfollow
       </button>
     </section>
     """

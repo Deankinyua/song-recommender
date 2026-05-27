@@ -49,7 +49,7 @@ defmodule SongRecommender.Artists do
 
   ## Examples
 
-      iex> get_user_genres("Dean")
+      iex> get_followed_artists("Dean")
         ["Drake", "Taylor Swift"]
 
   """
