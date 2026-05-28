@@ -53,7 +53,7 @@ defmodule SongRecommender.GraphHelpers do
     Bolt
     |> Boltx.query!(
       """
-      RETURN exists( (:User {name: $name})-[:LISTENED_TO]->(:Song {id: $song_id}) ) AS listened_status
+      RETURN EXISTS { (:User {name: $name})-[:LISTENED_TO]->(:Song {id: $song_id}) } AS listened_status
       """,
       %{name: username, song_id: song_id}
     )

@@ -3,13 +3,19 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   use SongRecommenderWeb, :setup_homepage_aliases
 
   @image_list 1..15
+  @no_playing_song_images 10
 
   @impl Phoenix.LiveView
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} class="bg-base-50" username={@current_user.name}>
       <div class="h-[92vh] flex text-base-100">
-        <section class="w-[22%] relative">
+        <section class="flex flex-col justify-end w-[22%] relative h-[90%] my-6 rounded-xl bg-base-70">
+          <CustomComponents.song_details
+            artist_image={@currently_playing_artist_image}
+            song={@currently_playing_song}
+          />
+
           <.live_component
             id="genres-popup-component"
             module={GenresPopupComponent}
@@ -40,7 +46,15 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           />
         </section>
 
-        <section class="w-[22%]"></section>
+        <section class="w-[22%] h-[90%] my-6 rounded-xl bg-base-70">
+          <.live_component
+            id="artist-details-component"
+            module={ArtistDetailsComponent}
+            current_user={@current_user}
+            artist_image={@currently_playing_artist_image}
+            song={@currently_playing_song}
+          />
+        </section>
       </div>
     </Layouts.app>
     """
@@ -50,6 +64,8 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
+     |> assign(:currently_playing_song, %Song{})
+     |> assign(:currently_playing_artist_image, nil)
      |> assign(:song_count, 0)
      |> maybe_fetch_genres()
      |> setup_recommendation_engine()
@@ -59,12 +75,12 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_params(params, _url, socket) do
+  def handle_params(params, _url, %{assigns: %{current_user: user}} = socket) do
     search_query = params["q"] || ""
 
     case search_query != "" do
       true ->
-        search_items = Search.search_query(search_query)
+        search_items = Search.search_query(search_query, user.name)
         search_items_empty? = Enum.empty?(search_items)
 
         search_items_with_images =
@@ -125,28 +141,62 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           "artist" => artist_name,
           "artist_monthly_listeners" => artist_listeners,
           "duration" => duration_ms,
+          "genre" => genre,
           "id" => id,
           "song_name" => song_name
         },
-        %{assigns: %{currently_playing_song: current_song}} = socket
+        %{assigns: %{currently_playing_song: current_song, current_user: user}} = socket
       ) do
     case id == current_song.id do
       true ->
         {:noreply, push_event(socket, "play_or_pause_song", %{})}
 
       false ->
-        artist = %Artist{name: artist_name, listeners: artist_listeners}
+        following_artist? = Artists.check_following_status(user.name, artist_name)
 
-        new_song = %Song{artist: artist, duration_ms: duration_ms, id: id, name: song_name}
+        artist = %Artist{
+          following: following_artist?,
+          name: artist_name,
+          listeners: artist_listeners
+        }
+
+        genre = %Genre{name: genre}
+
+        new_song = %Song{
+          artist: artist,
+          duration_ms: duration_ms,
+          genre: genre,
+          id: id,
+          name: song_name
+        }
 
         song_player_data = return_song_player_data(new_song, true)
 
         {:noreply,
          socket
+         |> set_playing_song_image()
          |> assign(:currently_playing_song, new_song)
          |> push_event("maybe_play_song", song_player_data)
          |> push_event("pause_previous_song", %{previous_song_id: current_song.id})}
     end
+  end
+
+  def handle_event(
+        "follow_artist",
+        %{"artist" => artist_name},
+        %{assigns: %{current_user: user}} = socket
+      ) do
+    Artists.follow_artist(user.name, artist_name)
+    {:noreply, socket}
+  end
+
+  def handle_event(
+        "unfollow_artist",
+        %{"artist" => artist_name},
+        %{assigns: %{current_user: user}} = socket
+      ) do
+    Artists.unfollow_artist(user.name, artist_name)
+    {:noreply, socket}
   end
 
   @impl Phoenix.LiveView
@@ -160,8 +210,15 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_async(:get_songs, {:ok, songs}, %{assigns: %{song_count: count}} = socket) do
-    initial_song = Enum.at(songs, 0)
+  def handle_async(
+        :get_songs,
+        {:ok, songs},
+        %{assigns: %{current_user: user, song_count: count}} = socket
+      ) do
+    initial_song =
+      songs
+      |> Enum.at(0)
+      |> Artists.set_artist_following_status(user.name)
 
     song_player_data = return_song_player_data(initial_song, false)
 
@@ -171,6 +228,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
     {:noreply,
      socket
+     |> set_playing_song_image()
      |> assign(:currently_playing_song, initial_song)
      |> assign(:song_count, new_song_count)
      |> push_event("maybe_play_song", song_player_data)
@@ -257,6 +315,11 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     genres = if capture_preferences?, do: Genres.get_user_genres(user.name), else: []
 
     assign(socket, :genres, genres)
+  end
+
+  defp set_playing_song_image(socket) do
+    image_num = :rand.uniform(@no_playing_song_images)
+    assign(socket, :currently_playing_artist_image, image_num)
   end
 
   defp engine_name(username), do: "#{username}_recommendation_engine"

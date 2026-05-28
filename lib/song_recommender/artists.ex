@@ -3,9 +3,42 @@ defmodule SongRecommender.Artists do
   Utilities to manage artists
   """
 
+  alias SongRecommender.Songs.Song
+
   @type artist :: String.t()
   @type bolt_response :: Boltx.Response.t()
+  @type song :: Song.t()
   @type username :: String.t()
+
+  @doc """
+  Checks if a user is following a particular artist
+  """
+
+  @spec check_following_status(username(), artist()) :: boolean()
+  def check_following_status(username, artist) do
+    Bolt
+    |> Boltx.query!(
+      """
+      MATCH (u:User {name: $username}), (a:Artist {name: $artist_name})
+      RETURN EXISTS { (u)-[:FOLLOWS]->(a) } AS following
+      """,
+      %{username: username, artist_name: artist}
+    )
+    |> Boltx.Response.first()
+    |> return_following_status()
+  end
+
+  @doc """
+  Checks if the user follows the artist who produced a particular
+  song and adds the following status to the song.
+  """
+
+  @spec set_artist_following_status(song(), username()) :: song()
+  def set_artist_following_status(%{artist: artist} = song, username) do
+    following_artist? = check_following_status(username, artist.name)
+    updated_artist = Map.replace!(artist, :following, following_artist?)
+    Map.replace!(song, :artist, updated_artist)
+  end
 
   @doc """
   Follows an artist
@@ -18,6 +51,22 @@ defmodule SongRecommender.Artists do
       """
       MATCH (u:User {name: $username}), (a:Artist {name: $artist_name})
       MERGE (u)-[:FOLLOWS]->(a)
+      """,
+      %{username: username, artist_name: artist}
+    )
+  end
+
+  @doc """
+  Unfollows an artist
+  """
+
+  @spec unfollow_artist(username(), artist()) :: bolt_response()
+  def unfollow_artist(username, artist) do
+    Boltx.query!(
+      Bolt,
+      """
+      MATCH (u:User {name: $username})-[f:FOLLOWS]->(a:Artist {name: $artist_name})
+      DELETE f
       """,
       %{username: username, artist_name: artist}
     )
@@ -49,7 +98,7 @@ defmodule SongRecommender.Artists do
 
   ## Examples
 
-      iex> get_user_genres("Dean")
+      iex> get_followed_artists("Dean")
         ["Drake", "Taylor Swift"]
 
   """
@@ -79,4 +128,5 @@ defmodule SongRecommender.Artists do
   end
 
   defp process_artist(%{"artist" => name}), do: name
+  defp return_following_status(%{"following" => following}), do: following
 end

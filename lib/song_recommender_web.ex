@@ -106,13 +106,17 @@ defmodule SongRecommenderWeb do
 
   def setup_homepage_aliases do
     quote do
+      alias SongRecommender.Artists
       alias SongRecommender.Artists.Artist
       alias SongRecommender.EngineQueueSupervisor
       alias SongRecommender.Genres
+      alias SongRecommender.Genres.Genre
       alias SongRecommender.RecommendationEngine
       alias SongRecommender.Search
       alias SongRecommender.SongQueue
       alias SongRecommender.Songs.Song
+      alias SongRecommenderWeb.CustomComponents
+      alias SongRecommenderWeb.Songs.ArtistDetailsComponent
       alias SongRecommenderWeb.Songs.GenresPopupComponent
       alias SongRecommenderWeb.Songs.PlayerComponent
       alias SongRecommenderWeb.Songs.SearchComponent

@@ -49,7 +49,7 @@ defmodule SongRecommender.Genres do
   ## Examples
 
       iex> prefer_genres("Dean", ["hip-hop"])
-        %User{genres: ["hip-hop"], name: "Dean"}
+        ["hip-hop"]
 
   """
 

@@ -109,8 +109,32 @@ defmodule SongRecommenderWeb.CustomComponents do
       <div class="text-sm">artist</div>
     </section>
     <section>
-      <button class="btn btn-secondary w-[7rem] h-[2rem] text-base-50 !rounded-full">
+      <button
+        id={"follow-#{@item.id}"}
+        class={[
+          "btn btn-secondary w-[7rem] h-[2rem] !rounded-full text-base-50",
+          @item.following && "hidden"
+        ]}
+        phx-click={
+          JS.push("follow_artist", value: %{artist: @item.name})
+          |> toggle_follow_buttons(@item.id)
+        }
+      >
         Follow
+      </button>
+
+      <button
+        id={"unfollow-#{@item.id}"}
+        class={[
+          "btn btn-secondary w-[7rem] h-[2rem] !rounded-full text-base-50",
+          !@item.following && "hidden"
+        ]}
+        phx-click={
+          JS.push("unfollow_artist", value: %{artist: @item.name})
+          |> toggle_follow_buttons(@item.id)
+        }
+      >
+        Unfollow
       </button>
     </section>
     """
@@ -119,7 +143,7 @@ defmodule SongRecommenderWeb.CustomComponents do
   def item(%{item: %Song{} = _song} = assigns) do
     ~H"""
     <section class="w-[90%] flex flex-col justify-center mx-2 gap-0">
-      <div class="happy-monkey-bold">{@item.name}</div>
+      <div class="happy-monkey-bold">{maybe_trim_song_title(@item.name)}</div>
       <div class="text-sm">
         Song . <span class="happy-monkey-bold">{@item.artist.name}</span>
       </div>
@@ -301,6 +325,7 @@ defmodule SongRecommenderWeb.CustomComponents do
             artist: @song.artist.name,
             artist_monthly_listeners: @song.artist.listeners,
             duration: @song.duration_ms,
+            genre: @song.genre.name,
             id: @song.id,
             song_name: @song.name
           }
@@ -404,10 +429,10 @@ defmodule SongRecommenderWeb.CustomComponents do
             <.song_play_icon song={@song} />
           </section>
         </section>
-        <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
-          <img src={path_to_image(@image)} alt="song image" class="object-cover" />
+        <section class="w-[3rem] h-[3rem] shrink-0 rounded-md overflow-hidden">
+          <img src={path_to_image(@image)} alt="song image" class="w-full h-full object-cover" />
         </section>
-        <section class="flex flex-col">
+        <section class="flex-1 flex flex-col">
           <p>{@song.name}</p>
           <p class="text-xs">{@song.artist.name}</p>
         </section>
@@ -428,7 +453,46 @@ defmodule SongRecommenderWeb.CustomComponents do
     """
   end
 
-  def milliseconds_to_minutes(milliseconds) do
+  attr :artist_image, :integer, required: true
+  attr :song, Song, required: true
+
+  @spec song_details(assigns()) :: rendered()
+  def song_details(assigns) do
+    ~H"""
+    <section>
+      <div
+        :if={@song.id}
+        class="w-[92%] mx-auto flex justify-between gap-2 items-center my-4"
+      >
+        <section class="w-[3.5rem] h-[3.5rem] rounded-md shrink-0 overflow-hidden">
+          <img
+            src={artist_image(@artist_image)}
+            alt="artist image"
+            class="w-full h-full object-cover"
+          />
+        </section>
+        <section class="max-w-[75%] grow-1 flex flex-col gap-1 min-w-0 overflow-hidden">
+          <.link
+            id={"song-title-#{@song.id}"}
+            href={"https://open.spotify.com/track/#{@song.id}"}
+            target="_blank"
+            referrerpolicy="noreferrer"
+            class={[
+              "montserrat-bold text-sm underline",
+              should_translate_title?(@song.name) && "translate-song-title"
+            ]}
+          >
+            {@song.name}
+          </.link>
+
+          <div class="text-xs">{@song.artist.name}</div>
+        </section>
+      </div>
+    </section>
+    """
+  end
+
+  defp milliseconds_to_minutes(milliseconds) do
     total_seconds = div(milliseconds, 1_000)
 
     minutes = div(total_seconds, 60)
@@ -437,7 +501,24 @@ defmodule SongRecommenderWeb.CustomComponents do
     "#{minutes}:#{String.pad_leading("#{seconds}", 2, "0")}"
   end
 
+  defp toggle_follow_buttons(js, id) do
+    js
+    |> JS.toggle(to: "#follow-#{id}")
+    |> JS.toggle(to: "#unfollow-#{id}")
+  end
+
+  defp should_translate_title?(<<_title::binary-size(35), _rest::binary>>), do: true
+
+  defp should_translate_title?(_title), do: false
+
+  defp maybe_trim_song_title(<<title::binary-size(40), _rest::binary>>),
+    do: title <> "..."
+
+  defp maybe_trim_song_title(title), do: title
+
   defp check_if_song(item), do: Map.get(item, :artist)
 
   defp path_to_image(num), do: ~p"/images/songs/" <> "image_#{num}.jpeg"
+
+  defp artist_image(image), do: ~p"/images/artists/artist_" <> "#{image}.jpeg"
 end
