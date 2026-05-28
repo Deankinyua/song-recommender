@@ -29,11 +29,12 @@ defmodule SongRecommender.Artists do
   end
 
   @doc """
-  Checks if a user is following a particular artist
+  Checks if the user follows the artist who produced a particular
+  song and adds the following status to the song.
   """
 
-  @spec update_song_artist(song(), username()) :: song()
-  def update_song_artist(song, username) do
+  @spec set_artist_following_status(song(), username()) :: song()
+  def set_artist_following_status(song, username) do
     artist_name = song.artist.name
     following_artist? = check_following_status(username, artist_name)
     artist = %{song.artist | following: following_artist?}

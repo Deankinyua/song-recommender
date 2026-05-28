@@ -218,7 +218,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     initial_song =
       songs
       |> Enum.at(0)
-      |> Artists.update_song_artist(user.name)
+      |> Artists.set_artist_following_status(user.name)
 
     song_player_data = return_song_player_data(initial_song, false)
 
