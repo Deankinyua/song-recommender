@@ -22,7 +22,7 @@ defmodule SongRecommender.Songs.Song do
     field :popularity, :integer
     field :released, :integer
 
-    embeds_one :artist, Artist, defaults_to_struct: true
+    embeds_one :artist, Artist, defaults_to_struct: true, on_replace: :update
     embeds_one :genre, Genre
   end
 
