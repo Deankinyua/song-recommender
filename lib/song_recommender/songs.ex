@@ -185,4 +185,10 @@ defmodule SongRecommender.Songs do
     |> Song.changeset(total_song_attrs)
     |> apply_action!(:update)
   end
+
+  def populate_song(%Song{} = song, attrs) do
+    song
+    |> Song.changeset(attrs)
+    |> apply_action!(:update)
+  end
 end
