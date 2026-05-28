@@ -31,3 +31,19 @@
 .song:hover .song-play-icon {
   display: block;
 }
+
+@keyframes move-title {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-30ch);
+  }
+}
+
+.translate-song-title {
+  text-wrap: nowrap;
+  animation: move-title 40s infinite ease;
+  animation-delay: 1s;
+}

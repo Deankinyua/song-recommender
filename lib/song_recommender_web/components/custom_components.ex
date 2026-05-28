@@ -429,10 +429,10 @@ defmodule SongRecommenderWeb.CustomComponents do
             <.song_play_icon song={@song} />
           </section>
         </section>
-        <section class="w-[3rem] h-[3rem] rounded-md overflow-hidden">
-          <img src={path_to_image(@image)} alt="song image" class="object-cover" />
+        <section class="w-[3rem] h-[3rem] shrink-0 rounded-md overflow-hidden">
+          <img src={path_to_image(@image)} alt="song image" class="w-full h-full object-cover" />
         </section>
-        <section class="flex flex-col">
+        <section class="flex-1 flex flex-col">
           <p>{@song.name}</p>
           <p class="text-xs">{@song.artist.name}</p>
         </section>
@@ -462,17 +462,29 @@ defmodule SongRecommenderWeb.CustomComponents do
     <section>
       <div
         :if={@song.id}
-        class="w-[90%] mx-auto flex items-center gap-4 my-4"
+        class="w-[92%] mx-auto flex justify-between gap-2 items-center my-4"
       >
-        <section class="w-[4rem] h-[4rem] rounded-md overflow-hidden">
+        <section class="w-[3.5rem] h-[3.5rem] rounded-md shrink-0 overflow-hidden">
           <img
             src={artist_image(@artist_image)}
             alt="artist image"
             class="w-full h-full object-cover"
           />
         </section>
-        <section class="flex flex-col gap-1">
-          <div class="montserrat-bold text-sm">{@song.name}</div>
+        <section class="max-w-[75%] grow-1 flex flex-col gap-1 min-w-0 overflow-hidden">
+          <.link
+            id={"song-title-#{@song.id}"}
+            href={"https://open.spotify.com/track/#{@song.id}"}
+            target="_blank"
+            referrerpolicy="noreferrer"
+            class={[
+              "montserrat-bold text-sm underline",
+              should_translate_title?(@song.name) && "translate-song-title"
+            ]}
+          >
+            {@song.name}
+          </.link>
+
           <div class="text-xs">{@song.artist.name}</div>
         </section>
       </div>
@@ -494,6 +506,10 @@ defmodule SongRecommenderWeb.CustomComponents do
     |> JS.toggle(to: "#follow-#{id}")
     |> JS.toggle(to: "#unfollow-#{id}")
   end
+
+  defp should_translate_title?(<<_title::binary-size(35), _rest::binary>>), do: true
+
+  defp should_translate_title?(_title), do: false
 
   defp maybe_trim_song_title(<<title::binary-size(40), _rest::binary>>),
     do: title <> "..."
