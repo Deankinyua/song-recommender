@@ -34,11 +34,10 @@ defmodule SongRecommender.Artists do
   """
 
   @spec set_artist_following_status(song(), username()) :: song()
-  def set_artist_following_status(song, username) do
-    artist_name = song.artist.name
-    following_artist? = check_following_status(username, artist_name)
-    artist = %{song.artist | following: following_artist?}
-    %{song | artist: artist}
+  def set_artist_following_status(%{artist: artist} = song, username) do
+    following_artist? = check_following_status(username, artist.name)
+    updated_artist = Map.replace!(artist, :following, following_artist?)
+    Map.replace!(song, :artist, updated_artist)
   end
 
   @doc """

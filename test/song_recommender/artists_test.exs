@@ -31,4 +31,17 @@ defmodule SongRecommender.ArtistsTest do
       assert followed_artists == []
     end
   end
+
+  describe "check_following_status/2" do
+    setup [:create_sample_artists]
+
+    test "returns true if a user follows a particular artist", %{user: user} do
+      _result = Artists.follow_artist(user.name, "Drake")
+      assert Artists.check_following_status(user.name, "Drake") == true
+    end
+
+    test "returns false if a user does not follow a particular artist", %{user: user} do
+      assert Artists.check_following_status(user.name, "Drake") == false
+    end
+  end
 end
