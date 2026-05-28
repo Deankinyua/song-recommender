@@ -18,7 +18,7 @@ defmodule SongRecommender.Songs.Song do
   embedded_schema do
     field :duration_ms, :integer
     field :id, :string
-    field :name, :string, default: ""
+    field :name, :string
     field :popularity, :integer
     field :released, :integer
 
