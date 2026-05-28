@@ -3,14 +3,16 @@ defmodule SongRecommender.Accounts do
   Simple user accounts backed by Neo4j
   """
 
+  import Ecto.Changeset, only: [apply_action: 2, apply_action!: 2]
+
   alias SongRecommender.Accounts.User
 
   @type attrs :: map()
   @type bolt_response :: Boltx.Response.t()
   @type changeset :: Ecto.Changeset.t()
-  @type name :: String.t()
   @type token :: binary()
   @type user :: User.t()
+  @type username :: String.t()
 
   @rand_size 32
 
@@ -31,9 +33,9 @@ defmodule SongRecommender.Accounts do
     if changeset.valid? do
       %{name: username} = changeset.changes
 
-      %{"user" => %{"name" => name}} = create_user(username)
+      %{"user" => _user} = create_user(username)
 
-      {:ok, %User{name: name}}
+      apply_action(changeset, :update)
     else
       {:error, changeset}
     end
@@ -44,7 +46,7 @@ defmodule SongRecommender.Accounts do
     |> Boltx.query!(
       """
       MERGE (u:User {name: $name})
-      RETURN u { .name } as user
+      RETURN u { .* } as user
       """,
       %{name: name}
     )
@@ -61,14 +63,16 @@ defmodule SongRecommender.Accounts do
 
   """
 
-  @spec get_user!(name()) :: user() | nil
+  @spec get_user!(username()) :: user() | nil
   def get_user!(name) do
     case get_user_by_name(name) do
       nil ->
         nil
 
-      %{"user" => %{"name" => name}} ->
-        %User{name: name}
+      %{"user" => attrs} ->
+        %User{}
+        |> User.changeset(attrs)
+        |> apply_action!(:update)
     end
   end
 
@@ -77,7 +81,7 @@ defmodule SongRecommender.Accounts do
     |> Boltx.query!(
       """
       MATCH (u:User {name: $name})
-      RETURN u { .name} as user
+      RETURN u { .*} as user
       """,
       %{name: name}
     )
@@ -103,7 +107,7 @@ defmodule SongRecommender.Accounts do
   Generates a session token.
   """
 
-  @spec generate_user_session_token(name()) :: token()
+  @spec generate_user_session_token(username()) :: token()
   def generate_user_session_token(username) do
     token = :crypto.strong_rand_bytes(@rand_size)
     store_token(username, token)
@@ -124,21 +128,17 @@ defmodule SongRecommender.Accounts do
   @doc """
   Gets the user by the session token. Ensures the token has not expired.
   """
-  @spec get_user_by_session_token(name()) :: user() | nil
-  def get_user_by_session_token(token) do
-    case get_user_by_token(token) do
-      nil -> nil
-      {:ok, user} -> user
-    end
-  end
 
-  defp get_user_by_token(token) do
+  @spec get_user_by_session_token(username()) :: user() | nil
+  def get_user_by_session_token(token) do
     case user_by_token(token) do
       nil ->
         nil
 
-      %{"user" => %{"name" => name}} ->
-        {:ok, %User{name: name}}
+      %{"user" => attrs} ->
+        %User{}
+        |> User.changeset(attrs)
+        |> apply_action!(:update)
     end
   end
 
@@ -149,7 +149,7 @@ defmodule SongRecommender.Accounts do
       MATCH (u:User)
       WHERE u.token = $token AND
       u.tokenInsertedAt >= datetime() - duration({days: 60})
-      RETURN u { .name } as user
+      RETURN u { .* } as user
       """,
       %{token: token}
     )
