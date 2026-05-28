@@ -3,8 +3,9 @@ defmodule SongRecommender.Search do
   Utilities to deal with search
   """
 
+  import Ecto.Changeset, only: [apply_action!: 2]
+
   alias SongRecommender.Artists.Artist
-  alias SongRecommender.Genres.Genre
   alias SongRecommender.Songs.Song
 
   @type artist :: Artist.t()
@@ -28,11 +29,26 @@ defmodule SongRecommender.Search do
         CALL (*) {
           WHEN a IS NULL THEN {
             WITH EXISTS { (u)-[:FOLLOWS]->(n) } AS following
-            RETURN n {.name, .monthlyListeners, following: following, artistName: NULL, popularity: NULL} AS searchItem
+            RETURN n {
+                     .*,
+                     following: following,
+                     id: randomUUID(),
+                     monthly_listeners: n.monthlyListeners,
+                     artistName: NULL,
+                     popularity: NULL
+                     }
+                     AS searchItem
           }
           ELSE {
             MATCH (n)-[:BELONGS_TO]->(g:Genre)
-            RETURN n {.name, .id, .popularity, .durationMs, artistMonthlyListeners: a.monthlyListeners, artistName: a.name, genre: g.name, monthlyListeners: NULL} AS searchItem
+            RETURN n {
+                     .*,
+                     duration_ms: n.durationMs,
+                     artist: a {.*, id: randomUUID(), monthly_listeners: a.monthlyListeners},
+                     genre: g {.*},
+                     monthlyListeners: NULL
+                     }
+                     AS searchItem
           }
         }
         RETURN searchItem
@@ -49,39 +65,15 @@ defmodule SongRecommender.Search do
     end
   end
 
-  defp process_search_item(%{
-         "searchItem" => %{
-           "artistName" => nil,
-           "following" => following,
-           "name" => artist_name
-         }
-       }),
-       do: %Artist{id: Ecto.UUID.generate(), following: following, name: artist_name}
+  defp process_search_item(%{"searchItem" => %{"artistName" => nil} = attrs}) do
+    %Artist{}
+    |> Artist.changeset(attrs)
+    |> apply_action!(:update)
+  end
 
-  defp process_search_item(%{
-         "searchItem" => %{
-           "artistMonthlyListeners" => artist_monthly_listeners,
-           "artistName" => artist_name,
-           "durationMs" => song_duration,
-           "genre" => genre,
-           "id" => song_id,
-           "name" => song_name
-         }
-       }) do
-    artist = %Artist{
-      id: Ecto.UUID.generate(),
-      name: artist_name,
-      listeners: artist_monthly_listeners
-    }
-
-    genre = %Genre{name: genre}
-
-    %Song{
-      artist: artist,
-      duration_ms: song_duration,
-      genre: genre,
-      id: song_id,
-      name: song_name
-    }
+  defp process_search_item(%{"searchItem" => attrs}) do
+    %Song{}
+    |> Song.changeset(attrs)
+    |> apply_action!(:update)
   end
 end

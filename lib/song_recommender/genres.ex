@@ -4,8 +4,8 @@ defmodule SongRecommender.Genres do
   """
 
   @type bolt_response :: Boltx.Response.t()
-  @type genre :: String.t()
-  @type genre_and_listening_time :: [genre() | listening_time()]
+  @type genre_name :: String.t()
+  @type genre_and_listening_time :: [genre_name() | listening_time()]
   @type listening_time :: integer()
   @type username :: String.t()
 
@@ -20,7 +20,7 @@ defmodule SongRecommender.Genres do
 
   """
 
-  @spec get_user_genres(username()) :: [genre()]
+  @spec get_user_genres(username()) :: [genre_name()]
   def get_user_genres(username) do
     %Boltx.Response{results: genres} =
       Boltx.query!(
@@ -53,7 +53,7 @@ defmodule SongRecommender.Genres do
 
   """
 
-  @spec prefer_genres(username(), [genre()]) :: [genre()]
+  @spec prefer_genres(username(), [genre_name()]) :: [genre_name()]
   def prefer_genres(username, genres) do
     Bolt
     |> Boltx.query!(

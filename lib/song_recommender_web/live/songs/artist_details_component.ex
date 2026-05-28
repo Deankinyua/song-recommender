@@ -22,7 +22,7 @@ defmodule SongRecommenderWeb.Songs.ArtistDetailsComponent do
         <div class="px-2 montserrat-bold">{@song.artist.name}</div>
         <div class="flex gap-2 justify-between px-2 text-sm items-center">
           <section>
-            {@song.artist.listeners} monthly listeners
+            {@song.artist.monthly_listeners} monthly listeners
           </section>
           <section>
             <button

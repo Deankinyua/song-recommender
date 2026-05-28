@@ -323,7 +323,7 @@ defmodule SongRecommenderWeb.CustomComponents do
         JS.push("play_or_pause_song",
           value: %{
             artist: @song.artist.name,
-            artist_monthly_listeners: @song.artist.listeners,
+            artist_monthly_listeners: @song.artist.monthly_listeners,
             duration: @song.duration_ms,
             genre: @song.genre.name,
             id: @song.id,
