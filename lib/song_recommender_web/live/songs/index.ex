@@ -138,37 +138,37 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def handle_event(
         "play_or_pause_song",
         %{
-          "artist" => artist_name,
-          "artist_monthly_listeners" => artist_listeners,
-          "duration" => duration_ms,
-          "genre" => genre,
-          "id" => id,
-          "song_name" => song_name
-        },
+          "artist_id" => artist_id,
+          "artist_monthly_listeners" => artist_monthly_listeners,
+          "artist_name" => artist_name,
+          "genre_name" => genre_name,
+          "id" => song_id
+        } = params,
         %{assigns: %{currently_playing_song: current_song, current_user: user}} = socket
       ) do
-    case id == current_song.id do
+    case song_id == current_song.id do
       true ->
         {:noreply, push_event(socket, "play_or_pause_song", %{})}
 
       false ->
         following_artist? = Artists.check_following_status(user.name, artist_name)
 
-        artist = %Artist{
-          following: following_artist?,
-          name: artist_name,
-          listeners: artist_listeners
+        artist_attrs = %{
+          "following" => following_artist?,
+          "id" => artist_id,
+          "monthly_listeners" => artist_monthly_listeners,
+          "name" => artist_name
         }
 
-        genre = %Genre{name: genre}
-
-        new_song = %Song{
-          artist: artist,
-          duration_ms: duration_ms,
-          genre: genre,
-          id: id,
-          name: song_name
+        genre_attrs = %{
+          "name" => genre_name
         }
+
+        new_song =
+          params
+          |> Map.put("artist", artist_attrs)
+          |> Map.put("genre", genre_attrs)
+          |> form_current_song()
 
         song_player_data = return_song_player_data(new_song, true)
 
@@ -321,6 +321,8 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     image_num = :rand.uniform(@no_playing_song_images)
     assign(socket, :currently_playing_artist_image, image_num)
   end
+
+  defp form_current_song(song_attrs), do: Songs.populate_song(%Song{}, song_attrs)
 
   defp engine_name(username), do: "#{username}_recommendation_engine"
 

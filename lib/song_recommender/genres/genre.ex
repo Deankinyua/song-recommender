@@ -5,9 +5,24 @@ defmodule SongRecommender.Genres.Genre do
 
   use Ecto.Schema
 
+  import Ecto.Changeset
+
+  @valid_genres Application.compile_env!(:song_recommender, :genres)
+
+  @type attrs :: map()
+  @type changeset :: Ecto.Changeset.t()
   @type t :: %__MODULE__{}
 
+  @primary_key false
   embedded_schema do
     field :name, :string
+  end
+
+  @spec changeset(t(), attrs()) :: changeset()
+  def changeset(user, attrs) do
+    user
+    |> cast(attrs, [:name])
+    |> validate_required([:name])
+    |> validate_inclusion(:name, @valid_genres)
   end
 end

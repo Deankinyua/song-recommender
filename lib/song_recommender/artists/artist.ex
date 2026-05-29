@@ -5,11 +5,24 @@ defmodule SongRecommender.Artists.Artist do
 
   use Ecto.Schema
 
+  import Ecto.Changeset
+
+  @type attrs :: map()
+  @type changeset :: Ecto.Changeset.t()
   @type t :: %__MODULE__{}
 
+  @primary_key false
   embedded_schema do
     field :following, :boolean
+    field :id, :string
+    field :monthly_listeners, :integer
     field :name, :string
-    field :listeners, :integer
+  end
+
+  @spec changeset(t(), attrs()) :: changeset()
+  def changeset(user, attrs) do
+    user
+    |> cast(attrs, [:following, :id, :monthly_listeners, :name])
+    |> validate_required([:name, :id])
   end
 end

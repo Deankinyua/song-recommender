@@ -322,12 +322,13 @@ defmodule SongRecommenderWeb.CustomComponents do
       phx-click={
         JS.push("play_or_pause_song",
           value: %{
-            artist: @song.artist.name,
-            artist_monthly_listeners: @song.artist.listeners,
-            duration: @song.duration_ms,
-            genre: @song.genre.name,
+            artist_id: @song.artist.id,
+            artist_monthly_listeners: @song.artist.monthly_listeners,
+            artist_name: @song.artist.name,
+            duration_ms: @song.duration_ms,
+            genre_name: @song.genre.name,
             id: @song.id,
-            song_name: @song.name
+            name: @song.name
           }
         )
       }

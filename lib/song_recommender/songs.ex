@@ -3,12 +3,13 @@ defmodule SongRecommender.Songs do
   Tracks how users listen to songs
   """
 
-  alias SongRecommender.Artists.Artist
-  alias SongRecommender.Genres.Genre
+  import Ecto.Changeset, only: [apply_action!: 2]
+
   alias SongRecommender.Songs.Song
 
+  @type attrs :: map()
   @type bolt_response :: Boltx.Response.t()
-  @type genre :: String.t()
+  @type genre_name :: String.t()
   @type listening_duration :: integer()
   @type song :: Song.t()
   @type song_id :: String.t()
@@ -18,28 +19,17 @@ defmodule SongRecommender.Songs do
   @doc """
   Returns a song with its details
   """
+
   @spec get_song!(song_id()) :: song() | nil
   def get_song!(song_id) do
     case song_by_id(song_id) do
       nil ->
         nil
 
-      %{
-        "song" => %{
-          "durationMs" => duration_ms,
-          "id" => id,
-          "name" => name,
-          "popularity" => popularity,
-          "released" => released
-        }
-      } ->
-        %Song{
-          duration_ms: duration_ms,
-          id: id,
-          name: name,
-          popularity: popularity,
-          released: released
-        }
+      %{"song" => song_attrs} ->
+        %Song{}
+        |> Song.changeset(song_attrs)
+        |> apply_action!(:update)
     end
   end
 
@@ -48,7 +38,7 @@ defmodule SongRecommender.Songs do
     |> Boltx.query!(
       """
       MATCH (s:Song {id: $song_id})
-      RETURN s { .* } as song
+      RETURN s { .*, duration_ms: s.durationMs } as song
       """,
       %{song_id: song_id}
     )
@@ -58,6 +48,7 @@ defmodule SongRecommender.Songs do
   @doc """
   Returns the duration a user has listened to a particualar song
   """
+
   @spec get_song_listening_time(song_id(), username()) :: listening_duration()
   def get_song_listening_time(song_id, username) do
     case get_listening_time(song_id, username) do
@@ -90,7 +81,8 @@ defmodule SongRecommender.Songs do
   than 3 times. Then, it will update the durationPlayedMs property
   each time setting it to the former value + the song duration.
   """
-  @spec listen_from_genre(username(), genre()) :: bolt_response()
+
+  @spec listen_from_genre(username(), genre_name()) :: bolt_response()
   def listen_from_genre(username, genre) do
     Boltx.query!(
       Bolt,
@@ -129,6 +121,7 @@ defmodule SongRecommender.Songs do
   @doc """
   Gets songs belonging to some genres and some sang by some artists
   """
+
   @spec get_songs_with_genre_based_strategy(taste_profile()) :: [song()]
   def get_songs_with_genre_based_strategy(%{artists: artists, genres: genres} = _taste_profile) do
     %{nodes: artist_names, limit: artists_song_limit} = artists
@@ -140,15 +133,15 @@ defmodule SongRecommender.Songs do
         """
         CALL () {
 
-          UNWIND $genres AS genre
-          WITH genre
+          UNWIND $genres AS genreName
+          WITH genreName
           CALL (*) {
-            MATCH (a:Artist)-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre {name: genre})
-            RETURN s AS song, a AS artist, g.name AS genreName
+            MATCH (a:Artist)-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre {name: genreName})
+            RETURN s AS song, a AS artist, g AS genre
             ORDER BY s.popularity DESC
             LIMIT $genres_song_limit
           }
-          RETURN song, artist, genreName
+          RETURN song, artist, genre
 
         UNION
 
@@ -156,17 +149,17 @@ defmodule SongRecommender.Songs do
           WITH artistName
           CALL (*) {
             MATCH (a:Artist {name: artistName})-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre)
-            RETURN s AS song, a AS artist, g.name AS genreName
+            RETURN s AS song, a AS artist, g AS genre
             ORDER BY s.popularity DESC
             LIMIT $artists_song_limit
           }
-          RETURN song, artist, genreName
+          RETURN song, artist, genre
 
         }
 
-        RETURN song { .id, .name, .durationMs, .released },
-               artist { .name, .monthlyListeners },
-               genreName
+        RETURN song { .*, duration_ms: song.durationMs },
+               artist { .*, id: randomUUID(), monthly_listeners: artist.monthlyListeners },
+               genre { .* }
         """,
         %{
           artists: artist_names,
@@ -180,28 +173,26 @@ defmodule SongRecommender.Songs do
   end
 
   defp process_song_data(%{
-         "song" => %{
-           "durationMs" => duration_ms,
-           "id" => song_id,
-           "name" => song_name,
-           "released" => released
-         },
-         "artist" => %{
-           "monthlyListeners" => monthly_listeners,
-           "name" => artist_name
-         },
-         "genreName" => genre
+         "song" => song_attrs,
+         "artist" => artist_attrs,
+         "genre" => genre_attrs
        }) do
-    genre = %Genre{name: genre}
-    artist = %Artist{id: Ecto.UUID.generate(), name: artist_name, listeners: monthly_listeners}
+    total_song_attrs =
+      song_attrs
+      |> Map.put("artist", artist_attrs)
+      |> Map.put("genre", genre_attrs)
 
-    %Song{
-      artist: artist,
-      duration_ms: duration_ms,
-      genre: genre,
-      id: song_id,
-      name: song_name,
-      released: released
-    }
+    populate_song(%Song{}, total_song_attrs)
+  end
+
+  @doc """
+  Updates a song struct with new attributes
+  """
+
+  @spec populate_song(song(), attrs()) :: song()
+  def populate_song(%Song{} = song, attrs) do
+    song
+    |> Song.changeset(attrs)
+    |> apply_action!(:update)
   end
 end
