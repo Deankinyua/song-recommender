@@ -5,7 +5,8 @@ let SongPlayerHooks = {};
 
 SongPlayerHooks.SongPlayer = {
   mounted() {
-    const playBtn = this.el;
+    let playerHook = this;
+    const playBtn = playerHook.el;
     let playBtnId = playBtn.id;
     const playerPolygon1 = document.getElementById(`polygon-1-${playBtnId}`);
     const playerPolygon2 = document.getElementById(`polygon-2-${playBtnId}`);
@@ -19,7 +20,7 @@ SongPlayerHooks.SongPlayer = {
     let player = null;
     let lastPlayedTime = null;
 
-    this.handleEvent(
+    playerHook.handleEvent(
       "maybe_play_song",
       async ({
         current_song_duration,
@@ -29,8 +30,8 @@ SongPlayerHooks.SongPlayer = {
       }) => {
         const { songIconPolygon1, songIconPolygon2 } =
           return_song_icon_polygons(current_song_id);
-        this.currentSongIconPolygon1 = songIconPolygon1;
-        this.currentSongIconPolygon2 = songIconPolygon2;
+        playerHook.currentSongIconPolygon1 = songIconPolygon1;
+        playerHook.currentSongIconPolygon2 = songIconPolygon2;
 
         player = {
           songDuration: current_song_duration,
@@ -67,25 +68,28 @@ SongPlayerHooks.SongPlayer = {
       },
     );
 
-    this.handleEvent("pause_previous_song", async ({ previous_song_id }) => {
-      const { songIconPolygon1, songIconPolygon2 } =
-        return_song_icon_polygons(previous_song_id);
+    playerHook.handleEvent(
+      "pause_previous_song",
+      async ({ previous_song_id }) => {
+        const { songIconPolygon1, songIconPolygon2 } =
+          return_song_icon_polygons(previous_song_id);
 
-      if (!isPaused) {
-        await animatePausePlayButton(
-          isPaused,
-          songIconPolygon1,
-          songIconPolygon2,
-        );
-      }
-    });
+        if (!isPaused) {
+          await animatePausePlayButton(
+            isPaused,
+            songIconPolygon1,
+            songIconPolygon2,
+          );
+        }
+      },
+    );
 
-    this.handleEvent("play_or_pause_song", async () => {
+    playerHook.handleEvent("play_or_pause_song", async () => {
       const [, newPausedState] = await Promise.all([
         animatePausePlayButton(
           isPaused,
-          this.currentSongIconPolygon1,
-          this.currentSongIconPolygon2,
+          playerHook.currentSongIconPolygon1,
+          playerHook.currentSongIconPolygon2,
         ),
         animatePausePlayButton(isPaused, playerPolygon1, playerPolygon2),
       ]);
@@ -119,8 +123,8 @@ SongPlayerHooks.SongPlayer = {
         if (player.currentTime >= player.songDuration) {
           player.currentTime = player.songDuration;
           // At this point we can send an event to the server
-          console.log("next song please");
           player.isPlaying = false;
+          playerHook.pushEvent("play_next_song", {});
         }
       }
 
@@ -137,8 +141,8 @@ SongPlayerHooks.SongPlayer = {
       const [, newPausedState] = await Promise.all([
         animatePausePlayButton(
           isPaused,
-          this.currentSongIconPolygon1,
-          this.currentSongIconPolygon2,
+          playerHook.currentSongIconPolygon1,
+          playerHook.currentSongIconPolygon2,
         ),
         animatePausePlayButton(isPaused, playerPolygon1, playerPolygon2),
       ]);
