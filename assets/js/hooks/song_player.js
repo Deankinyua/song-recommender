@@ -74,12 +74,14 @@ SongPlayerHooks.SongPlayer = {
         const { songIconPolygon1, songIconPolygon2 } =
           return_song_icon_polygons(previous_song_id);
 
-        if (!isPaused) {
-          await animatePausePlayButton(
-            isPaused,
-            songIconPolygon1,
-            songIconPolygon2,
-          );
+        if (songIconPolygon1) {
+          !isPaused
+            ? await animatePausePlayButton(
+                isPaused,
+                songIconPolygon1,
+                songIconPolygon2,
+              )
+            : null;
         }
       },
     );

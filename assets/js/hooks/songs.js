@@ -17,13 +17,8 @@ SongsHooks.Songs = {
 
       let nextSongBtn = songPlayButtons[0];
 
-      nextSongBtn.dispatchEvent(
-        new MouseEvent("click", {
-          bubbles: true,
-          cancelable: true,
-          view: window,
-        }),
-      );
+      // cook up a synthetic event
+      nextSongBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
   },
 };
