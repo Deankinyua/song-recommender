@@ -3,9 +3,9 @@ defmodule SongRecommender.Search do
   Utilities to deal with search
   """
 
-  import Ecto.Changeset, only: [apply_action!: 2]
-
+  alias SongRecommender.Artists
   alias SongRecommender.Artists.Artist
+  alias SongRecommender.Songs
   alias SongRecommender.Songs.Song
 
   @type artist :: Artist.t()
@@ -66,15 +66,8 @@ defmodule SongRecommender.Search do
     end
   end
 
-  defp process_search_item(%{"searchItem" => %{"artistName" => nil} = attrs}) do
-    %Artist{}
-    |> Artist.changeset(attrs)
-    |> apply_action!(:update)
-  end
+  defp process_search_item(%{"searchItem" => %{"artistName" => nil} = attrs}),
+    do: Artists.populate_artist(%Artist{}, attrs)
 
-  defp process_search_item(%{"searchItem" => attrs}) do
-    %Song{}
-    |> Song.changeset(attrs)
-    |> apply_action!(:update)
-  end
+  defp process_search_item(%{"searchItem" => attrs}), do: Songs.populate_song(%Song{}, attrs)
 end

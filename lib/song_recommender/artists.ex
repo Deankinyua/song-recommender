@@ -3,9 +3,14 @@ defmodule SongRecommender.Artists do
   Utilities to manage artists
   """
 
+  import Ecto.Changeset, only: [apply_action!: 2]
+
+  alias SongRecommender.Artists.Artist
   alias SongRecommender.Songs.Song
 
+  @type artist :: Artist.t()
   @type artist_name :: String.t()
+  @type attrs :: map()
   @type bolt_response :: Boltx.Response.t()
   @type song :: Song.t()
   @type username :: String.t()
@@ -125,6 +130,17 @@ defmodule SongRecommender.Artists do
       |> Enum.shuffle()
       |> Enum.take(5)
     end
+  end
+
+  @doc """
+  Updates an artist struct with new attributes
+  """
+
+  @spec populate_artist(artist(), attrs()) :: artist()
+  def populate_artist(%Artist{} = artist, attrs) do
+    artist
+    |> Artist.changeset(attrs)
+    |> apply_action!(:update)
   end
 
   defp process_artist(%{"artist" => name}), do: name
