@@ -84,7 +84,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
         search_items_empty? = Enum.empty?(search_items)
 
         search_items_with_images =
-          if search_items_empty?, do: [], else: maybe_add_song_numbers(search_items, :search_item)
+          if search_items_empty?, do: [], else: add_image_numbers(search_items)
 
         {:noreply,
          socket
@@ -235,9 +235,9 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
     song_player_data = return_song_player_data(initial_song, false)
 
-    processed_songs = maybe_add_song_numbers(songs, :song, count)
+    processed_songs = add_image_numbers(songs)
 
-    {_last_song, _last_song_image, new_song_count} = Enum.at(processed_songs, -1)
+    new_song_count = count + Enum.count(processed_songs)
 
     {:noreply,
      socket
@@ -245,6 +245,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
      |> assign(:currently_playing_song, initial_song)
      |> assign(:song_count, new_song_count)
      |> push_event("maybe_play_song", song_player_data)
+     |> push_event("set_song_numbers", %{})
      |> stream(:songs, processed_songs, reset: true)}
   end
 
@@ -259,34 +260,15 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     }
   end
 
-  defp maybe_add_song_numbers(items, item_type, current_song_count \\ 0)
+  defp add_image_numbers(items) do
+    images = return_thumbnails(items)
 
-  defp maybe_add_song_numbers(search_items, :search_item, _current_song_count) do
-    images = return_thumbnails(search_items)
-
-    search_items
+    items
     |> Enum.with_index()
-    |> Enum.reduce([], fn {search_item, index}, acc ->
+    |> Enum.reduce([], fn {item, index}, acc ->
       image_num = Enum.at(images, index)
 
-      [{search_item, image_num} | acc]
-    end)
-    |> Enum.reverse()
-  end
-
-  defp maybe_add_song_numbers(songs, :song, current_song_count) do
-    images = return_thumbnails(songs)
-
-    starting_number = current_song_count + 1
-
-    songs
-    |> Enum.with_index()
-    |> Enum.reduce([], fn {song, index}, acc ->
-      image_num = Enum.at(images, index)
-
-      song_number = starting_number + index
-
-      [{song, image_num, song_number} | acc]
+      [{item, image_num} | acc]
     end)
     |> Enum.reverse()
   end

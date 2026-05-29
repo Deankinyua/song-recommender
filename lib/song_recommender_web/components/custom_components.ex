@@ -417,7 +417,6 @@ defmodule SongRecommenderWeb.CustomComponents do
 
   attr :image, :integer, required: true
   attr :song, Song, required: true
-  attr :song_number, :integer, required: true
 
   @spec song(assigns()) :: rendered()
   def song(assigns) do
@@ -425,7 +424,7 @@ defmodule SongRecommenderWeb.CustomComponents do
     <section class="song rounded-md py-2 px-4 mx-3 flex justify-between items-center hover:bg-neutral hover:cursor-pointer">
       <div class="flex items-center gap-4">
         <section class="w-[1.6rem] flex flex-col items-center">
-          <section class="song-number">{@song_number}</section>
+          <section class="song-number"></section>
           <section class="w-[20px] song-play-icon hidden">
             <.song_play_icon song={@song} />
           </section>
