@@ -7,6 +7,7 @@ defmodule SongRecommender.Songs do
 
   alias SongRecommender.Songs.Song
 
+  @type attrs :: map()
   @type bolt_response :: Boltx.Response.t()
   @type genre_name :: String.t()
   @type listening_duration :: integer()
@@ -181,11 +182,14 @@ defmodule SongRecommender.Songs do
       |> Map.put("artist", artist_attrs)
       |> Map.put("genre", genre_attrs)
 
-    %Song{}
-    |> Song.changeset(total_song_attrs)
-    |> apply_action!(:update)
+    populate_song(%Song{}, total_song_attrs)
   end
 
+  @doc """
+  Updates a song struct with new attributes
+  """
+
+  @spec populate_song(song(), attrs()) :: song()
   def populate_song(%Song{} = song, attrs) do
     song
     |> Song.changeset(attrs)
