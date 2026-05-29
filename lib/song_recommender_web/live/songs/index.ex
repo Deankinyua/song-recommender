@@ -182,6 +182,19 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   def handle_event(
+        "play_next_song",
+        _params,
+        %{assigns: %{currently_playing_song: current_song, current_user: user}} = socket
+      ) do
+    song_dom_id = "song-#{current_song.id}"
+
+    {:noreply,
+     socket
+     |> push_event("play_next_song", %{})
+     |> stream_delete_by_dom_id(:songs, song_dom_id)}
+  end
+
+  def handle_event(
         "follow_artist",
         %{"artist" => artist_name},
         %{assigns: %{current_user: user}} = socket
