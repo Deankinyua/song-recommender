@@ -319,20 +319,15 @@ defmodule SongRecommenderWeb.CustomComponents do
   def song_play_icon(assigns) do
     ~H"""
     <svg
-      phx-click={
-        JS.push("play_or_pause_song",
-          value: %{
-            artist_id: @song.artist.id,
-            artist_monthly_listeners: @song.artist.monthly_listeners,
-            artist_name: @song.artist.name,
-            duration_ms: @song.duration_ms,
-            genre_name: @song.genre.name,
-            id: @song.id,
-            name: @song.name
-          }
-        )
-      }
+      phx-hook="SongPlayIcon"
       id={@song.id}
+      data-artist_id={@song.artist.id}
+      data-artist_monthly_listeners={@song.artist.monthly_listeners}
+      data-artist_name={@song.artist.name}
+      data-duration_ms={@song.duration_ms}
+      data-duration_played={0}
+      data-genre_name={@song.genre.name}
+      data-name={@song.name}
       width="30"
       viewBox="0 0 36 36"
       fill="white"

@@ -33,11 +33,13 @@ SongPlayerHooks.SongPlayer = {
         playerHook.currentSongIconPolygon1 = songIconPolygon1;
         playerHook.currentSongIconPolygon2 = songIconPolygon2;
 
+        playerHook.currentSongPlayIcon =
+          document.getElementById(current_song_id);
+
         player = {
           songDuration: current_song_duration,
           currentTime: current_time,
           isPlaying: should_play,
-          playbackRate: 1,
         };
 
         if (should_play) {
@@ -86,22 +88,6 @@ SongPlayerHooks.SongPlayer = {
       },
     );
 
-    playerHook.handleEvent("play_or_pause_song", async () => {
-      const [, newPausedState] = await Promise.all([
-        animatePausePlayButton(
-          isPaused,
-          playerHook.currentSongIconPolygon1,
-          playerHook.currentSongIconPolygon2,
-        ),
-        animatePausePlayButton(isPaused, playerPolygon1, playerPolygon2),
-      ]);
-
-      isPaused = newPausedState;
-
-      player.isPlaying = !player.isPlaying;
-      toogleTooltip();
-    });
-
     function toogleTooltip() {
       playPauseTooltipEl.textContent = player.isPlaying ? "Pause" : "Play";
     }
@@ -120,7 +106,11 @@ SongPlayerHooks.SongPlayer = {
       lastPlayedTime = timestamp;
 
       if (player?.isPlaying) {
-        player.currentTime += delta * player.playbackRate;
+        player.currentTime += delta;
+        playerHook.currentSongPlayIcon.dataset.duration_played = Math.min(
+          player.currentTime,
+          player.songDuration,
+        );
 
         if (player.currentTime >= player.songDuration) {
           player.currentTime = player.songDuration;
