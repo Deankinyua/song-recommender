@@ -8,7 +8,7 @@
   );
 }
 
-.play-song-icon {
+.searched-song-play-icon {
   @apply absolute top-[0.6rem] left-[0.6rem] z-[50] hidden;
 }
 
@@ -20,7 +20,7 @@
   display: block;
 }
 
-.search-item:hover .play-song-icon {
+.search-item:hover .searched-song-play-icon {
   display: block;
 }
 

@@ -89,7 +89,7 @@ defmodule SongRecommenderWeb.CustomComponents do
         />
         <section
           :if={check_if_song(@item)}
-          class="play-song-icon"
+          class="searched-song-play-icon"
         >
           <.song_play_icon song={@item} />
         </section>
