@@ -75,7 +75,11 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_params(params, _url, %{assigns: %{current_user: user}} = socket) do
+  def handle_params(
+        params,
+        _url,
+        %{assigns: %{current_user: user, currently_playing_song: current_song}} = socket
+      ) do
     search_query = params["q"] || ""
 
     case search_query != "" do
@@ -91,6 +95,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
          |> assign(:empty_search?, search_items_empty?)
          |> assign(:search_query, search_query)
          |> assign(:show_recent_searches?, false)
+         |> push_event("set_current_song_id_for_search", %{current_song_id: current_song.id})
          |> stream(:search_items, search_items_with_images, reset: true)}
 
       false ->
@@ -136,54 +141,52 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   def handle_event(
-        "play_or_pause_song",
+        "play_new_song",
         %{
           "artist_id" => artist_id,
           "artist_monthly_listeners" => artist_monthly_listeners,
           "artist_name" => artist_name,
           "genre_name" => genre_name,
-          "id" => song_id
+          "previous_song_duration_played" => previous_song_duration_played
         } = params,
-        %{assigns: %{currently_playing_song: current_song, current_user: user}} = socket
+        %{assigns: %{currently_playing_song: previous_song, current_user: user}} = socket
       ) do
-    case song_id == current_song.id do
-      true ->
-        {:noreply, push_event(socket, "play_or_pause_song", %{})}
+    following_artist? = Artists.check_following_status(user.name, artist_name)
 
-      false ->
-        following_artist? = Artists.check_following_status(user.name, artist_name)
+    artist_attrs = %{
+      "following" => following_artist?,
+      "id" => artist_id,
+      "monthly_listeners" => artist_monthly_listeners,
+      "name" => artist_name
+    }
 
-        artist_attrs = %{
-          "following" => following_artist?,
-          "id" => artist_id,
-          "monthly_listeners" => artist_monthly_listeners,
-          "name" => artist_name
-        }
+    genre_attrs = %{
+      "name" => genre_name
+    }
 
-        genre_attrs = %{
-          "name" => genre_name
-        }
+    new_song =
+      params
+      |> Map.put("artist", artist_attrs)
+      |> Map.put("genre", genre_attrs)
+      |> form_current_song()
 
-        new_song =
-          params
-          |> Map.put("artist", artist_attrs)
-          |> Map.put("genre", genre_attrs)
-          |> form_current_song()
+    song_player_data = return_song_player_data(new_song, true)
 
-        song_player_data = return_song_player_data(new_song, true)
+    previous_song_dom_id = "song-#{previous_song.id}"
 
-        {:noreply,
-         socket
-         |> set_playing_song_image()
-         |> assign(:currently_playing_song, new_song)
-         |> push_event("maybe_play_song", song_player_data)
-         |> push_event("pause_previous_song", %{previous_song_id: current_song.id})}
-    end
+    {:noreply,
+     socket
+     |> set_playing_song_image()
+     |> assign(:currently_playing_song, new_song)
+     |> push_event("maybe_play_song", song_player_data)
+     |> push_event("set_current_song_id", %{current_song_id: new_song.id})
+     |> push_event("pause_previous_song", %{previous_song_id: previous_song.id})
+     |> stream_delete_by_dom_id(:songs, previous_song_dom_id)}
   end
 
   def handle_event(
         "play_next_song",
-        _params,
+        %{"duration_played" => duration_ms},
         %{assigns: %{currently_playing_song: current_song, current_user: user}} = socket
       ) do
     song_dom_id = "song-#{current_song.id}"
@@ -245,7 +248,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
      |> assign(:currently_playing_song, initial_song)
      |> assign(:song_count, new_song_count)
      |> push_event("maybe_play_song", song_player_data)
-     |> push_event("set_song_numbers", %{})
+     |> push_event("set_current_song_id", %{current_song_id: initial_song.id})
      |> stream(:songs, processed_songs, reset: true)}
   end
 

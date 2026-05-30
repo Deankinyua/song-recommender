@@ -114,9 +114,11 @@ SongPlayerHooks.SongPlayer = {
 
         if (player.currentTime >= player.songDuration) {
           player.currentTime = player.songDuration;
-          // At this point we can send an event to the server
+          // At this point we can send an event to the server to play the next song
           player.isPlaying = false;
-          playerHook.pushEvent("play_next_song", {});
+          playerHook.pushEvent("play_next_song", {
+            duration_played: player.songDuration,
+          });
         }
       }
 
