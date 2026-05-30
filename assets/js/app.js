@@ -25,6 +25,7 @@ import { LiveSocket } from "phoenix_live_view";
 import { hooks as ColocatedHooks } from "phoenix-colocated/song_recommender";
 import CartoonAnimationHooks from "./hooks/cartoon_animation.js";
 import GenrePreferencesPopupHooks from "./hooks/genre_preferences_popup.js";
+import SearchItemsHooks from "./hooks/search_items.js";
 import SongPlayerHooks from "./hooks/song_player.js";
 import SongsHooks from "./hooks/songs.js";
 import topbar from "../vendor/topbar";
@@ -33,6 +34,7 @@ let Hooks = {
   ...CartoonAnimationHooks,
   ...ColocatedHooks,
   ...GenrePreferencesPopupHooks,
+  ...SearchItemsHooks,
   ...SongPlayerHooks,
   ...SongsHooks,
 };

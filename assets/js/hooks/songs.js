@@ -2,7 +2,7 @@ let SongsHooks = {};
 
 SongsHooks.Songs = {
   mounted() {
-    let SongsHook = this;
+    let songHook = this;
 
     const setSongNumbers = () => {
       let songNumbers = document.querySelectorAll(".song-number");
@@ -12,20 +12,36 @@ SongsHooks.Songs = {
       });
     };
 
-    SongsHook.handleEvent("play_next_song", () => {
-      setSongNumbers();
-
+    const returnSongPlayButtons = () => {
       const songPlayButtons = document.querySelectorAll(
         "section.song-play-icon > svg",
       );
 
+      return songPlayButtons;
+    };
+
+    const setCurrentSongId = (current_song_id) => {
+      setSongNumbers();
+      let songPlayButtons = returnSongPlayButtons();
+      songPlayButtons.forEach((playBtn) => {
+        playBtn.dataset.current_song_id = current_song_id;
+      });
+    };
+
+    songHook.handleEvent("play_next_song", () => {
+      setSongNumbers();
+
+      const songPlayButtons = returnSongPlayButtons();
+
       let nextSongBtn = songPlayButtons[0];
 
       // cook up a synthetic event
-      nextSongBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      nextSongBtn.dispatchEvent(new MouseEvent("click", { bubbles: false }));
     });
 
-    SongsHook.handleEvent("set_song_numbers", () => setSongNumbers());
+    songHook.handleEvent("set_current_song_id", ({ current_song_id }) =>
+      setCurrentSongId(current_song_id),
+    );
   },
 };
 
