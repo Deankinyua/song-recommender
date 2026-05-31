@@ -26,6 +26,14 @@ SongPlayerHooks.SongPlayer = {
     let player = null;
     let lastPlayedTime = null;
 
+    const showCurrentlyPlayingSong = (current_song_id) => {
+      const currentSongName = document.getElementById(
+        `song-name-${current_song_id}`,
+      );
+
+      currentSongName?.classList.add("playing-song-name");
+    };
+
     playerHook.handleEvent(
       "maybe_play_song",
       async ({
@@ -41,6 +49,8 @@ SongPlayerHooks.SongPlayer = {
 
         playerHook.currentSongPlayIcon =
           document.getElementById(current_song_id);
+
+        showCurrentlyPlayingSong(current_song_id);
 
         player = {
           songDuration: current_song_duration,

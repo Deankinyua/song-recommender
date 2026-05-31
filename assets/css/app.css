@@ -171,3 +171,7 @@
 .genre-label:has(input:checked) {
   border: 1px solid var(--color-secondary);
 }
+
+.playing-song-name {
+  color: var(--color-secondary);
+}

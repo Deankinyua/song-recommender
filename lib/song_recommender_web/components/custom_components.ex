@@ -412,7 +412,7 @@ defmodule SongRecommenderWeb.CustomComponents do
           <img src={path_to_image(@image)} alt="song image" class="w-full h-full object-cover" />
         </section>
         <section class="flex-1 flex flex-col">
-          <p>{@song.name}</p>
+          <p id={"song-name-#{@song.id}"}>{@song.name}</p>
           <p class="text-xs">{@song.artist.name}</p>
         </section>
       </div>
