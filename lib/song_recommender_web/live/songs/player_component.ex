@@ -18,7 +18,7 @@ defmodule SongRecommenderWeb.Songs.PlayerComponent do
         <div class="control-icon">
           <CustomComponents.back_icon />
           <div class="top-[-1.8rem] left-[-1rem] tooltip">
-            Back
+            0:00
           </div>
         </div>
         <div id="play-icon" class="control-icon">
@@ -27,17 +27,10 @@ defmodule SongRecommenderWeb.Songs.PlayerComponent do
             Play
           </div>
         </div>
-        <div id="next-icon" class="control-icon">
+        <div class="control-icon">
           <CustomComponents.next_icon />
           <div class="top-[-1.8rem] left-[-0.4rem] tooltip">
             Next
-          </div>
-        </div>
-        <div id="skip-icon" class="control-icon">
-          <CustomComponents.skip_icon />
-
-          <div class="top-[-1.3rem] left-[-0.4rem] tooltip">
-            Skip
           </div>
         </div>
       </div>

@@ -18,10 +18,6 @@
   display: block;
 }
 
-#next-icon:hover .tooltip {
-  display: block;
-}
-
-#skip-icon:hover .tooltip {
+#next-icon:hover + .tooltip {
   display: block;
 }

@@ -1,5 +1,6 @@
 import { animatePausePlayButton } from "../helpers/play_pause_animation.js";
 import { formatTime, return_song_icon_polygons } from "../helpers/player.js";
+import { animateControlButton } from "../helpers/controls_animation.js";
 
 let SongPlayerHooks = {};
 
@@ -10,6 +11,11 @@ SongPlayerHooks.SongPlayer = {
     let playBtnId = playBtn.id;
     const playerPolygon1 = document.getElementById(`polygon-1-${playBtnId}`);
     const playerPolygon2 = document.getElementById(`polygon-2-${playBtnId}`);
+
+    const backIcon = document.getElementById("back-icon");
+    const backTargetPolygon = document.getElementById("back-polygon-2");
+    const nextIcon = document.getElementById("next-icon");
+    const nextTargetPolygon = document.getElementById("next-polygon-2");
 
     const playedTimeEl = document.getElementById("song-played-time");
     const songProgressEl = document.getElementById("song-progress");
@@ -145,6 +151,18 @@ SongPlayerHooks.SongPlayer = {
 
       player.isPlaying = !player.isPlaying;
       toogleTooltip();
+    });
+
+    backIcon.addEventListener("click", () => {
+      player.currentTime = 0;
+      animateControlButton("back", true, backTargetPolygon);
+    });
+
+    nextIcon.addEventListener("click", () => {
+      playerHook.pushEvent("play_next_song", {
+        duration_played: player.songDuration,
+      });
+      animateControlButton("next", true, nextTargetPolygon);
     });
 
     requestAnimationFrame(updateSongPlayedTime);
