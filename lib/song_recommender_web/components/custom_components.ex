@@ -356,7 +356,7 @@ defmodule SongRecommenderWeb.CustomComponents do
         y="120"
         text-anchor="middle"
         font-size="14"
-        fill="white"
+        fill="#5df8d8"
       >
         <tspan x="210" dy="0">
           I see that you listen

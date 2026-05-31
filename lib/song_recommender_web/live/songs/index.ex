@@ -198,6 +198,20 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   def handle_event(
+        "change_genre_preferences",
+        _params,
+        %{assigns: %{current_user: user}} = socket
+      ) do
+    genres = Genres.get_user_genres(user.name)
+
+    {:noreply,
+     socket
+     |> assign(:capture_user_preferences?, true)
+     |> assign(:genres, genres)
+     |> push_event("maybe_pause_song", %{})}
+  end
+
+  def handle_event(
         "follow_artist",
         %{"artist" => artist_name},
         %{assigns: %{current_user: user}} = socket

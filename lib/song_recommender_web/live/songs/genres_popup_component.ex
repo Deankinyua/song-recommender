@@ -57,6 +57,7 @@ defmodule SongRecommenderWeb.Songs.GenresPopupComponent do
                   hide_modal("capture-user-preferences-modal")
                   |> JS.dispatch("hide_genre_preferences_popup", to: "#genre-preferences-popup")
                   |> JS.push("maybe_refetch_recommended_songs")
+                  |> JS.push("reset_submitted_state", target: @myself)
                 }
                 class="btn btn-primary h-[2rem] !rounded-full"
               >
@@ -102,6 +103,9 @@ defmodule SongRecommenderWeb.Songs.GenresPopupComponent do
          |> assign(:submitted?, valid_genres?)}
     end
   end
+
+  def handle_event("reset_submitted_state", _params, socket),
+    do: {:noreply, assign(socket, :submitted?, false)}
 
   defp maybe_prefer_some_genres(true, user, genres), do: Genres.prefer_genres(user.name, genres)
 

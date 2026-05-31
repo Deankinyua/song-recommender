@@ -64,12 +64,14 @@ defmodule SongRecommenderWeb.Layouts do
           </li>
 
           <li>
-            <.link
-              patch={~p"/"}
+            <div
+              phx-click={
+                JS.push("change_genre_preferences") |> show_modal("capture-user-preferences-modal")
+              }
               class="btn btn-ghost flex items-center gap-2"
             >
-              <p>Your Favourite Artists</p>
-            </.link>
+              <p>Change Your Preferences</p>
+            </div>
           </li>
 
           <li>
