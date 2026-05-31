@@ -160,7 +160,7 @@ SongPlayerHooks.SongPlayer = {
     );
 
     playerHook.handleEvent("maybe_pause_song", async () => {
-      if (player.isPlaying) await animatePlayerAndSongIcons();
+      if (player?.isPlaying) await animatePlayerAndSongIcons();
     });
 
     songProgressEl.addEventListener("input", (e) => {

@@ -81,7 +81,8 @@ defmodule SongRecommenderWeb.CoreComponents do
             <.focus_wrap
               id={"#{@id}-container"}
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
-              phx-key="escape"
+              phx-key={modal_close_key(@show)}
+              phx-click-away={click_away(@show, @id)}
               class="max-w-[42rem] mx-auto shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-xl bg-base-300 py-4 px-6 shadow-lg ring-1 transition"
             >
               <div id={"#{@id}-content"}>
@@ -94,6 +95,12 @@ defmodule SongRecommenderWeb.CoreComponents do
     </div>
     """
   end
+
+  defp modal_close_key(cannot_close_by_key?) when cannot_close_by_key?, do: "nil"
+  defp modal_close_key(_cannot_close_by_key?), do: "escape"
+
+  defp click_away(cannot_click_away?, _id) when cannot_click_away?, do: JS.dispatch("null")
+  defp click_away(_cannot_click_away?, id), do: JS.exec("data-cancel", to: "##{id}")
 
   def show_modal(js \\ %JS{}, id) when is_binary(id) do
     js

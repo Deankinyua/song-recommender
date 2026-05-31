@@ -137,7 +137,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           :ok
       end
 
-    {:noreply, socket}
+    {:noreply, assign(socket, :capture_user_preferences?, false)}
   end
 
   def handle_event(
@@ -206,7 +206,6 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
     {:noreply,
      socket
-     |> assign(:capture_user_preferences?, true)
      |> assign(:genres, genres)
      |> push_event("maybe_pause_song", %{})}
   end
