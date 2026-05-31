@@ -1,14 +1,21 @@
 import { animatePausePlayButton } from "../helpers/play_pause_animation.js";
 import { formatTime, return_song_icon_polygons } from "../helpers/player.js";
+import { animateControlButton } from "../helpers/controls_animation.js";
 
 let SongPlayerHooks = {};
 
 SongPlayerHooks.SongPlayer = {
   mounted() {
-    const playBtn = this.el;
+    let playerHook = this;
+    const playBtn = playerHook.el;
     let playBtnId = playBtn.id;
     const playerPolygon1 = document.getElementById(`polygon-1-${playBtnId}`);
     const playerPolygon2 = document.getElementById(`polygon-2-${playBtnId}`);
+
+    const backIcon = document.getElementById("back-icon");
+    const backTargetPolygon = document.getElementById("back-polygon-2");
+    const nextIcon = document.getElementById("next-icon");
+    const nextTargetPolygon = document.getElementById("next-polygon-2");
 
     const playedTimeEl = document.getElementById("song-played-time");
     const songProgressEl = document.getElementById("song-progress");
@@ -19,7 +26,7 @@ SongPlayerHooks.SongPlayer = {
     let player = null;
     let lastPlayedTime = null;
 
-    this.handleEvent(
+    playerHook.handleEvent(
       "maybe_play_song",
       async ({
         current_song_duration,
@@ -29,14 +36,16 @@ SongPlayerHooks.SongPlayer = {
       }) => {
         const { songIconPolygon1, songIconPolygon2 } =
           return_song_icon_polygons(current_song_id);
-        this.currentSongIconPolygon1 = songIconPolygon1;
-        this.currentSongIconPolygon2 = songIconPolygon2;
+        playerHook.currentSongIconPolygon1 = songIconPolygon1;
+        playerHook.currentSongIconPolygon2 = songIconPolygon2;
+
+        playerHook.currentSongPlayIcon =
+          document.getElementById(current_song_id);
 
         player = {
           songDuration: current_song_duration,
           currentTime: current_time,
           isPlaying: should_play,
-          playbackRate: 1,
         };
 
         if (should_play) {
@@ -67,34 +76,23 @@ SongPlayerHooks.SongPlayer = {
       },
     );
 
-    this.handleEvent("pause_previous_song", async ({ previous_song_id }) => {
-      const { songIconPolygon1, songIconPolygon2 } =
-        return_song_icon_polygons(previous_song_id);
+    playerHook.handleEvent(
+      "pause_previous_song",
+      async ({ previous_song_id }) => {
+        const { songIconPolygon1, songIconPolygon2 } =
+          return_song_icon_polygons(previous_song_id);
 
-      if (!isPaused) {
-        await animatePausePlayButton(
-          isPaused,
-          songIconPolygon1,
-          songIconPolygon2,
-        );
-      }
-    });
-
-    this.handleEvent("play_or_pause_song", async () => {
-      const [, newPausedState] = await Promise.all([
-        animatePausePlayButton(
-          isPaused,
-          this.currentSongIconPolygon1,
-          this.currentSongIconPolygon2,
-        ),
-        animatePausePlayButton(isPaused, playerPolygon1, playerPolygon2),
-      ]);
-
-      isPaused = newPausedState;
-
-      player.isPlaying = !player.isPlaying;
-      toogleTooltip();
-    });
+        if (songIconPolygon1) {
+          !isPaused
+            ? await animatePausePlayButton(
+                isPaused,
+                songIconPolygon1,
+                songIconPolygon2,
+              )
+            : null;
+        }
+      },
+    );
 
     function toogleTooltip() {
       playPauseTooltipEl.textContent = player.isPlaying ? "Pause" : "Play";
@@ -114,13 +112,19 @@ SongPlayerHooks.SongPlayer = {
       lastPlayedTime = timestamp;
 
       if (player?.isPlaying) {
-        player.currentTime += delta * player.playbackRate;
+        player.currentTime += delta;
+        playerHook.currentSongPlayIcon.dataset.duration_played = Math.min(
+          player.currentTime,
+          player.songDuration,
+        );
 
         if (player.currentTime >= player.songDuration) {
           player.currentTime = player.songDuration;
-          // At this point we can send an event to the server
-          console.log("next song please");
+          // At this point we can send an event to the server to play the next song
           player.isPlaying = false;
+          playerHook.pushEvent("play_next_song", {
+            duration_played: player.songDuration,
+          });
         }
       }
 
@@ -137,8 +141,8 @@ SongPlayerHooks.SongPlayer = {
       const [, newPausedState] = await Promise.all([
         animatePausePlayButton(
           isPaused,
-          this.currentSongIconPolygon1,
-          this.currentSongIconPolygon2,
+          playerHook.currentSongIconPolygon1,
+          playerHook.currentSongIconPolygon2,
         ),
         animatePausePlayButton(isPaused, playerPolygon1, playerPolygon2),
       ]);
@@ -147,6 +151,18 @@ SongPlayerHooks.SongPlayer = {
 
       player.isPlaying = !player.isPlaying;
       toogleTooltip();
+    });
+
+    backIcon.addEventListener("click", () => {
+      player.currentTime = 0;
+      animateControlButton("back", true, backTargetPolygon);
+    });
+
+    nextIcon.addEventListener("click", () => {
+      playerHook.pushEvent("play_next_song", {
+        duration_played: player.songDuration,
+      });
+      animateControlButton("next", true, nextTargetPolygon);
     });
 
     requestAnimationFrame(updateSongPlayedTime);

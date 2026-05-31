@@ -56,6 +56,7 @@ defmodule SongRecommenderWeb.Songs.SearchComponent do
             </div>
           </div>
           <div
+            phx-hook="SearchItems"
             id="search-items"
             phx-update="stream"
           >

@@ -75,7 +75,11 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_params(params, _url, %{assigns: %{current_user: user}} = socket) do
+  def handle_params(
+        params,
+        _url,
+        %{assigns: %{current_user: user, currently_playing_song: current_song}} = socket
+      ) do
     search_query = params["q"] || ""
 
     case search_query != "" do
@@ -84,13 +88,14 @@ defmodule SongRecommenderWeb.SongsLive.Index do
         search_items_empty? = Enum.empty?(search_items)
 
         search_items_with_images =
-          if search_items_empty?, do: [], else: maybe_add_song_numbers(search_items, :search_item)
+          if search_items_empty?, do: [], else: add_image_numbers(search_items)
 
         {:noreply,
          socket
          |> assign(:empty_search?, search_items_empty?)
          |> assign(:search_query, search_query)
          |> assign(:show_recent_searches?, false)
+         |> push_event("set_current_song_id_for_search", %{current_song_id: current_song.id})
          |> stream(:search_items, search_items_with_images, reset: true)}
 
       false ->
@@ -136,49 +141,60 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   def handle_event(
-        "play_or_pause_song",
+        "play_new_song",
         %{
           "artist_id" => artist_id,
           "artist_monthly_listeners" => artist_monthly_listeners,
           "artist_name" => artist_name,
           "genre_name" => genre_name,
-          "id" => song_id
+          "previous_song_duration_played" => previous_song_duration_played
         } = params,
+        %{assigns: %{currently_playing_song: previous_song, current_user: user}} = socket
+      ) do
+    following_artist? = Artists.check_following_status(user.name, artist_name)
+
+    artist_attrs = %{
+      "following" => following_artist?,
+      "id" => artist_id,
+      "monthly_listeners" => artist_monthly_listeners,
+      "name" => artist_name
+    }
+
+    genre_attrs = %{
+      "name" => genre_name
+    }
+
+    new_song =
+      params
+      |> Map.put("artist", artist_attrs)
+      |> Map.put("genre", genre_attrs)
+      |> form_current_song()
+
+    song_player_data = return_song_player_data(new_song, true)
+
+    previous_song_dom_id = "song-#{previous_song.id}"
+
+    {:noreply,
+     socket
+     |> set_playing_song_image()
+     |> assign(:currently_playing_song, new_song)
+     |> push_event("maybe_play_song", song_player_data)
+     |> push_event("set_current_song_id", %{current_song_id: new_song.id})
+     |> push_event("pause_previous_song", %{previous_song_id: previous_song.id})
+     |> stream_delete_by_dom_id(:songs, previous_song_dom_id)}
+  end
+
+  def handle_event(
+        "play_next_song",
+        %{"duration_played" => duration_ms},
         %{assigns: %{currently_playing_song: current_song, current_user: user}} = socket
       ) do
-    case song_id == current_song.id do
-      true ->
-        {:noreply, push_event(socket, "play_or_pause_song", %{})}
+    song_dom_id = "song-#{current_song.id}"
 
-      false ->
-        following_artist? = Artists.check_following_status(user.name, artist_name)
-
-        artist_attrs = %{
-          "following" => following_artist?,
-          "id" => artist_id,
-          "monthly_listeners" => artist_monthly_listeners,
-          "name" => artist_name
-        }
-
-        genre_attrs = %{
-          "name" => genre_name
-        }
-
-        new_song =
-          params
-          |> Map.put("artist", artist_attrs)
-          |> Map.put("genre", genre_attrs)
-          |> form_current_song()
-
-        song_player_data = return_song_player_data(new_song, true)
-
-        {:noreply,
-         socket
-         |> set_playing_song_image()
-         |> assign(:currently_playing_song, new_song)
-         |> push_event("maybe_play_song", song_player_data)
-         |> push_event("pause_previous_song", %{previous_song_id: current_song.id})}
-    end
+    {:noreply,
+     socket
+     |> push_event("play_next_song", %{})
+     |> stream_delete_by_dom_id(:songs, song_dom_id)}
   end
 
   def handle_event(
@@ -222,9 +238,9 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
     song_player_data = return_song_player_data(initial_song, false)
 
-    processed_songs = maybe_add_song_numbers(songs, :song, count)
+    processed_songs = add_image_numbers(songs)
 
-    {_last_song, _last_song_image, new_song_count} = Enum.at(processed_songs, -1)
+    new_song_count = count + Enum.count(processed_songs)
 
     {:noreply,
      socket
@@ -232,6 +248,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
      |> assign(:currently_playing_song, initial_song)
      |> assign(:song_count, new_song_count)
      |> push_event("maybe_play_song", song_player_data)
+     |> push_event("set_current_song_id", %{current_song_id: initial_song.id})
      |> stream(:songs, processed_songs, reset: true)}
   end
 
@@ -246,34 +263,15 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     }
   end
 
-  defp maybe_add_song_numbers(items, item_type, current_song_count \\ 0)
+  defp add_image_numbers(items) do
+    images = return_thumbnails(items)
 
-  defp maybe_add_song_numbers(search_items, :search_item, _current_song_count) do
-    images = return_thumbnails(search_items)
-
-    search_items
+    items
     |> Enum.with_index()
-    |> Enum.reduce([], fn {search_item, index}, acc ->
+    |> Enum.reduce([], fn {item, index}, acc ->
       image_num = Enum.at(images, index)
 
-      [{search_item, image_num} | acc]
-    end)
-    |> Enum.reverse()
-  end
-
-  defp maybe_add_song_numbers(songs, :song, current_song_count) do
-    images = return_thumbnails(songs)
-
-    starting_number = current_song_count + 1
-
-    songs
-    |> Enum.with_index()
-    |> Enum.reduce([], fn {song, index}, acc ->
-      image_num = Enum.at(images, index)
-
-      song_number = starting_number + index
-
-      [{song, image_num, song_number} | acc]
+      [{item, image_num} | acc]
     end)
     |> Enum.reverse()
   end

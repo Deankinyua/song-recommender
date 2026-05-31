@@ -15,10 +15,10 @@ defmodule SongRecommenderWeb.Songs.PlayerComponent do
       class="w-[92%] h-[16%] bg-base-50 flex flex-col gap-2 justify-center items-center song-player text-base-100"
     >
       <div class="w-[60%] flex justify-center items-center gap-4">
-        <div id="back-icon" class="control-icon">
+        <div class="control-icon">
           <CustomComponents.back_icon />
-          <div class="top-[-1.8rem] left-[-1.4rem] tooltip">
-            Back
+          <div class="top-[-1.8rem] left-[-1rem] tooltip">
+            0:00
           </div>
         </div>
         <div id="play-icon" class="control-icon">
@@ -27,17 +27,10 @@ defmodule SongRecommenderWeb.Songs.PlayerComponent do
             Play
           </div>
         </div>
-        <div id="next-icon" class="control-icon">
+        <div class="control-icon">
           <CustomComponents.next_icon />
           <div class="top-[-1.8rem] left-[-0.4rem] tooltip">
             Next
-          </div>
-        </div>
-        <div id="skip-icon" class="control-icon">
-          <CustomComponents.skip_icon />
-
-          <div class="top-[-1.3rem] left-[-0.4rem] tooltip">
-            Skip
           </div>
         </div>
       </div>

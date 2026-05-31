@@ -11,15 +11,16 @@ defmodule SongRecommenderWeb.Songs.SongsComponent do
   def render(assigns) do
     ~H"""
     <div
+      phx-hook="Songs"
       id="songs"
       phx-update="stream"
       class="w-[92%] h-[75%] mx-auto mb-3 py-4 px-2 bg-base-70 rounded-xl flex flex-col justify-between happy-monkey-regular overflow-y-scroll"
     >
       <div
-        :for={{dom_id, {song, image_number, song_number}} <- @songs}
+        :for={{dom_id, {song, image_number}} <- @songs}
         id={dom_id}
       >
-        <CustomComponents.song song={song} image={image_number} song_number={song_number} />
+        <CustomComponents.song song={song} image={image_number} />
       </div>
     </div>
     """

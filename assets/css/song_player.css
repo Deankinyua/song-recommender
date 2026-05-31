@@ -10,7 +10,7 @@
   accent-color: #5df8d8;
 }
 
-#back-icon:hover .tooltip {
+#back-icon:hover + .tooltip {
   display: block;
 }
 
@@ -18,10 +18,6 @@
   display: block;
 }
 
-#next-icon:hover .tooltip {
-  display: block;
-}
-
-#skip-icon:hover .tooltip {
+#next-icon:hover + .tooltip {
   display: block;
 }
