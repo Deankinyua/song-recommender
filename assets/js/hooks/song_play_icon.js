@@ -5,6 +5,14 @@ SongPlayIconHooks.SongPlayIcon = {
     let songPlayIconHook = this;
     const songPlayBtn = songPlayIconHook.el;
 
+    const clearPreviousSongHighlight = (previous_song_id) => {
+      const previousSongName = document.getElementById(
+        `song-name-${previous_song_id}`,
+      );
+
+      previousSongName?.classList.remove("playing-song-name");
+    };
+
     songPlayBtn.addEventListener("click", () => {
       let id = songPlayBtn.id;
 
@@ -41,6 +49,7 @@ SongPlayIconHooks.SongPlayIcon = {
           new MouseEvent("click", { bubbles: false }),
         );
       } else {
+        clearPreviousSongHighlight(current_song_id);
         songPlayIconHook.pushEvent("play_new_song", params);
       }
     });
