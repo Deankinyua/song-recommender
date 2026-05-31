@@ -26,13 +26,68 @@ SongPlayerHooks.SongPlayer = {
     let player = null;
     let lastPlayedTime = null;
 
-    const showCurrentlyPlayingSong = (current_song_id) => {
+    function showCurrentlyPlayingSong(current_song_id) {
       const currentSongName = document.getElementById(
         `song-name-${current_song_id}`,
       );
 
       currentSongName?.classList.add("playing-song-name");
-    };
+    }
+
+    function toogleTooltip() {
+      playPauseTooltipEl.textContent = player.isPlaying ? "Pause" : "Play";
+    }
+
+    function renderSongData() {
+      if (player) {
+        songProgressEl.value = player.currentTime;
+        playedTimeEl.textContent = formatTime(player.currentTime);
+      }
+    }
+
+    function updateSongPlayedTime(timestamp) {
+      if (!lastPlayedTime) lastPlayedTime = timestamp;
+
+      const delta = (timestamp - lastPlayedTime) / 1000;
+      lastPlayedTime = timestamp;
+
+      if (player?.isPlaying) {
+        player.currentTime += delta;
+        playerHook.currentSongPlayIcon.dataset.duration_played = Math.min(
+          player.currentTime,
+          player.songDuration,
+        );
+
+        if (player.currentTime >= player.songDuration) {
+          player.currentTime = player.songDuration;
+          // At this point we can send an event to the server to play the next song
+          player.isPlaying = false;
+          playerHook.pushEvent("play_next_song", {
+            duration_played: player.songDuration,
+          });
+        }
+      }
+
+      renderSongData();
+
+      requestAnimationFrame(updateSongPlayedTime);
+    }
+
+    async function animatePlayerAndSongIcons() {
+      const [, newPausedState] = await Promise.all([
+        animatePausePlayButton(
+          isPaused,
+          playerHook.currentSongIconPolygon1,
+          playerHook.currentSongIconPolygon2,
+        ),
+        animatePausePlayButton(isPaused, playerPolygon1, playerPolygon2),
+      ]);
+
+      isPaused = newPausedState;
+
+      player.isPlaying = !player.isPlaying;
+      toogleTooltip();
+    }
 
     playerHook.handleEvent(
       "maybe_play_song",
@@ -104,64 +159,15 @@ SongPlayerHooks.SongPlayer = {
       },
     );
 
-    function toogleTooltip() {
-      playPauseTooltipEl.textContent = player.isPlaying ? "Pause" : "Play";
-    }
-
-    function renderSongData() {
-      if (player) {
-        songProgressEl.value = player.currentTime;
-        playedTimeEl.textContent = formatTime(player.currentTime);
-      }
-    }
-
-    function updateSongPlayedTime(timestamp) {
-      if (!lastPlayedTime) lastPlayedTime = timestamp;
-
-      const delta = (timestamp - lastPlayedTime) / 1000;
-      lastPlayedTime = timestamp;
-
-      if (player?.isPlaying) {
-        player.currentTime += delta;
-        playerHook.currentSongPlayIcon.dataset.duration_played = Math.min(
-          player.currentTime,
-          player.songDuration,
-        );
-
-        if (player.currentTime >= player.songDuration) {
-          player.currentTime = player.songDuration;
-          // At this point we can send an event to the server to play the next song
-          player.isPlaying = false;
-          playerHook.pushEvent("play_next_song", {
-            duration_played: player.songDuration,
-          });
-        }
-      }
-
-      renderSongData();
-
-      requestAnimationFrame(updateSongPlayedTime);
-    }
+    playerHook.handleEvent("maybe_pause_song", async () => {
+      if (player.isPlaying) await animatePlayerAndSongIcons();
+    });
 
     songProgressEl.addEventListener("input", (e) => {
       player.currentTime = Number(e.target.value);
     });
 
-    playBtn.addEventListener("click", async () => {
-      const [, newPausedState] = await Promise.all([
-        animatePausePlayButton(
-          isPaused,
-          playerHook.currentSongIconPolygon1,
-          playerHook.currentSongIconPolygon2,
-        ),
-        animatePausePlayButton(isPaused, playerPolygon1, playerPolygon2),
-      ]);
-
-      isPaused = newPausedState;
-
-      player.isPlaying = !player.isPlaying;
-      toogleTooltip();
-    });
+    playBtn.addEventListener("click", async () => animatePlayerAndSongIcons());
 
     backIcon.addEventListener("click", () => {
       player.currentTime = 0;
