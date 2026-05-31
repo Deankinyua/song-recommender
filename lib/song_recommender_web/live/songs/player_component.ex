@@ -15,9 +15,9 @@ defmodule SongRecommenderWeb.Songs.PlayerComponent do
       class="w-[92%] h-[16%] bg-base-50 flex flex-col gap-2 justify-center items-center song-player text-base-100"
     >
       <div class="w-[60%] flex justify-center items-center gap-4">
-        <div id="back-icon" class="control-icon">
+        <div class="control-icon">
           <CustomComponents.back_icon />
-          <div class="top-[-1.8rem] left-[-1.4rem] tooltip">
+          <div class="top-[-1.8rem] left-[-1rem] tooltip">
             Back
           </div>
         </div>

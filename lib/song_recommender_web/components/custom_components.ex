@@ -194,6 +194,7 @@ defmodule SongRecommenderWeb.CustomComponents do
       xmlns:xlink="http://www.w3.org/1999/xlink"
       viewBox="0 0 512.005 512.005"
       xml:space="preserve"
+      id="back-icon"
     >
       <g id="SVGRepo_bgCarrier_1" stroke-width="0"></g>
       <g id="SVGRepo_tracerCarrier_1" stroke-linecap="round" stroke-linejoin="round"></g>

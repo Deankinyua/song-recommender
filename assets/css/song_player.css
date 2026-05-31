@@ -10,7 +10,7 @@
   accent-color: #5df8d8;
 }
 
-#back-icon:hover .tooltip {
+#back-icon:hover + .tooltip {
   display: block;
 }
 
