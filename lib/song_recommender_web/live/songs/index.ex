@@ -147,9 +147,12 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           "artist_monthly_listeners" => artist_monthly_listeners,
           "artist_name" => artist_name,
           "genre_name" => genre_name,
+          "id" => song_id,
           "previous_song_duration_played" => previous_song_duration_played
         } = params,
-        %{assigns: %{currently_playing_song: previous_song, current_user: user}} = socket
+        %{
+          assigns: %{currently_playing_song: previous_song, current_user: user, queue_name: queue}
+        } = socket
       ) do
     following_artist? = Artists.check_following_status(user.name, artist_name)
 
@@ -174,6 +177,8 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
     previous_song_dom_id = "song-#{previous_song.id}"
 
+    persist_song_history(queue, song_id, previous_song_duration_played)
+
     {:noreply,
      socket
      |> set_playing_song_image()
@@ -186,10 +191,13 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
   def handle_event(
         "play_next_song",
-        %{"duration_played" => duration_ms},
-        %{assigns: %{currently_playing_song: current_song, current_user: user}} = socket
+        %{"duration_played" => duration_played},
+        %{assigns: %{currently_playing_song: current_song, queue_name: queue}} =
+          socket
       ) do
-    song_dom_id = "song-#{current_song.id}"
+    song_id = current_song.id
+    persist_song_history(queue, song_id, duration_played)
+    song_dom_id = "song-#{song_id}"
 
     {:noreply,
      socket
@@ -274,6 +282,16 @@ defmodule SongRecommenderWeb.SongsLive.Index do
       current_time: current_time,
       should_play: should_play
     }
+  end
+
+  defp persist_song_history(_queue, _song_id, nil), do: :ok
+
+  defp persist_song_history(_queue, _song_id, 0), do: :ok
+
+  defp persist_song_history(queue, song_id, duration_played) do
+    duration_ms = trunc(duration_played * 1000)
+    song_details = [song_id, duration_ms]
+    SongQueue.persist_played_song(queue, song_details)
   end
 
   defp add_image_numbers(items) do
