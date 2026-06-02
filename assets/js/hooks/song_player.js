@@ -176,7 +176,7 @@ SongPlayerHooks.SongPlayer = {
 
     nextIcon.addEventListener("click", () => {
       playerHook.pushEvent("play_next_song", {
-        duration_played: player.songDuration,
+        duration_played: player.currentTime,
       });
       animateControlButton("next", true, nextTargetPolygon);
     });
