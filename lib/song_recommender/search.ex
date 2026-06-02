@@ -15,7 +15,8 @@ defmodule SongRecommender.Search do
 
   @doc """
   Searches for an item (Artist or Song) using the normalizedName property.
-  Returns artists first (most listened_to artist first) then songs.
+  Returns artists first (with artists with the most monthly listeners coming first)
+  then songs.
   """
 
   @spec search_query(query(), username()) :: [artist() | song()]

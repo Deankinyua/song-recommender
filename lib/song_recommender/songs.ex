@@ -12,6 +12,7 @@ defmodule SongRecommender.Songs do
   @type genre_name :: String.t()
   @type listening_duration :: integer()
   @type song :: Song.t()
+  @type song_and_listening_time :: [song_id() | listening_duration()]
   @type song_id :: String.t()
   @type taste_profile :: map()
   @type username :: String.t()
@@ -113,6 +114,35 @@ defmodule SongRecommender.Songs do
       """,
       %{
         genre: genre,
+        username: username
+      }
+    )
+  end
+
+  @spec persist_user_session_history(username(), [song_and_listening_time()]) :: bolt_response()
+  def persist_user_session_history(username, songs_listening_history) do
+    Boltx.query!(
+      Bolt,
+      """
+      MATCH (user:User {name: $username})
+      UNWIND $songs_listening_history AS songAndDurationPlayed
+      WITH user,
+           songAndDurationPlayed[0] AS song_id,
+           songAndDurationPlayed[1] AS durationPlayedMs
+      MATCH (a:Artist)-[:SANG]->(song:Song {id: song_id})-[:BELONGS_TO]->(g:Genre)
+      MERGE (user)-[lt:LISTENED_TO]->(song)
+      ON CREATE SET lt.durationPlayedMs = durationPlayedMs
+      ON MATCH SET lt.durationPlayedMs = lt.durationPlayedMs + durationPlayedMs
+      SET lt.lastPlayedDate = datetime()
+      MERGE (user)-[lg:LISTENED_TO_GENRE]->(g)
+      ON CREATE SET lg.totalDurationPlayedMs = durationPlayedMs
+      ON MATCH SET lg.totalDurationPlayedMs = lg.totalDurationPlayedMs + durationPlayedMs
+      MERGE (user)-[la:LISTENED_TO_ARTIST]->(a)
+      ON CREATE SET la.totalDurationPlayedMs = durationPlayedMs
+      ON MATCH SET la.totalDurationPlayedMs = la.totalDurationPlayedMs + durationPlayedMs
+      """,
+      %{
+        songs_listening_history: songs_listening_history,
         username: username
       }
     )
