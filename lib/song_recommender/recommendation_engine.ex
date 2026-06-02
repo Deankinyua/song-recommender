@@ -53,12 +53,12 @@ defmodule SongRecommender.RecommendationEngine do
 
   @impl GenServer
   def handle_cast(
-        :get_initial_songs,
+        :get_songs,
         %{queue_name: queue_name, strategy: strategy, taste_profile: taste_profile} = state
       ) do
     :ok =
       strategy
-      |> QueryEngine.get_initial_songs(taste_profile)
+      |> QueryEngine.get_songs(taste_profile)
       |> send_songs_to_queue(queue_name)
 
     {:noreply, state, @timeout}
