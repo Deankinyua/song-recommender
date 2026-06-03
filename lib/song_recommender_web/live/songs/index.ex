@@ -12,8 +12,8 @@ defmodule SongRecommenderWeb.SongsLive.Index do
       <div class="h-[92vh] flex text-base-100">
         <section class="flex flex-col justify-end w-[22%] relative h-[90%] my-6 rounded-xl bg-base-70">
           <CustomComponents.song_details
-            artist_image={@currently_playing_artist_image}
-            song={@currently_playing_song}
+            artist_image={@current_artist_image}
+            song={@current_song}
           />
 
           <.live_component
@@ -51,8 +51,8 @@ defmodule SongRecommenderWeb.SongsLive.Index do
             id="artist-details-component"
             module={ArtistDetailsComponent}
             current_user={@current_user}
-            artist_image={@currently_playing_artist_image}
-            song={@currently_playing_song}
+            artist_image={@current_artist_image}
+            song={@current_song}
           />
         </section>
       </div>
@@ -64,8 +64,8 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(:currently_playing_song, %Song{})
-     |> assign(:currently_playing_artist_image, nil)
+     |> assign(:current_song, %Song{})
+     |> assign(:current_artist_image, nil)
      |> maybe_fetch_genres()
      |> setup_recommendation_engine()
      |> stream_configure(:search_items, dom_id: &"search-item-#{elem(&1, 0).id}")
@@ -77,7 +77,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def handle_params(
         params,
         _url,
-        %{assigns: %{current_user: user, currently_playing_song: current_song}} = socket
+        %{assigns: %{current_song: current_song, current_user: user}} = socket
       ) do
     search_query = params["q"] || ""
 
@@ -150,7 +150,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           "previous_song_duration_played" => previous_song_duration_played
         } = params,
         %{
-          assigns: %{currently_playing_song: previous_song, current_user: user, queue_name: queue}
+          assigns: %{current_song: previous_song, current_user: user, queue_name: queue}
         } = socket
       ) do
     following_artist? = Artists.check_following_status(user.name, artist_name)
@@ -181,7 +181,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     {:noreply,
      socket
      |> set_playing_song_image()
-     |> assign(:currently_playing_song, new_song)
+     |> assign(:current_song, new_song)
      |> push_event("maybe_play_song", song_player_data)
      |> push_event("set_current_song_id", %{current_song_id: new_song.id})
      |> push_event("pause_previous_song", %{previous_song_id: previous_song.id})
@@ -191,7 +191,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def handle_event(
         "play_next_song",
         %{"duration_played" => duration_played},
-        %{assigns: %{currently_playing_song: current_song, queue_name: queue}} =
+        %{assigns: %{current_song: current_song, queue_name: queue}} =
           socket
       ) do
     song_id = current_song.id
@@ -259,7 +259,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     {:noreply,
      socket
      |> set_playing_song_image()
-     |> assign(:currently_playing_song, initial_song)
+     |> assign(:current_song, initial_song)
      |> push_event("maybe_play_song", song_player_data)
      |> push_event("set_current_song_id", %{current_song_id: initial_song.id})
      |> stream(:songs, processed_songs)}
@@ -340,7 +340,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
   defp set_playing_song_image(socket) do
     image_num = :rand.uniform(@no_playing_song_images)
-    assign(socket, :currently_playing_artist_image, image_num)
+    assign(socket, :current_artist_image, image_num)
   end
 
   defp form_current_song(song_attrs), do: Songs.populate_song(%Song{}, song_attrs)
