@@ -10,6 +10,8 @@ defmodule SongRecommender.SongQueue do
 
   import SongRecommender.GenserverHelpers
 
+  alias SongRecommender.RecommendationEngine
+  alias SongRecommender.Songs
   alias SongRecommender.Songs.Song
 
   @type duration_played :: integer()
@@ -26,7 +28,6 @@ defmodule SongRecommender.SongQueue do
       previously_played_songs: [],
       previously_played_songs_count: 0,
       recommended_songs: [],
-      recommended_songs_count: 0,
       username: username
     }
 
@@ -39,7 +40,7 @@ defmodule SongRecommender.SongQueue do
   @impl GenServer
   def handle_continue(:initialize_queue, %{username: username} = state) do
     engine_name = engine_name(username)
-    :ok = make_genserver_request(engine_name, :cast, :get_songs)
+    :ok = RecommendationEngine.recommend_new_songs(engine_name)
     new_state = Map.put(state, :engine_name, engine_name)
 
     {:noreply, new_state}
@@ -59,10 +60,8 @@ defmodule SongRecommender.SongQueue do
   def handle_cast(
         {:persist_song, song_details},
         %{
-          engine_name: engine,
           previously_played_songs: previously_played_songs,
           previously_played_songs_count: song_count,
-          recommended_songs: recommended_songs,
           username: username
         } = state
       ) do
@@ -80,10 +79,7 @@ defmodule SongRecommender.SongQueue do
         {:noreply, new_state}
 
       false ->
-        # check if all 4 are from the recommeded songs
         # update_listening_history here
-
-        maybe_recommend_new_songs(engine, previously_played_songs, recommended_songs)
 
         new_state =
           state
@@ -104,19 +100,11 @@ defmodule SongRecommender.SongQueue do
 
   defp update_recommended_songs(
          songs,
-         state
+         %{recommended_songs: recommended_songs, username: username} = state
        ) do
-    songs_count = Enum.count(songs)
+    Songs.broadcast(username, recommended_songs)
 
-    state
-    |> Map.put(:recommended_songs, songs)
-    |> Map.put(:recommended_songs_count, songs_count)
-  end
-
-  def maybe_recommend_new_songs(engine, played_songs, recommended_songs) do
-    recommend? = Enum.all?(played_songs, &Enum.member?(recommended_songs, &1))
-
-    if recommend?, do: make_genserver_request(engine, :cast, :get_songs), else: :ok
+    Map.put(state, :recommended_songs, songs)
   end
 
   defp engine_name(username), do: "#{username}_recommendation_engine"

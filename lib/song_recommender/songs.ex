@@ -5,6 +5,7 @@ defmodule SongRecommender.Songs do
 
   import Ecto.Changeset, only: [apply_action!: 2]
 
+  alias SongRecommender.PubSub
   alias SongRecommender.Songs.Song
 
   @type attrs :: map()
@@ -16,6 +17,38 @@ defmodule SongRecommender.Songs do
   @type song_id :: String.t()
   @type taste_profile :: map()
   @type username :: String.t()
+
+  @doc """
+   Subscribes to song events.
+
+  ## Examples
+
+      iex> subscribe("550e8400-e29b-41d4-a716-446655440000")
+      :ok
+
+  """
+  @spec subscribe(username()) :: :ok
+  def subscribe(username) do
+    Phoenix.PubSub.subscribe(PubSub, "songs-#{username}")
+  end
+
+  @doc """
+  Broadcasts a message with newly recommended songs.
+
+  ## Examples
+
+      iex> broadcast("Robert", recommended_songs)
+      :ok
+
+  """
+  @spec broadcast(username(), [song()]) :: :ok
+  def broadcast(username, recommended_songs) do
+    Phoenix.PubSub.broadcast(
+      PubSub,
+      "songs-#{username}",
+      {:new_recommended_songs, recommended_songs}
+    )
+  end
 
   @doc """
   Returns a song with its details

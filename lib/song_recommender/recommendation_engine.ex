@@ -18,9 +18,11 @@ defmodule SongRecommender.RecommendationEngine do
   alias SongRecommender.QueryEngine
   alias SongRecommender.Songs
 
-  @ideal_song_number 10
+  @ideal_song_number 12
   @threshold_listening_time_ms 3_600_000
   @timeout 1_200_000
+
+  @type engine_name :: String.t()
 
   @spec start_link(any()) :: GenServer.on_start()
   def start_link(opts) do
@@ -92,8 +94,13 @@ defmodule SongRecommender.RecommendationEngine do
     {:stop, :normal, state}
   end
 
+  @spec maybe_change_taste_profile(engine_name()) ::
+          {:ok, :profile_changed} | {:error, :profile_should_not_change}
   def maybe_change_taste_profile(engine_name),
     do: make_genserver_request(engine_name, :call, :change_taste_profile)
+
+  @spec recommend_new_songs(engine_name()) :: :ok
+  def recommend_new_songs(engine_name), do: make_genserver_request(engine_name, :cast, :get_songs)
 
   defp send_songs_to_queue(songs, queue_name),
     do: make_genserver_request(queue_name, :call, {:recommended_songs, songs})
