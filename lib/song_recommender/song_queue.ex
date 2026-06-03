@@ -13,6 +13,7 @@ defmodule SongRecommender.SongQueue do
   alias SongRecommender.RecommendationEngine
   alias SongRecommender.Songs
   alias SongRecommender.Songs.Song
+  alias SongRecommender.Songs.UpdateUserListeningHistoryWorker
 
   @type duration_played :: integer()
   @type queue :: String.t()
@@ -79,7 +80,10 @@ defmodule SongRecommender.SongQueue do
         {:noreply, new_state}
 
       false ->
-        # update_listening_history here
+        UpdateUserListeningHistoryWorker.enqueue(%{
+          "username" => username,
+          "songs" => previously_played_songs
+        })
 
         new_state =
           state

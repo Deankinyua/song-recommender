@@ -218,7 +218,7 @@ defmodule SongRecommender.Songs do
             MATCH (a:Artist)-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre {name: genreName})
             OPTIONAL MATCH (u)-[lt:LISTENED_TO]->(s)
             RETURN s AS song, a AS artist, g AS genre
-            ORDER BY s.popularity DESC, lt.lastPlayedDate
+            ORDER BY s.popularity DESC, lt.lastPlayedDate DESC
             LIMIT $genres_song_limit
           }
           RETURN song, artist, genre
@@ -251,7 +251,9 @@ defmodule SongRecommender.Songs do
         }
       )
 
-    Enum.map(song_data, &process_song_data(&1))
+    song_data
+    |> Enum.map(&process_song_data(&1))
+    |> Enum.shuffle()
   end
 
   defp process_song_data(%{
