@@ -109,7 +109,8 @@ config :song_recommender, Oban,
   queues: [
     create_user: 3,
     set_song_history: 2,
-    update_artist_listeners: 1
+    update_artist_listeners: 1,
+    update_user_listening_history: 3
   ],
   repo: SongRecommender.Repo
 
