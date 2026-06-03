@@ -152,6 +152,18 @@ defmodule SongRecommender.Songs do
     )
   end
 
+  @doc """
+  Adds direct listening relationships between users and songs. It also
+  adds these relationships to artists and genres which helps in the Wrapped feature
+  and also checking the totalListeningTime for the user computed by going
+  through all the genres of music the user has listened to.
+
+  ## Examples
+
+      iex> persist_user_session_history("Dean", [ ["24NvptbNKGs6sPy1Vh1O0v", 3213], ["1RjEDlhTp2iJXWPdLpa8OM", 1293] ])
+       %Boltx.Response{}
+  """
+
   @spec persist_user_session_history(username(), [song_and_listening_time()]) :: bolt_response()
   def persist_user_session_history(username, songs_listening_history) do
     Boltx.query!(

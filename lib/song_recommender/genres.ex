@@ -3,9 +3,7 @@ defmodule SongRecommender.Genres do
   Utilities to manage genres
   """
 
-  @type bolt_response :: Boltx.Response.t()
   @type genre_name :: String.t()
-  @type genre_and_listening_time :: [genre_name() | listening_time()]
   @type listening_time :: integer()
   @type username :: String.t()
 
@@ -74,36 +72,6 @@ defmodule SongRecommender.Genres do
   end
 
   @doc """
-  Creates a LISTENED_TO_GENRE relationship between a user and some genres.
-  This function has a deeper purpose. It can be used in the wrapped feature
-  and also checking the totalListeningTime for the user computed by going
-  through all the genres of music the user has listened to.
-
-  ## Examples
-
-      iex> listen_to_genres("Dean", [ ["hip-hop", 3213], ["house", 1293] ])
-       %Boltx.Response{}
-
-  """
-
-  @spec listen_to_genres(username(), [genre_and_listening_time()]) :: bolt_response()
-  def listen_to_genres(username, genres_and_listening_times) do
-    Boltx.query!(
-      Bolt,
-      """
-      MATCH (u:User {name: $name})
-      UNWIND $genres_and_listening_times AS genre_and_listening_time
-      WITH u, genre_and_listening_time[0] AS genre, genre_and_listening_time[1] AS durationListened
-      MATCH (g:Genre {name: genre})
-      MERGE (u)-[lg:LISTENED_TO_GENRE]->(g)
-      ON CREATE SET lg.totalListeningTimeMs = durationListened
-      ON MATCH SET lg.totalListeningTimeMs = lg.totalListeningTimeMs + durationListened
-      """,
-      %{name: username, genres_and_listening_times: genres_and_listening_times}
-    )
-  end
-
-  @doc """
   Calculates the totalListeningTime in milliseconds.
 
   ## Examples
@@ -119,7 +87,7 @@ defmodule SongRecommender.Genres do
     |> Boltx.query!(
       """
       MATCH (u:User {name: $name})-[lg:LISTENED_TO_GENRE]->(g:Genre)
-      RETURN sum(lg.totalListeningTimeMs) AS lifetime_listening_ms
+      RETURN sum(lg.totalDurationPlayedMs) AS lifetime_listening_ms
       """,
       %{name: username}
     )

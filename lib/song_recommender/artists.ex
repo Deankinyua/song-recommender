@@ -128,7 +128,7 @@ defmodule SongRecommender.Artists do
       artists
       |> Enum.map(&process_artist(&1))
       |> Enum.shuffle()
-      |> Enum.take(5)
+      |> Enum.take(8)
     end
   end
 
