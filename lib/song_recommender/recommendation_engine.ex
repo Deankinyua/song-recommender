@@ -56,11 +56,16 @@ defmodule SongRecommender.RecommendationEngine do
   @impl GenServer
   def handle_cast(
         :get_songs,
-        %{queue_name: queue_name, strategy: strategy, taste_profile: taste_profile} = state
+        %{
+          queue_name: queue_name,
+          strategy: strategy,
+          taste_profile: taste_profile,
+          username: username
+        } = state
       ) do
     :ok =
       strategy
-      |> QueryEngine.get_songs(taste_profile)
+      |> QueryEngine.get_songs(username, taste_profile)
       |> send_songs_to_queue(queue_name)
 
     {:noreply, state, @timeout}
@@ -76,8 +81,8 @@ defmodule SongRecommender.RecommendationEngine do
     taste_profile = fetch_recommendation_utility_data(strategy, username)
 
     :ok =
-      taste_profile
-      |> Songs.get_songs_with_genre_based_strategy()
+      username
+      |> Songs.get_songs_with_genre_based_strategy(taste_profile)
       |> send_songs_to_queue(queue_name)
 
     new_state = Map.put(state, :taste_profile, taste_profile)

@@ -185,8 +185,11 @@ defmodule SongRecommender.Songs do
   Gets songs belonging to some genres and some sang by some artists
   """
 
-  @spec get_songs_with_genre_based_strategy(taste_profile()) :: [song()]
-  def get_songs_with_genre_based_strategy(%{artists: artists, genres: genres} = _taste_profile) do
+  @spec get_songs_with_genre_based_strategy(username(), taste_profile()) :: [song()]
+  def get_songs_with_genre_based_strategy(
+        username,
+        %{artists: artists, genres: genres} = _taste_profile
+      ) do
     %{nodes: artist_names, limit: artists_song_limit} = artists
     %{nodes: genre_names, limit: genres_song_limit} = genres
 
@@ -194,14 +197,16 @@ defmodule SongRecommender.Songs do
       Boltx.query!(
         Bolt,
         """
-        CALL () {
+        MATCH (u:User {name: $username})
+        CALL (*) {
 
           UNWIND $genres AS genreName
           WITH genreName
           CALL (*) {
             MATCH (a:Artist)-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre {name: genreName})
+            OPTIONAL MATCH (u)-[lt:LISTENED_TO]->(s)
             RETURN s AS song, a AS artist, g AS genre
-            ORDER BY s.popularity DESC
+            ORDER BY s.popularity DESC, lt.lastPlayedDate
             LIMIT $genres_song_limit
           }
           RETURN song, artist, genre
@@ -212,8 +217,9 @@ defmodule SongRecommender.Songs do
           WITH artistName
           CALL (*) {
             MATCH (a:Artist {name: artistName})-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre)
+            OPTIONAL MATCH (u)-[lt:LISTENED_TO]->(s)
             RETURN s AS song, a AS artist, g AS genre
-            ORDER BY s.popularity DESC
+            ORDER BY s.popularity DESC, lt.lastPlayedDate
             LIMIT $artists_song_limit
           }
           RETURN song, artist, genre
@@ -228,7 +234,8 @@ defmodule SongRecommender.Songs do
           artists: artist_names,
           artists_song_limit: artists_song_limit,
           genres: genre_names,
-          genres_song_limit: genres_song_limit
+          genres_song_limit: genres_song_limit,
+          username: username
         }
       )
 
