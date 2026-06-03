@@ -66,7 +66,6 @@ defmodule SongRecommenderWeb.SongsLive.Index do
      socket
      |> assign(:currently_playing_song, %Song{})
      |> assign(:currently_playing_artist_image, nil)
-     |> assign(:song_count, 0)
      |> maybe_fetch_genres()
      |> setup_recommendation_engine()
      |> stream_configure(:search_items, dom_id: &"search-item-#{elem(&1, 0).id}")
@@ -247,11 +246,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_async(
-        :get_songs,
-        {:ok, songs},
-        %{assigns: %{current_user: user, song_count: count}} = socket
-      ) do
+  def handle_async(:get_songs, {:ok, songs}, %{assigns: %{current_user: user}} = socket) do
     initial_song =
       songs
       |> Enum.at(0)
@@ -261,16 +256,13 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
     processed_songs = add_image_numbers(songs)
 
-    new_song_count = count + Enum.count(processed_songs)
-
     {:noreply,
      socket
      |> set_playing_song_image()
      |> assign(:currently_playing_song, initial_song)
-     |> assign(:song_count, new_song_count)
      |> push_event("maybe_play_song", song_player_data)
      |> push_event("set_current_song_id", %{current_song_id: initial_song.id})
-     |> stream(:songs, processed_songs, reset: true)}
+     |> stream(:songs, processed_songs)}
   end
 
   defp return_song_player_data(song, should_play, current_time \\ 0) do
