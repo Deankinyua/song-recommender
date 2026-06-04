@@ -64,8 +64,10 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(:current_song, %Song{})
      |> assign(:current_artist_image, nil)
+     |> assign(:current_song, %Song{})
+     |> assign(:current_song_count, 0)
+     |> assign(:played_song_count, 0)
      |> maybe_fetch_genres()
      |> setup_recommendation_engine()
      |> stream_configure(:search_items, dom_id: &"search-item-#{elem(&1, 0).id}")
@@ -125,8 +127,10 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def handle_event(
         "maybe_refetch_recommended_songs",
         _params,
-        %{assigns: %{engine_name: engine}} = socket
+        %{assigns: %{engine_name: engine, queue_name: queue}} = socket
       ) do
+    :ok = SongQueue.reset_queue(queue)
+
     _result =
       case RecommendationEngine.maybe_change_taste_profile(engine) do
         {:ok, :profile_changed} ->
@@ -136,7 +140,14 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           :ok
       end
 
-    {:noreply, assign(socket, :capture_user_preferences?, false)}
+    {
+      :noreply,
+      socket
+      |> assign(:capture_user_preferences?, false)
+      |> assign(:current_song_count, 0)
+      |> assign(:played_song_count, 0)
+      |> stream(:songs, [], reset: true)
+    }
   end
 
   def handle_event(
@@ -191,15 +202,29 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def handle_event(
         "play_next_song",
         %{"duration_played" => duration_played},
-        %{assigns: %{current_song: current_song, queue_name: queue}} =
+        %{
+          assigns: %{
+            current_song: current_song,
+            current_song_count: song_count,
+            engine_name: engine_name,
+            played_song_count: played_song_count,
+            queue_name: queue
+          }
+        } =
           socket
       ) do
+    remaining_song_count = song_count - played_song_count
     song_id = current_song.id
     persist_song_history(queue, song_id, duration_played)
     song_dom_id = "song-#{song_id}"
+    new_played_song_count = played_song_count + 1
+
+    :ok = maybe_fetch_new_songs(engine_name, remaining_song_count)
 
     {:noreply,
      socket
+     |> assign(:current_song_count, song_count - 1)
+     |> assign(:played_song_count, new_played_song_count)
      |> push_event("play_next_song", %{})
      |> stream_delete_by_dom_id(:songs, song_dom_id)}
   end
@@ -245,8 +270,32 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     {:noreply, socket}
   end
 
+  def handle_info({:new_recommended_songs, []}, socket), do: {:noreply, socket}
+
+  def handle_info(
+        {:new_recommended_songs, recommended_songs},
+        %{
+          assigns: %{
+            current_song_count: song_count
+          }
+        } = socket
+      ) do
+    new_song_count = song_count + Enum.count(recommended_songs)
+    processed_recommended_songs = add_image_numbers(recommended_songs)
+
+    {:noreply,
+     socket
+     |> assign(:current_song_count, new_song_count)
+     |> assign(:played_song_count, 0)
+     |> stream(:songs, processed_recommended_songs)}
+  end
+
   @impl Phoenix.LiveView
-  def handle_async(:get_songs, {:ok, songs}, %{assigns: %{current_user: user}} = socket) do
+  def handle_async(
+        :get_songs,
+        {:ok, songs},
+        %{assigns: %{current_song_count: song_count, current_user: user}} = socket
+      ) do
     initial_song =
       songs
       |> Enum.at(0)
@@ -254,12 +303,15 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
     song_player_data = return_song_player_data(initial_song, false)
 
+    new_song_count = song_count + Enum.count(songs)
+
     processed_songs = add_image_numbers(songs)
 
     {:noreply,
      socket
      |> set_playing_song_image()
      |> assign(:current_song, initial_song)
+     |> assign(:current_song_count, new_song_count)
      |> push_event("maybe_play_song", song_player_data)
      |> push_event("set_current_song_id", %{current_song_id: initial_song.id})
      |> stream(:songs, processed_songs)}
@@ -275,6 +327,12 @@ defmodule SongRecommenderWeb.SongsLive.Index do
       should_play: should_play
     }
   end
+
+  defp maybe_fetch_new_songs(engine, remaining_song_count)
+       when remaining_song_count <= 10,
+       do: RecommendationEngine.recommend_new_songs(engine)
+
+  defp maybe_fetch_new_songs(_engine, _remaining_song_count), do: :ok
 
   defp persist_song_history(_queue, _song_id, nil), do: :ok
 
@@ -304,6 +362,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
     @image_list
     |> Enum.shuffle()
+    |> Stream.cycle()
     |> Enum.take(item_count)
   end
 
@@ -318,6 +377,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
 
       EngineQueueSupervisor.start_engine(engine_name, username)
       EngineQueueSupervisor.start_song_queue(queue_name, username)
+      Songs.subscribe(username)
 
       if !capture_preferences?, do: Process.send_after(self(), :get_initial_songs, 800)
 
