@@ -25,13 +25,12 @@ defmodule SongRecommender.SongQueue do
   def start_link(opts) do
     username = Keyword.get(opts, :username)
 
-    state = %{
-      previously_played_songs: [],
-      previously_played_songs_count: 0,
-      recommended_songs: [],
-      recommended_songs_count: 0,
-      username: username
-    }
+    initial_songs_state = default_queue_values()
+
+    state =
+      %{}
+      |> Map.put(:username, username)
+      |> Map.merge(initial_songs_state)
 
     GenServer.start_link(__MODULE__, state, opts)
   end
@@ -56,6 +55,12 @@ defmodule SongRecommender.SongQueue do
 
   def handle_call(:return_recommended_songs, _from, %{recommended_songs: songs} = state) do
     {:reply, songs, state}
+  end
+
+  def handle_call(:reset_queue, _from, state) do
+    initial_songs_state = default_queue_values()
+    new_state = Map.merge(state, initial_songs_state)
+    {:reply, :ok, new_state}
   end
 
   @impl GenServer
@@ -99,6 +104,10 @@ defmodule SongRecommender.SongQueue do
   def get_recommended_songs(queue_name),
     do: make_genserver_request(queue_name, :call, :return_recommended_songs)
 
+  @spec reset_queue(queue()) :: :ok
+  def reset_queue(queue_name),
+    do: make_genserver_request(queue_name, :call, :reset_queue)
+
   @spec persist_played_song(queue(), song_details()) :: :ok
   def persist_played_song(queue_name, song_details),
     do: make_genserver_request(queue_name, :cast, {:persist_song, song_details})
@@ -118,6 +127,15 @@ defmodule SongRecommender.SongQueue do
     state
     |> Map.put(:recommended_songs, songs)
     |> Map.put(:recommended_songs_count, Enum.count(songs))
+  end
+
+  defp default_queue_values do
+    %{
+      previously_played_songs: [],
+      previously_played_songs_count: 0,
+      recommended_songs: [],
+      recommended_songs_count: 0
+    }
   end
 
   defp return_new_recommended_songs([], new_songs), do: new_songs
