@@ -212,6 +212,20 @@ defmodule SongRecommender.Songs do
         MATCH (u:User {name: $username})
 
         CALL (u) {
+
+          CALL (*) {
+            MATCH (u)-[lt:LISTENED_TO]->(s:Song)-[:BELONGS_TO]->(g:Genre)
+            WHERE duration.between(lt.lastPlayedDate, datetime()).hours > 9
+            MATCH (a:Artist)-[:SANG]->(s)
+            RETURN s AS song, a AS artist, g AS genre
+            ORDER BY lt.durationPlayedMs DESC
+            LIMIT 2
+          }
+
+          RETURN song, artist, genre
+
+        UNION
+
           UNWIND $genres AS genreName
 
           CALL (*) {
