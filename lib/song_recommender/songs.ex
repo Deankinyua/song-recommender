@@ -210,30 +210,66 @@ defmodule SongRecommender.Songs do
         Bolt,
         """
         MATCH (u:User {name: $username})
-        CALL (*) {
 
+        CALL (u) {
           UNWIND $genres AS genreName
-          WITH genreName
+
           CALL (*) {
-            MATCH (a:Artist)-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre {name: genreName})
-            OPTIONAL MATCH (u)-[lt:LISTENED_TO]->(s)
-            RETURN s AS song, a AS artist, g AS genre
-            ORDER BY s.popularity DESC, lt.lastPlayedDate DESC
+            MATCH (g:Genre {name: genreName})
+            OPTIONAL MATCH (s:Song)-[:BELONGS_TO]->(g)
+            WHERE NOT EXISTS { (u)-[:LISTENED_TO]->(s) }
+            WITH *
+            ORDER BY s.popularity DESC
+
+            CALL (*) {
+              WHEN s IS NOT NULL THEN {
+                MATCH (a:Artist)-[:SANG]->(s)
+                RETURN a AS theArtist, s AS theSong
+              }
+              ELSE {
+                MATCH (a:Artist)-[:SANG]->(listenedToSong:Song)-[:BELONGS_TO]->(g)
+                MATCH (u)-[lt:LISTENED_TO]->(listenedToSong)
+                RETURN a AS theArtist, listenedToSong AS theSong
+                ORDER BY lt.lastPlayedDate
+                LIMIT $genres_song_limit
+              }
+            }
+
+            RETURN theSong AS song, theArtist AS artist, g AS genre
             LIMIT $genres_song_limit
           }
+
           RETURN song, artist, genre
 
         UNION
 
           UNWIND $artists AS artistName
-          WITH artistName
+
           CALL (*) {
-            MATCH (a:Artist {name: artistName})-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre)
-            OPTIONAL MATCH (u)-[lt:LISTENED_TO]->(s)
-            RETURN s AS song, a AS artist, g AS genre
-            ORDER BY s.popularity DESC, lt.lastPlayedDate
-            LIMIT $artists_song_limit
+            MATCH (a:Artist {name: artistName})
+            OPTIONAL MATCH (a)-[:SANG]->(s:Song)
+            WHERE NOT EXISTS { (u)-[:LISTENED_TO]->(s) }
+            WITH *
+            ORDER BY s.popularity DESC
+
+            CALL (*) {
+              WHEN s IS NOT NULL THEN {
+                MATCH (s)-[:BELONGS_TO]->(g:Genre)
+                RETURN g, s AS theSong
+              }
+              ELSE {
+                MATCH (a)-[:SANG]->(listenedToSong:Song)-[:BELONGS_TO]->(g:Genre)
+                MATCH (u)-[lt:LISTENED_TO]->(listenedToSong)
+                RETURN g, listenedToSong AS theSong
+                ORDER BY lt.lastPlayedDate
+                LIMIT $genres_song_limit
+              }
+            }
+
+            RETURN a AS artist, g AS genre, theSong AS song
+            LIMIT $genres_song_limit
           }
+
           RETURN song, artist, genre
 
         }
