@@ -1,7 +1,7 @@
 defmodule SongRecommender.Songs.UpdateUserListeningHistoryWorker do
   @moduledoc """
   Updates the listening history of a user within a given session
-  in batches of 4 songs each.
+  in batches of 3 songs each.
   """
 
   use Oban.Worker,
