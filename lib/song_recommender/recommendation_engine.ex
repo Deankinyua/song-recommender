@@ -18,7 +18,7 @@ defmodule SongRecommender.RecommendationEngine do
   alias SongRecommender.QueryEngine
   alias SongRecommender.Songs
 
-  @ideal_song_number 12
+  @ideal_song_number 16
   @threshold_listening_time_ms 3_600_000
   @timeout 1_200_000
 
