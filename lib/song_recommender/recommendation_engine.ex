@@ -18,9 +18,11 @@ defmodule SongRecommender.RecommendationEngine do
   alias SongRecommender.QueryEngine
   alias SongRecommender.Songs
 
-  @ideal_song_number 10
+  @ideal_song_number 16
   @threshold_listening_time_ms 3_600_000
   @timeout 1_200_000
+
+  @type engine_name :: String.t()
 
   @spec start_link(any()) :: GenServer.on_start()
   def start_link(opts) do
@@ -53,12 +55,17 @@ defmodule SongRecommender.RecommendationEngine do
 
   @impl GenServer
   def handle_cast(
-        :get_initial_songs,
-        %{queue_name: queue_name, strategy: strategy, taste_profile: taste_profile} = state
+        :get_songs,
+        %{
+          queue_name: queue_name,
+          strategy: strategy,
+          taste_profile: taste_profile,
+          username: username
+        } = state
       ) do
     :ok =
       strategy
-      |> QueryEngine.get_initial_songs(taste_profile)
+      |> QueryEngine.get_songs(username, taste_profile)
       |> send_songs_to_queue(queue_name)
 
     {:noreply, state, @timeout}
@@ -74,8 +81,8 @@ defmodule SongRecommender.RecommendationEngine do
     taste_profile = fetch_recommendation_utility_data(strategy, username)
 
     :ok =
-      taste_profile
-      |> Songs.get_songs_with_genre_based_strategy()
+      username
+      |> Songs.get_songs_with_genre_based_strategy(taste_profile)
       |> send_songs_to_queue(queue_name)
 
     new_state = Map.put(state, :taste_profile, taste_profile)
@@ -92,8 +99,13 @@ defmodule SongRecommender.RecommendationEngine do
     {:stop, :normal, state}
   end
 
+  @spec maybe_change_taste_profile(engine_name()) ::
+          {:ok, :profile_changed} | {:error, :profile_should_not_change}
   def maybe_change_taste_profile(engine_name),
     do: make_genserver_request(engine_name, :call, :change_taste_profile)
+
+  @spec recommend_new_songs(engine_name()) :: :ok
+  def recommend_new_songs(engine_name), do: make_genserver_request(engine_name, :cast, :get_songs)
 
   defp send_songs_to_queue(songs, queue_name),
     do: make_genserver_request(queue_name, :call, {:recommended_songs, songs})

@@ -5,6 +5,7 @@ defmodule SongRecommender.Songs do
 
   import Ecto.Changeset, only: [apply_action!: 2]
 
+  alias SongRecommender.PubSub
   alias SongRecommender.Songs.Song
 
   @type attrs :: map()
@@ -12,9 +13,42 @@ defmodule SongRecommender.Songs do
   @type genre_name :: String.t()
   @type listening_duration :: integer()
   @type song :: Song.t()
+  @type song_and_listening_time :: [song_id() | listening_duration()]
   @type song_id :: String.t()
   @type taste_profile :: map()
   @type username :: String.t()
+
+  @doc """
+   Subscribes to song events.
+
+  ## Examples
+
+      iex> subscribe("550e8400-e29b-41d4-a716-446655440000")
+      :ok
+
+  """
+  @spec subscribe(username()) :: :ok
+  def subscribe(username) do
+    Phoenix.PubSub.subscribe(PubSub, "songs-#{username}")
+  end
+
+  @doc """
+  Broadcasts a message with newly recommended songs.
+
+  ## Examples
+
+      iex> broadcast("Robert", recommended_songs)
+      :ok
+
+  """
+  @spec broadcast(username(), [song()]) :: :ok
+  def broadcast(username, recommended_songs) do
+    Phoenix.PubSub.broadcast(
+      PubSub,
+      "songs-#{username}",
+      {:new_recommended_songs, recommended_songs}
+    )
+  end
 
   @doc """
   Returns a song with its details
@@ -119,11 +153,55 @@ defmodule SongRecommender.Songs do
   end
 
   @doc """
+  Adds direct listening relationships between users and songs. It also
+  adds these relationships to artists and genres which helps in the Wrapped feature
+  and also checking the totalListeningTime for the user computed by going
+  through all the genres of music the user has listened to.
+
+  ## Examples
+
+      iex> persist_user_session_history("Dean", [ ["24NvptbNKGs6sPy1Vh1O0v", 3213], ["1RjEDlhTp2iJXWPdLpa8OM", 1293] ])
+       %Boltx.Response{}
+  """
+
+  @spec persist_user_session_history(username(), [song_and_listening_time()]) :: bolt_response()
+  def persist_user_session_history(username, songs_listening_history) do
+    Boltx.query!(
+      Bolt,
+      """
+      MATCH (user:User {name: $username})
+      UNWIND $songs_listening_history AS songAndDurationPlayed
+      WITH user,
+           songAndDurationPlayed[0] AS song_id,
+           songAndDurationPlayed[1] AS durationPlayedMs
+      MATCH (a:Artist)-[:SANG]->(song:Song {id: song_id})-[:BELONGS_TO]->(g:Genre)
+      MERGE (user)-[lt:LISTENED_TO]->(song)
+      ON CREATE SET lt.durationPlayedMs = durationPlayedMs
+      ON MATCH SET lt.durationPlayedMs = lt.durationPlayedMs + durationPlayedMs
+      SET lt.lastPlayedDate = datetime()
+      MERGE (user)-[lg:LISTENED_TO_GENRE]->(g)
+      ON CREATE SET lg.totalDurationPlayedMs = durationPlayedMs
+      ON MATCH SET lg.totalDurationPlayedMs = lg.totalDurationPlayedMs + durationPlayedMs
+      MERGE (user)-[la:LISTENED_TO_ARTIST]->(a)
+      ON CREATE SET la.totalDurationPlayedMs = durationPlayedMs
+      ON MATCH SET la.totalDurationPlayedMs = la.totalDurationPlayedMs + durationPlayedMs
+      """,
+      %{
+        songs_listening_history: songs_listening_history,
+        username: username
+      }
+    )
+  end
+
+  @doc """
   Gets songs belonging to some genres and some sang by some artists
   """
 
-  @spec get_songs_with_genre_based_strategy(taste_profile()) :: [song()]
-  def get_songs_with_genre_based_strategy(%{artists: artists, genres: genres} = _taste_profile) do
+  @spec get_songs_with_genre_based_strategy(username(), taste_profile()) :: [song()]
+  def get_songs_with_genre_based_strategy(
+        username,
+        %{artists: artists, genres: genres} = _taste_profile
+      ) do
     %{nodes: artist_names, limit: artists_song_limit} = artists
     %{nodes: genre_names, limit: genres_song_limit} = genres
 
@@ -131,28 +209,81 @@ defmodule SongRecommender.Songs do
       Boltx.query!(
         Bolt,
         """
-        CALL () {
+        MATCH (u:User {name: $username})
+
+        CALL (u) {
+
+          CALL (*) {
+            MATCH (u)-[lt:LISTENED_TO]->(s:Song)-[:BELONGS_TO]->(g:Genre)
+            WHERE duration.between(lt.lastPlayedDate, datetime()).hours > 9
+            MATCH (a:Artist)-[:SANG]->(s)
+            RETURN s AS song, a AS artist, g AS genre
+            ORDER BY lt.durationPlayedMs DESC
+            LIMIT 2
+          }
+
+          RETURN song, artist, genre
+
+        UNION
 
           UNWIND $genres AS genreName
-          WITH genreName
+
           CALL (*) {
-            MATCH (a:Artist)-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre {name: genreName})
-            RETURN s AS song, a AS artist, g AS genre
+            MATCH (g:Genre {name: genreName})
+            OPTIONAL MATCH (s:Song)-[:BELONGS_TO]->(g)
+            WHERE NOT EXISTS { (u)-[:LISTENED_TO]->(s) }
+            WITH *
             ORDER BY s.popularity DESC
+
+            CALL (*) {
+              WHEN s IS NOT NULL THEN {
+                MATCH (a:Artist)-[:SANG]->(s)
+                RETURN a AS theArtist, s AS theSong
+              }
+              ELSE {
+                MATCH (a:Artist)-[:SANG]->(listenedToSong:Song)-[:BELONGS_TO]->(g)
+                MATCH (u)-[lt:LISTENED_TO]->(listenedToSong)
+                RETURN a AS theArtist, listenedToSong AS theSong
+                ORDER BY lt.lastPlayedDate
+                LIMIT $genres_song_limit
+              }
+            }
+
+            RETURN theSong AS song, theArtist AS artist, g AS genre
             LIMIT $genres_song_limit
           }
+
           RETURN song, artist, genre
 
         UNION
 
           UNWIND $artists AS artistName
-          WITH artistName
+
           CALL (*) {
-            MATCH (a:Artist {name: artistName})-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre)
-            RETURN s AS song, a AS artist, g AS genre
+            MATCH (a:Artist {name: artistName})
+            OPTIONAL MATCH (a)-[:SANG]->(s:Song)
+            WHERE NOT EXISTS { (u)-[:LISTENED_TO]->(s) }
+            WITH *
             ORDER BY s.popularity DESC
-            LIMIT $artists_song_limit
+
+            CALL (*) {
+              WHEN s IS NOT NULL THEN {
+                MATCH (s)-[:BELONGS_TO]->(g:Genre)
+                RETURN g, s AS theSong
+              }
+              ELSE {
+                MATCH (a)-[:SANG]->(listenedToSong:Song)-[:BELONGS_TO]->(g:Genre)
+                MATCH (u)-[lt:LISTENED_TO]->(listenedToSong)
+                RETURN g, listenedToSong AS theSong
+                ORDER BY lt.lastPlayedDate
+                LIMIT $genres_song_limit
+              }
+            }
+
+            RETURN a AS artist, g AS genre, theSong AS song
+            LIMIT $genres_song_limit
           }
+
           RETURN song, artist, genre
 
         }
@@ -165,11 +296,14 @@ defmodule SongRecommender.Songs do
           artists: artist_names,
           artists_song_limit: artists_song_limit,
           genres: genre_names,
-          genres_song_limit: genres_song_limit
+          genres_song_limit: genres_song_limit,
+          username: username
         }
       )
 
-    Enum.map(song_data, &process_song_data(&1))
+    song_data
+    |> Enum.map(&process_song_data(&1))
+    |> Enum.shuffle()
   end
 
   defp process_song_data(%{

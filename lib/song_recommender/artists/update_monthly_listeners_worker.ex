@@ -4,7 +4,7 @@ defmodule SongRecommender.Artists.UpdateMonthlyListenersWorker do
   """
 
   use Oban.Worker,
-    max_attempts: 3,
+    max_attempts: 1,
     queue: :update_artist_listeners
 
   alias SongRecommender.Artists

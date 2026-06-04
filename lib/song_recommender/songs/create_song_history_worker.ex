@@ -7,7 +7,7 @@ defmodule SongRecommender.Songs.CreateSongHistoryWorker do
   """
 
   use Oban.Worker,
-    max_attempts: 3,
+    max_attempts: 1,
     queue: :set_song_history
 
   alias SongRecommender.Songs
