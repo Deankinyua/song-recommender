@@ -245,18 +245,20 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def handle_event(
         "follow_artist",
         %{"artist" => artist_name},
-        %{assigns: %{current_user: user}} = socket
+        %{assigns: %{current_user: user, engine_name: engine_name}} = socket
       ) do
     Artists.follow_artist(user.name, artist_name)
+    :ok = RecommendationEngine.track_followed_artist(engine_name)
     {:noreply, socket}
   end
 
   def handle_event(
         "unfollow_artist",
         %{"artist" => artist_name},
-        %{assigns: %{current_user: user}} = socket
+        %{assigns: %{current_user: user, engine_name: engine_name}} = socket
       ) do
     Artists.unfollow_artist(user.name, artist_name)
+    :ok = RecommendationEngine.track_unfollowed_artist(engine_name)
     {:noreply, socket}
   end
 
