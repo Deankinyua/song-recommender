@@ -379,7 +379,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
       EngineQueueSupervisor.start_song_queue(queue_name, username)
       Songs.subscribe(username)
 
-      if !capture_preferences?, do: Process.send_after(self(), :get_initial_songs, 800)
+      if !capture_preferences?, do: Process.send_after(self(), :get_initial_songs, 1200)
 
       socket
       |> assign(:engine_name, engine_name)
