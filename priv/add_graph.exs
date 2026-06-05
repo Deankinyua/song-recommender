@@ -46,7 +46,25 @@ defmodule AddGraph do
   defp process_songs(songs), do: Enum.map(songs, &add_song_details(&1))
 
   defp add_song_details(song_details) do
-    [[artist, track_name, track_id, popularity, year_released, genre, duration_ms]] =
+    [
+      [
+        artist,
+        track_name,
+        track_id,
+        popularity,
+        year_released,
+        genre,
+        danceability,
+        energy,
+        key,
+        loudness,
+        acousticness,
+        instrumentalness,
+        liveness,
+        valence,
+        duration_ms
+      ]
+    ] =
       song_details
       |> String.trim()
       |> SpotifyDataCSV.parse_string(skip_headers: false)
