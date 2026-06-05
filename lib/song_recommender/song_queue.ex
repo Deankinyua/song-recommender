@@ -15,6 +15,8 @@ defmodule SongRecommender.SongQueue do
   alias SongRecommender.Songs.Song
   alias SongRecommender.Songs.UpdateUserListeningHistoryWorker
 
+  @previously_played_songs_count_threshold 3
+
   @type duration_played :: integer()
   @type queue :: String.t()
   @type song :: Song.t()
@@ -72,7 +74,7 @@ defmodule SongRecommender.SongQueue do
           username: username
         } = state
       ) do
-    case song_count < 3 do
+    case song_count < @previously_played_songs_count_threshold do
       true ->
         previously_played_songs = [song_details | previously_played_songs]
 

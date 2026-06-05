@@ -50,8 +50,9 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           <.live_component
             id="artist-details-component"
             module={ArtistDetailsComponent}
-            current_user={@current_user}
             artist_image={@current_artist_image}
+            current_user={@current_user}
+            engine_name={@engine_name}
             song={@current_song}
           />
         </section>
@@ -67,6 +68,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
      |> assign(:current_artist_image, nil)
      |> assign(:current_song, %Song{})
      |> assign(:current_song_count, 0)
+     |> assign(:engine_name, nil)
      |> assign(:played_song_count, 0)
      |> maybe_fetch_genres()
      |> setup_recommendation_engine()
@@ -245,18 +247,20 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   def handle_event(
         "follow_artist",
         %{"artist" => artist_name},
-        %{assigns: %{current_user: user}} = socket
+        %{assigns: %{current_user: user, engine_name: engine_name}} = socket
       ) do
     Artists.follow_artist(user.name, artist_name)
+    :ok = RecommendationEngine.track_followed_artist(engine_name)
     {:noreply, socket}
   end
 
   def handle_event(
         "unfollow_artist",
         %{"artist" => artist_name},
-        %{assigns: %{current_user: user}} = socket
+        %{assigns: %{current_user: user, engine_name: engine_name}} = socket
       ) do
     Artists.unfollow_artist(user.name, artist_name)
+    :ok = RecommendationEngine.track_unfollowed_artist(engine_name)
     {:noreply, socket}
   end
 

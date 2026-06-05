@@ -19,6 +19,8 @@ defmodule SongRecommender.RecommendationEngine do
   alias SongRecommender.Songs
 
   @ideal_song_number 16
+  @just_followed_artists_threshold 3
+  @just_unfollowed_artists_threshold 2
   @threshold_listening_time_ms 3_600_000
   @timeout 1_200_000
 
@@ -46,9 +48,11 @@ defmodule SongRecommender.RecommendationEngine do
 
     new_state =
       state
+      |> Map.put(:followed_artists, 0)
       |> Map.put(:queue_name, queue_name)
       |> Map.put(:strategy, recommendation_strategy)
       |> Map.put(:taste_profile, taste_profile)
+      |> Map.put(:unfollowed_artists, 0)
 
     {:noreply, new_state, @timeout}
   end
@@ -69,6 +73,54 @@ defmodule SongRecommender.RecommendationEngine do
       |> send_songs_to_queue(queue_name)
 
     {:noreply, state, @timeout}
+  end
+
+  def handle_cast(
+        :artist_followed,
+        %{
+          followed_artists: followed_artists,
+          strategy: recommendation_strategy,
+          username: username
+        } = state
+      ) do
+    new_state =
+      case followed_artists < @just_followed_artists_threshold do
+        true ->
+          Map.put(state, :followed_artists, followed_artists + 1)
+
+        false ->
+          taste_profile = fetch_recommendation_utility_data(recommendation_strategy, username)
+
+          state
+          |> Map.put(:followed_artists, 1)
+          |> Map.put(:taste_profile, taste_profile)
+      end
+
+    {:noreply, new_state, @timeout}
+  end
+
+  def handle_cast(
+        :artist_unfollowed,
+        %{
+          unfollowed_artists: unfollowed_artists,
+          strategy: recommendation_strategy,
+          username: username
+        } = state
+      ) do
+    new_state =
+      case unfollowed_artists < @just_unfollowed_artists_threshold do
+        true ->
+          Map.put(state, :unfollowed_artists, unfollowed_artists + 1)
+
+        false ->
+          taste_profile = fetch_recommendation_utility_data(recommendation_strategy, username)
+
+          state
+          |> Map.put(:unfollowed_artists, 1)
+          |> Map.put(:taste_profile, taste_profile)
+      end
+
+    {:noreply, new_state, @timeout}
   end
 
   @impl GenServer
@@ -106,6 +158,14 @@ defmodule SongRecommender.RecommendationEngine do
 
   @spec recommend_new_songs(engine_name()) :: :ok
   def recommend_new_songs(engine_name), do: make_genserver_request(engine_name, :cast, :get_songs)
+
+  @spec track_followed_artist(engine_name()) :: :ok
+  def track_followed_artist(engine_name),
+    do: make_genserver_request(engine_name, :cast, :artist_followed)
+
+  @spec track_unfollowed_artist(engine_name()) :: :ok
+  def track_unfollowed_artist(engine_name),
+    do: make_genserver_request(engine_name, :cast, :artist_unfollowed)
 
   defp send_songs_to_queue(songs, queue_name),
     do: make_genserver_request(queue_name, :call, {:recommended_songs, songs})
