@@ -50,8 +50,9 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           <.live_component
             id="artist-details-component"
             module={ArtistDetailsComponent}
-            current_user={@current_user}
             artist_image={@current_artist_image}
+            current_user={@current_user}
+            engine_name={@engine_name}
             song={@current_song}
           />
         </section>
@@ -67,6 +68,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
      |> assign(:current_artist_image, nil)
      |> assign(:current_song, %Song{})
      |> assign(:current_song_count, 0)
+     |> assign(:engine_name, nil)
      |> assign(:played_song_count, 0)
      |> maybe_fetch_genres()
      |> setup_recommendation_engine()

@@ -6,6 +6,7 @@ defmodule SongRecommenderWeb.Songs.ArtistDetailsComponent do
   use SongRecommenderWeb, :live_component
 
   alias SongRecommender.Artists
+  alias SongRecommender.RecommendationEngine
 
   @impl Phoenix.LiveComponent
   def render(assigns) do
@@ -59,10 +60,11 @@ defmodule SongRecommenderWeb.Songs.ArtistDetailsComponent do
   def handle_event(
         "follow_artist",
         %{"artist" => artist_name},
-        %{assigns: %{current_user: user, song: song}} = socket
+        %{assigns: %{current_user: user, engine_name: engine, song: song}} = socket
       ) do
     Artists.follow_artist(user.name, artist_name)
 
+    :ok = RecommendationEngine.track_followed_artist(engine)
     artist = %{song.artist | following: true}
     updated_song = %{song | artist: artist}
 
@@ -72,10 +74,11 @@ defmodule SongRecommenderWeb.Songs.ArtistDetailsComponent do
   def handle_event(
         "unfollow_artist",
         %{"artist" => artist_name},
-        %{assigns: %{current_user: user, song: song}} = socket
+        %{assigns: %{current_user: user, engine_name: engine, song: song}} = socket
       ) do
     Artists.unfollow_artist(user.name, artist_name)
 
+    :ok = RecommendationEngine.track_unfollowed_artist(engine)
     artist = %{song.artist | following: false}
     updated_song = %{song | artist: artist}
 
