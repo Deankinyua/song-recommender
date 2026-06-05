@@ -3,9 +3,11 @@ defmodule SongRecommender.GraphHelpers do
   Helpers to add and clear graph data.
   """
 
-  @type artist :: String.t()
+  @type artist_name :: String.t()
   @type bolt_response :: Boltx.Response.t()
-  @type genre :: String.t()
+  @type genre_name :: String.t()
+  @type song_id :: String.t()
+  @type username :: String.t()
 
   @doc """
   Clears the graph so that the next test can start on a clean slate
@@ -22,7 +24,7 @@ defmodule SongRecommender.GraphHelpers do
     )
   end
 
-  @spec create_songs_with_genre(genre()) :: bolt_response()
+  @spec create_songs_with_genre(genre_name()) :: [song_id()]
   def create_songs_with_genre(genre) do
     Bolt
     |> Boltx.query!(
@@ -49,6 +51,7 @@ defmodule SongRecommender.GraphHelpers do
     |> return_song_ids()
   end
 
+  @spec check_for_listens(username(), song_id()) :: boolean()
   def check_for_listens(username, song_id) do
     Bolt
     |> Boltx.query!(
@@ -61,7 +64,7 @@ defmodule SongRecommender.GraphHelpers do
     |> user_listened_to_song?()
   end
 
-  @spec create_genres([genre()]) :: bolt_response()
+  @spec create_genres([genre_name()]) :: [genre_name()]
   def create_genres(genres) do
     Bolt
     |> Boltx.query!(
@@ -76,7 +79,7 @@ defmodule SongRecommender.GraphHelpers do
     |> return_genres()
   end
 
-  @spec create_artists([artist()]) :: bolt_response()
+  @spec create_artists([artist_name()]) :: [artist_name()]
   def create_artists(artists) do
     Bolt
     |> Boltx.query!(
