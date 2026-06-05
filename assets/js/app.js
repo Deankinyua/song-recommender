@@ -42,10 +42,6 @@ let Hooks = {
 };
 
 let showOrHideGenrePreferencesPopup = () => {
-  if (localStorage.getItem("show-genre-preferences-popup") === null) {
-    localStorage.setItem("show-genre-preferences-popup", true);
-  }
-
   return localStorage.getItem("show-genre-preferences-popup");
 };
 
@@ -62,6 +58,10 @@ const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: params,
   hooks: Hooks,
+});
+
+window.addEventListener("phx:registration_complete", () => {
+  localStorage.setItem("show-genre-preferences-popup", true);
 });
 
 // Show progress bar on live navigation and form submits

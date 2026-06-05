@@ -83,7 +83,11 @@ defmodule SongRecommenderWeb.AuthLive.SignUp do
       {:noreply, put_flash(socket, :info, "#{username} already exists, try logging in")}
     else
       Accounts.register_user(user_params)
-      {:noreply, assign(socket, :trigger_submit, true)}
+
+      {:noreply,
+       socket
+       |> assign(:trigger_submit, true)
+       |> push_event("registration_complete", %{})}
     end
   end
 
