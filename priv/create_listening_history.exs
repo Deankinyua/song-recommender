@@ -6,8 +6,8 @@ defmodule CreateListeningHistory do
   emerges when a combination of chords and notes are chosen as Zipfian units
   (https://arxiv.org/abs/1902.06678) Songs from the same genre might share
   similar characteristics; even though this is a bit of an oversimplification.
-  That said, I used the genre as the Zipfian units. This script will definitely
-  take a while to complete, so you can just import the data into Neo4j.
+  That said, I used the genre as the Zipfian units. However, this will not account
+  for much of the recommendations since we will rely more on content-based filtering.
   """
 
   alias SongRecommender.Accounts.CreateUserWorker
@@ -16,7 +16,7 @@ defmodule CreateListeningHistory do
 
   @chunk_size 20
   @max_percentage_for_a_genre 43..69
-  @songs_threshold 200
+  @songs_threshold 120
   @zipf_exponent 0.96
 
   def start do
@@ -25,8 +25,8 @@ defmodule CreateListeningHistory do
     genre_categories = get_genre_categories()
 
     Enum.each(genre_categories, fn category ->
-      # 500 users per group of genres
-      1..500
+      # 50 users per group of genres
+      1..50
       |> Stream.chunk_every(@chunk_size)
       |> Enum.map(&process_users(&1, category))
     end)
