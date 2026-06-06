@@ -69,6 +69,19 @@ defmodule AddGraph do
       |> String.trim()
       |> SpotifyDataCSV.parse_string(skip_headers: false)
 
+    attributes_sum =
+      danceability + energy + key + loudness + acousticness + instrumentalness + liveness +
+        valence
+
+    danceability = Float.round(danceability / attributes_sum, 4)
+    energy = Float.round(energy / attributes_sum, 4)
+    key = Float.round(key / attributes_sum, 4)
+    loudness = Float.round(loudness / attributes_sum, 4)
+    acousticness = Float.round(acousticness / attributes_sum, 4)
+    instrumentalness = Float.round(instrumentalness / attributes_sum, 4)
+    liveness = Float.round(liveness / attributes_sum, 4)
+    valence = Float.round(valence / attributes_sum, 4)
+
     Boltx.query!(
       Bolt,
       """
@@ -77,7 +90,16 @@ defmodule AddGraph do
                     s.popularity = $popularity,
                     s.released = $year_released,
                     s.name = $track_name,
-                    s.normalizedName = $track_normalized_name
+                    s.normalizedName = $track_normalized_name,
+                    s.danceability = $danceability,
+                    s.energy = $energy,
+                    s.key = $key,
+                    s.loudness = $loudness,
+                    s.acousticness = $acousticness,
+                    s.instrumentalness = $instrumentalness,
+                    s.liveness = $liveness,
+                    s.valence = $valence
+
       OPTIONAL MATCH (s)-[:BELONGS_TO]->(genre:Genre)
       CALL (*) {
         WHEN genre IS NULL THEN {
@@ -99,7 +121,15 @@ defmodule AddGraph do
         track_id: track_id,
         track_name: track_name,
         track_normalized_name: String.downcase(track_name),
-        year_released: String.to_integer(year_released)
+        year_released: String.to_integer(year_released),
+        danceability: danceability,
+        energy: energy,
+        key: key,
+        loudness: loudness,
+        acousticness: acousticness,
+        instrumentalness: instrumentalness,
+        liveness: liveness,
+        valence: valence
       }
     )
   end
