@@ -69,18 +69,28 @@ defmodule AddGraph do
       |> String.trim()
       |> SpotifyDataCSV.parse_string(skip_headers: false)
 
-    attributes_sum =
-      danceability + energy + key + loudness + acousticness + instrumentalness + liveness +
-        valence
+    {danceability_num, _rem} = Float.parse(danceability)
+    {energy_num, _rem} = Float.parse(energy)
+    key_num = String.to_integer(key)
+    {loudness_num, _rem} = Float.parse(loudness)
+    {acousticness_num, _rem} = Float.parse(acousticness)
+    {instrumentalness_num, _rem} = Float.parse(instrumentalness)
+    {liveness_num, _rem} = Float.parse(liveness)
+    {valence_num, _rem} = Float.parse(valence)
 
-    danceability = Float.round(danceability / attributes_sum, 4)
-    energy = Float.round(energy / attributes_sum, 4)
-    key = Float.round(key / attributes_sum, 4)
-    loudness = Float.round(loudness / attributes_sum, 4)
-    acousticness = Float.round(acousticness / attributes_sum, 4)
-    instrumentalness = Float.round(instrumentalness / attributes_sum, 4)
-    liveness = Float.round(liveness / attributes_sum, 4)
-    valence = Float.round(valence / attributes_sum, 4)
+    attributes_sum =
+      danceability_num + energy_num + key_num + loudness_num + acousticness_num +
+        instrumentalness_num + liveness_num +
+        valence_num
+
+    danceability = Float.round(danceability_num / attributes_sum, 4)
+    energy = Float.round(energy_num / attributes_sum, 4)
+    key = Float.round(key_num / attributes_sum, 4)
+    loudness = Float.round(loudness_num / attributes_sum, 4)
+    acousticness = Float.round(acousticness_num / attributes_sum, 4)
+    instrumentalness = Float.round(instrumentalness_num / attributes_sum, 4)
+    liveness = Float.round(liveness_num / attributes_sum, 4)
+    valence = Float.round(valence_num / attributes_sum, 4)
 
     Boltx.query!(
       Bolt,
