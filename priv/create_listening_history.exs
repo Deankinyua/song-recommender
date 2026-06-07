@@ -6,11 +6,9 @@ defmodule CreateListeningHistory do
   emerges when a combination of chords and notes are chosen as Zipfian units
   (https://arxiv.org/abs/1902.06678) Songs from the same genre might share
   similar characteristics; even though this is a bit of an oversimplification.
-  That said, I used the genre as the Zipfian units. However, this will not account
-  for much of the recommendations since we will rely more on content-based filtering.
+  That said, I used the genre as the Zipfian units.
 
-
-  EDIT: I retired using this in the application
+  EDIT: I retired using this for recommendations; only using it for checking monthly listeners
   """
 
   alias SongRecommender.Accounts.CreateUserWorker
