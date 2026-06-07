@@ -69,18 +69,14 @@ defmodule AddGraph do
       |> String.trim()
       |> SpotifyDataCSV.parse_string(skip_headers: false)
 
-    attributes_sum =
-      danceability + energy + key + loudness + acousticness + instrumentalness + liveness +
-        valence
-
-    danceability = Float.round(danceability / attributes_sum, 4)
-    energy = Float.round(energy / attributes_sum, 4)
-    key = Float.round(key / attributes_sum, 4)
-    loudness = Float.round(loudness / attributes_sum, 4)
-    acousticness = Float.round(acousticness / attributes_sum, 4)
-    instrumentalness = Float.round(instrumentalness / attributes_sum, 4)
-    liveness = Float.round(liveness / attributes_sum, 4)
-    valence = Float.round(valence / attributes_sum, 4)
+    {danceability, _rem} = Float.parse(danceability)
+    {energy, _rem} = Float.parse(energy)
+    key = String.to_integer(key)
+    {loudness, _rem} = Float.parse(loudness)
+    {acousticness, _rem} = Float.parse(acousticness)
+    {instrumentalness, _rem} = Float.parse(instrumentalness)
+    {liveness, _rem} = Float.parse(liveness)
+    {valence, _rem} = Float.parse(valence)
 
     Boltx.query!(
       Bolt,
