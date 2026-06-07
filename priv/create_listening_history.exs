@@ -8,6 +8,9 @@ defmodule CreateListeningHistory do
   similar characteristics; even though this is a bit of an oversimplification.
   That said, I used the genre as the Zipfian units. However, this will not account
   for much of the recommendations since we will rely more on content-based filtering.
+
+
+  EDIT: I retired using this in the application
   """
 
   alias SongRecommender.Accounts.CreateUserWorker
