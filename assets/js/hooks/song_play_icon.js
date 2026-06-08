@@ -13,7 +13,7 @@ SongPlayIconHooks.SongPlayIcon = {
       previousSongName?.classList.remove("playing-song-name");
     };
 
-    songPlayBtn.addEventListener("click", () => {
+    songPlayBtn.addEventListener("click", (e) => {
       let id = songPlayBtn.id;
 
       let {
@@ -43,6 +43,7 @@ SongPlayIconHooks.SongPlayIcon = {
       };
 
       if (id === current_song_id) {
+        e.stopPropagation();
         let songPlayerIcon = document.getElementById("pause-play");
 
         songPlayerIcon.dispatchEvent(
