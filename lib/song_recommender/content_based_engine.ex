@@ -40,7 +40,7 @@ defmodule SongRecommender.ContentBasedEngine do
     |> Stream.map(& &1.id)
     |> Stream.zip(cosine_similarity_result)
     |> Enum.sort_by(fn {_id, score} -> score end, :desc)
-    |> Enum.take(15)
+    |> Enum.take(18)
     |> Enum.map(fn {id, _score} -> id end)
   end
 

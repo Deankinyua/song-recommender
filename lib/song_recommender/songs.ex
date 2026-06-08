@@ -367,7 +367,7 @@ defmodule SongRecommender.Songs do
             WHERE a.name <> $artist_name
             RETURN s AS song
             SKIP $randomizer
-            LIMIT 35
+            LIMIT 45
           }
 
           RETURN song
