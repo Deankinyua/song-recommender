@@ -27,8 +27,8 @@ defmodule SongRecommender.Songs.Song do
   end
 
   @spec changeset(t(), attrs()) :: changeset()
-  def changeset(user, attrs) do
-    user
+  def changeset(song, attrs) do
+    song
     |> cast(attrs, [:duration_ms, :id, :name, :popularity, :released])
     |> validate_required([:duration_ms, :id, :name])
     |> cast_embed(:artist)

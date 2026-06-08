@@ -6,12 +6,14 @@ defmodule SongRecommender.Songs do
   import Ecto.Changeset, only: [apply_action!: 2]
 
   alias SongRecommender.PubSub
+  alias SongRecommender.Songs.MusicalProperties
   alias SongRecommender.Songs.Song
 
   @type attrs :: map()
   @type bolt_response :: Boltx.Response.t()
   @type genre_name :: String.t()
   @type listening_duration :: integer()
+  @type musical_properties :: MusicalProperties.t()
   @type song :: Song.t()
   @type song_and_listening_time :: [song_id() | listening_duration()]
   @type song_id :: String.t()
@@ -65,6 +67,47 @@ defmodule SongRecommender.Songs do
         |> Song.changeset(song_attrs)
         |> apply_action!(:update)
     end
+  end
+
+  @doc """
+  Returns the musical properties e.g valence, danceability e.t.c of a song
+  """
+
+  @spec get_song_musical_properties(song_id()) :: musical_properties() | nil
+  def get_song_musical_properties(song_id) do
+    case song_by_id(song_id) do
+      nil ->
+        nil
+
+      %{"song" => song_attrs} ->
+        %MusicalProperties{}
+        |> MusicalProperties.changeset(song_attrs)
+        |> apply_action!(:update)
+    end
+  end
+
+  @doc """
+  Returns multiple songs in one go.
+  """
+
+  @spec get_multiple_songs([song_id()]) :: [song()]
+  def get_multiple_songs(song_ids) do
+    %Boltx.Response{results: song_data} =
+      Boltx.query!(
+        Bolt,
+        """
+        UNWIND $song_ids AS song_id
+        MATCH (artist:Artist)-[:SANG]->(song:Song {id: song_id})-[:BELONGS_TO]->(genre:Genre)
+        RETURN song { .*, duration_ms: song.durationMs },
+               artist { .*, id: randomUUID(), monthly_listeners: artist.monthlyListeners },
+               genre { .* }
+        """,
+        %{song_ids: song_ids}
+      )
+
+    song_data
+    |> Enum.map(&process_song_data(&1))
+    |> Enum.shuffle()
   end
 
   defp song_by_id(song_id) do
@@ -304,6 +347,71 @@ defmodule SongRecommender.Songs do
     song_data
     |> Enum.map(&process_song_data(&1))
     |> Enum.shuffle()
+  end
+
+  @doc """
+  Gets songs musical properties. Returns a list with %MusicalProperties{}
+  """
+
+  @spec get_songs_properties(map()) :: [musical_properties()]
+  def get_songs_properties(song_information) do
+    %Boltx.Response{results: song_musical_properties} =
+      Boltx.query!(
+        Bolt,
+        """
+        MATCH (targetSong:Song {id: $id})
+        CALL () {
+
+          CALL () {
+            MATCH (a:Artist)-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre {name: $genre_name})
+            WHERE a.name <> $artist_name
+            RETURN s AS song
+            SKIP $randomizer
+            LIMIT 45
+          }
+
+          RETURN song
+
+        UNION
+
+          CALL {
+            MATCH (a:Artist {name: $artist_name})-[:SANG]->(s:Song)
+            RETURN s AS song
+            SKIP $randomizer
+            LIMIT 5
+
+          UNION
+
+            MATCH (s:Song)
+            WHERE s.normalizedName CONTAINS toLower($artist_name)
+            RETURN s AS song
+            SKIP $randomizer
+            LIMIT 10
+          }
+
+          RETURN song
+
+        }
+
+        RETURN DISTINCT song { .* }
+
+        """,
+        song_information
+      )
+
+    Enum.map(song_musical_properties, &process_song_attributes(&1))
+  end
+
+  defp process_song_attributes(%{
+         "song" => song_attrs
+       }) do
+    populate_song_musical_properties(%MusicalProperties{}, song_attrs)
+  end
+
+  defp populate_song_musical_properties(%MusicalProperties{} = properties, attrs) do
+    properties
+    |> MusicalProperties.changeset(attrs)
+    |> apply_action!(:update)
   end
 
   defp process_song_data(%{

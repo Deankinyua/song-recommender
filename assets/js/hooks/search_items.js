@@ -4,6 +4,8 @@ SearchItemsHooks.SearchItems = {
   mounted() {
     let searchItemsHook = this;
 
+    let searchSongsContainer = searchItemsHook.el;
+
     const returnSongPlayButtons = () => {
       const songPlayButtons = document.querySelectorAll(
         "section.searched-song-play-icon > svg",
@@ -27,6 +29,13 @@ SearchItemsHooks.SearchItems = {
       "set_current_song_id_for_search",
       ({ current_song_id }) => setCurrentSongId(current_song_id),
     );
+
+    searchSongsContainer.addEventListener("click", (e) => {
+      const targetId = e.target.id;
+      if (targetId.startsWith("polygon")) {
+        searchItemsHook.pushEvent("should_recommend_new_songs", {});
+      }
+    });
   },
 };
 

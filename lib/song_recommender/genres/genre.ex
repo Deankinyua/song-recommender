@@ -19,8 +19,8 @@ defmodule SongRecommender.Genres.Genre do
   end
 
   @spec changeset(t(), attrs()) :: changeset()
-  def changeset(user, attrs) do
-    user
+  def changeset(genre, attrs) do
+    genre
     |> cast(attrs, [:name])
     |> validate_required([:name])
     |> validate_inclusion(:name, @valid_genres)

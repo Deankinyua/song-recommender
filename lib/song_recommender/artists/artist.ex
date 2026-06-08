@@ -20,8 +20,8 @@ defmodule SongRecommender.Artists.Artist do
   end
 
   @spec changeset(t(), attrs()) :: changeset()
-  def changeset(user, attrs) do
-    user
+  def changeset(artist, attrs) do
+    artist
     |> cast(attrs, [:following, :id, :monthly_listeners, :name])
     |> validate_required([:name, :id])
   end
