@@ -19,11 +19,17 @@ Finally, the recommendations are not absolute shit, try it out!
 
 # Setup
 
-- Install [Neo4j Desktop](https://neo4j.com/deployment-center/?desktop-gdb) on your PC and create an empty Neo4j instance. 
+- Install [Neo4j Desktop](https://neo4j.com/deployment-center/?desktop-gdb) on your PC and create an empty Neo4j instance. You can do it with [Docker](https://neo4j.com/docs/operations-manual/current/docker/introduction/) as well. 
 - Download the dump file from [here](https://drive.google.com/drive/folders/1SeOridgsPwETBSU9c_4hVzy4JJEN35DC?usp=sharing). 
 - In the instance box, on the top right corner you will see 3 dots. Click that button, then you'll see an option that says 'Load Database from file'. Choose the file you just downloaded above.
 - You can also create the data yourself directly from the spotify_data.csv file by running the scripts in the [priv directory](https://github.com/Deankinyua/song-recommender/blob/main/priv/add_graph.exs). 
 - Create a .env file with the contents of `.env.example` and adjust accordingly. 
 - Setup the application with `mix setup` then start your Phoenix server with `iex -S mix phx.server`
+
+# Testing
+
+Testing has been implemented via [TestContainers](https://github.com/testcontainers/testcontainers-elixir) by spinning up an ephemeral Neo4j sandbox environment. You need to have Docker installed to be able to run tests. Note that due to port mapping issues, you might need to stop the instance running on the Desktop app to be able to run tests effectively. 
+Make sure you can run docker commands without sudo e.g `docker ps`. If you are on Linux and can't do that then check out this [guide](https://docs.docker.com/engine/install/linux-postinstall/)
+Run the whole ci suite with `mix ci` and tests with `mix test`. 
 
 
