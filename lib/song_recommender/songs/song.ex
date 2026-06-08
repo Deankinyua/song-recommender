@@ -9,7 +9,6 @@ defmodule SongRecommender.Songs.Song do
 
   alias SongRecommender.Artists.Artist
   alias SongRecommender.Genres.Genre
-  alias SongRecommender.Songs.MusicalProperties
 
   @type attrs :: map()
   @type changeset :: Ecto.Changeset.t()
@@ -25,7 +24,6 @@ defmodule SongRecommender.Songs.Song do
 
     embeds_one :artist, Artist, defaults_to_struct: true, on_replace: :update
     embeds_one :genre, Genre
-    embeds_one :properties, MusicalProperties
   end
 
   @spec changeset(t(), attrs()) :: changeset()
@@ -35,6 +33,5 @@ defmodule SongRecommender.Songs.Song do
     |> validate_required([:duration_ms, :id, :name])
     |> cast_embed(:artist)
     |> cast_embed(:genre)
-    |> cast_embed(:properties)
   end
 end

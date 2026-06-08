@@ -232,6 +232,16 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   def handle_event(
+        "should_recommend_new_songs",
+        _params,
+        %{assigns: %{current_song: song, engine_name: engine_name}} = socket
+      ) do
+    RecommendationEngine.recommend_with_song(engine_name, song)
+
+    {:noreply, assign(socket, :current_song_count, 0)}
+  end
+
+  def handle_event(
         "change_genre_preferences",
         _params,
         %{assigns: %{current_user: user}} = socket
@@ -280,6 +290,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
         {:new_recommended_songs, recommended_songs},
         %{
           assigns: %{
+            current_song: song,
             current_song_count: song_count
           }
         } = socket
@@ -291,7 +302,8 @@ defmodule SongRecommenderWeb.SongsLive.Index do
      socket
      |> assign(:current_song_count, new_song_count)
      |> assign(:played_song_count, 0)
-     |> stream(:songs, processed_recommended_songs)}
+     |> push_event("set_current_song_id", %{current_song_id: song.id})
+     |> stream(:songs, processed_recommended_songs, at: -1, limit: -18)}
   end
 
   @impl Phoenix.LiveView
