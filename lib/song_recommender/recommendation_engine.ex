@@ -17,6 +17,7 @@ defmodule SongRecommender.RecommendationEngine do
   alias SongRecommender.Genres
   alias SongRecommender.QueryEngine
   alias SongRecommender.Songs
+  alias SongRecommender.Songs.Song
 
   @ideal_song_number 16
   @just_followed_artists_threshold 3
@@ -25,6 +26,7 @@ defmodule SongRecommender.RecommendationEngine do
   @timeout 1_200_000
 
   @type engine_name :: String.t()
+  @type song :: Song.t()
 
   @spec start_link(any()) :: GenServer.on_start()
   def start_link(opts) do
@@ -70,6 +72,15 @@ defmodule SongRecommender.RecommendationEngine do
     :ok =
       strategy
       |> QueryEngine.get_songs(username, taste_profile)
+      |> send_songs_to_queue(queue_name)
+
+    {:noreply, state, @timeout}
+  end
+
+  def handle_cast({:recommend_similar_songs, song_information}, %{queue_name: queue_name} = state) do
+    :ok =
+      song_information
+      |> QueryEngine.get_similar_songs()
       |> send_songs_to_queue(queue_name)
 
     {:noreply, state, @timeout}
@@ -166,6 +177,15 @@ defmodule SongRecommender.RecommendationEngine do
   @spec track_unfollowed_artist(engine_name()) :: :ok
   def track_unfollowed_artist(engine_name),
     do: make_genserver_request(engine_name, :cast, :artist_unfollowed)
+
+  @spec recommend_with_song(engine_name(), song()) :: :ok
+  def recommend_with_song(engine_name, song) do
+    song_information = extract_song_information(song)
+    make_genserver_request(engine_name, :cast, {:recommend_similar_songs, song_information})
+  end
+
+  defp extract_song_information(%Song{id: id, artist: artist, genre: genre}),
+    do: %{id: id, artist_name: artist.name, genre_name: genre.name, randomizer: :rand.uniform(20)}
 
   defp send_songs_to_queue(songs, queue_name),
     do: make_genserver_request(queue_name, :call, {:recommended_songs, songs})
