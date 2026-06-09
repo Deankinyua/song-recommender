@@ -361,39 +361,31 @@ defmodule SongRecommender.Songs do
         """
         CALL () {
 
-          CALL () {
-            MATCH (a:Artist)-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre {name: $genre_name})
-            WHERE a.name <> $artist_name
-            RETURN s AS song
-            SKIP $randomizer
-            LIMIT 45
-          }
-
-          RETURN song
+          MATCH (a:Artist)-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre {name: $genre_name})
+          WHERE a.name <> $artist_name
+          RETURN s AS song
+          SKIP $randomizer
+          LIMIT 45
 
         UNION
 
-          CALL {
-            MATCH (a:Artist {name: $artist_name})-[:SANG]->(s:Song)
-            WHERE s.id <> $id
-            RETURN s AS song
-            SKIP $randomizer
-            LIMIT 5
+          MATCH (a:Artist {name: $artist_name})-[:SANG]->(s:Song)
+          WHERE s.id <> $id
+          RETURN s AS song
+          SKIP $randomizer
+          LIMIT 5
 
-          UNION
+        UNION
 
-            MATCH (s:Song)
-            WHERE s.normalizedName CONTAINS toLower($artist_name) AND s.id <> $id
-            RETURN s AS song
-            SKIP $randomizer
-            LIMIT 10
-          }
-
-          RETURN song
+          MATCH (s:Song)
+          WHERE s.normalizedName CONTAINS toLower($artist_name) AND s.id <> $id
+          RETURN s AS song
+          SKIP $randomizer
+          LIMIT 10
 
         }
 
-        RETURN DISTINCT song { .* }
+        RETURN song { .* }
 
         """,
         song_information
