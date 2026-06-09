@@ -86,14 +86,13 @@ defmodule SongRecommender.RecommendationEngine do
         :get_songs,
         %{
           queue_name: queue_name,
-          strategy: strategy,
           taste_profile: taste_profile,
           username: username
         } = state
       ) do
     :ok =
-      strategy
-      |> QueryEngine.get_songs(username, taste_profile)
+      username
+      |> QueryEngine.get_songs(taste_profile)
       |> send_songs_to_queue(queue_name)
 
     {:noreply, state, @timeout}
@@ -113,6 +112,7 @@ defmodule SongRecommender.RecommendationEngine do
         %{
           followed_artists: followed_artists,
           strategy: recommendation_strategy,
+          taste_profile: taste_profile,
           username: username
         } = state
       ) do
@@ -122,7 +122,10 @@ defmodule SongRecommender.RecommendationEngine do
           Map.put(state, :followed_artists, followed_artists + 1)
 
         false ->
-          taste_profile = fetch_recommendation_utility_data(recommendation_strategy, username)
+          taste_profile =
+            if recommendation_strategy == :genre_based,
+              do: fetch_recommendation_utility_data(recommendation_strategy, username),
+              else: taste_profile
 
           state
           |> Map.put(:followed_artists, 1)
@@ -137,6 +140,7 @@ defmodule SongRecommender.RecommendationEngine do
         %{
           unfollowed_artists: unfollowed_artists,
           strategy: recommendation_strategy,
+          taste_profile: taste_profile,
           username: username
         } = state
       ) do
@@ -146,7 +150,10 @@ defmodule SongRecommender.RecommendationEngine do
           Map.put(state, :unfollowed_artists, unfollowed_artists + 1)
 
         false ->
-          taste_profile = fetch_recommendation_utility_data(recommendation_strategy, username)
+          taste_profile =
+            if recommendation_strategy == :genre_based,
+              do: fetch_recommendation_utility_data(recommendation_strategy, username),
+              else: taste_profile
 
           state
           |> Map.put(:unfollowed_artists, 1)
@@ -167,7 +174,7 @@ defmodule SongRecommender.RecommendationEngine do
 
     :ok =
       username
-      |> Songs.get_songs_with_genre_based_strategy(taste_profile)
+      |> Songs.recommend_songs_with_profile(taste_profile)
       |> send_songs_to_queue(queue_name)
 
     new_state = Map.put(state, :taste_profile, taste_profile)
@@ -210,7 +217,19 @@ defmodule SongRecommender.RecommendationEngine do
     %{artists: artists, genres: genres}
   end
 
-  defp fetch_recommendation_utility_data(:hybrid, _username), do: %{}
+  defp fetch_recommendation_utility_data(:hybrid, username) do
+    artists =
+      username
+      |> Artists.get_favorite_artists()
+      |> group_by_limit(2)
+
+    genres =
+      username
+      |> Genres.get_favorite_genres()
+      |> group_by_limit()
+
+    %{artists: artists, genres: genres}
+  end
 
   defp group_by_limit(node_list, songs_per_node_type \\ @ideal_song_number / 2)
 

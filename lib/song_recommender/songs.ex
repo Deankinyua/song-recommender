@@ -240,8 +240,8 @@ defmodule SongRecommender.Songs do
   Gets songs belonging to some genres and some sang by some artists
   """
 
-  @spec get_songs_with_genre_based_strategy(username(), taste_profile()) :: [song()]
-  def get_songs_with_genre_based_strategy(
+  @spec recommend_songs_with_profile(username(), taste_profile()) :: [song()]
+  def recommend_songs_with_profile(
         username,
         %{artists: artists, genres: genres} = _taste_profile
       ) do
