@@ -133,6 +133,53 @@ defmodule SongRecommender.Artists do
   end
 
   @doc """
+  Gets the favorite artists of a particular user. Used when the
+  user has spent at least an hour listening to songs.
+
+  ## Examples
+
+      iex> get_favorite_artists("Dean")
+        ["Drake", "Taylor Swift"]
+
+  """
+
+  @spec get_favorite_artists(username()) :: [artist_name()]
+  def get_favorite_artists(username) do
+    %Boltx.Response{results: artists} =
+      Boltx.query!(
+        Bolt,
+        """
+        MATCH (u:User {name: $name})
+        CALL (u) {
+          MATCH (u)-[la:LISTENED_TO_ARTIST]->(a:Artist)
+          RETURN a AS theArtist
+          ORDER BY la.totalDurationPlayedMs DESC
+          LIMIT 15
+
+        UNION
+
+          MATCH (u)-[:FOLLOWS]->(a:Artist)
+          RETURN a AS theArtist
+          SKIP $randomizer
+          LIMIT 5
+
+        }
+
+        RETURN theArtist.name AS artist
+        """,
+        %{name: username, randomizer: :rand.uniform(15)}
+      )
+
+    if Enum.empty?(artists) do
+      []
+    else
+      artists
+      |> Enum.map(&process_artist(&1))
+      |> Enum.shuffle()
+    end
+  end
+
+  @doc """
   Updates an artist struct with new attributes
   """
 
