@@ -1,5 +1,6 @@
 # Demo
 
+https://github.com/user-attachments/assets/d1470ac9-64ce-4ad2-b78c-134c733d7722
 
 # A Naive Song Recommendation System
 
@@ -16,6 +17,8 @@ The system fetches more songs as long as a song is playing. You don't have to ex
 
 It is important to note that **no sound** will actually be coming from your computer. 
 Next to each song is a link that when clicked, will open the song on **Spotify**. You can test the quality of the recommendations from there.
+
+Also, the images used for artists and songs are made up. They are not the actual ones on Spotify.
 
 The tech stack used is **Phoenix**, **Elixir**, **Neo4j** for all application data and **PostgreSQL** for job scheduling. You'll find a lot of **Cypher** throughout the app.
 
