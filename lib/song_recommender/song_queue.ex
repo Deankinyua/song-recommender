@@ -40,6 +40,18 @@ defmodule SongRecommender.SongQueue do
   @impl GenServer
   def init(state), do: {:ok, state, {:continue, :initialize_queue}}
 
+  @spec get_recommended_songs(queue()) :: [song()]
+  def get_recommended_songs(queue_name),
+    do: make_genserver_request(queue_name, :call, :return_recommended_songs)
+
+  @spec reset_queue(queue()) :: :ok
+  def reset_queue(queue_name),
+    do: make_genserver_request(queue_name, :call, :reset_queue)
+
+  @spec persist_played_song(queue(), song_details()) :: :ok
+  def persist_played_song(queue_name, song_details),
+    do: make_genserver_request(queue_name, :cast, {:persist_song, song_details})
+
   @impl GenServer
   def handle_continue(:initialize_queue, %{username: username} = state) do
     engine_name = engine_name(username)
@@ -101,18 +113,6 @@ defmodule SongRecommender.SongQueue do
         {:noreply, new_state}
     end
   end
-
-  @spec get_recommended_songs(queue()) :: [song()]
-  def get_recommended_songs(queue_name),
-    do: make_genserver_request(queue_name, :call, :return_recommended_songs)
-
-  @spec reset_queue(queue()) :: :ok
-  def reset_queue(queue_name),
-    do: make_genserver_request(queue_name, :call, :reset_queue)
-
-  @spec persist_played_song(queue(), song_details()) :: :ok
-  def persist_played_song(queue_name, song_details),
-    do: make_genserver_request(queue_name, :cast, {:persist_song, song_details})
 
   defp update_recommended_songs(
          songs,

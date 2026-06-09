@@ -1,6 +1,6 @@
 defmodule SongRecommender.Songs do
   @moduledoc """
-  Tracks how users listen to songs
+  Tracks how users listen to songs. Fetches songs with certain characteristics.
   """
 
   import Ecto.Changeset, only: [apply_action!: 2]
@@ -25,7 +25,7 @@ defmodule SongRecommender.Songs do
 
   ## Examples
 
-      iex> subscribe("550e8400-e29b-41d4-a716-446655440000")
+      iex> subscribe("Kennedy")
       :ok
 
   """
@@ -70,7 +70,7 @@ defmodule SongRecommender.Songs do
   end
 
   @doc """
-  Returns the musical properties e.g valence, danceability e.t.c of a song
+  Returns the musical properties (valence, danceability, liveness e.t.c) of a song
   """
 
   @spec get_song_musical_properties(song_id()) :: musical_properties() | nil
@@ -87,7 +87,7 @@ defmodule SongRecommender.Songs do
   end
 
   @doc """
-  Returns multiple songs in one go.
+  Returns multiple songs in one go. Takes a list of song_ids.
   """
 
   @spec get_multiple_songs([song_id()]) :: [song()]

@@ -3,7 +3,7 @@ defmodule SongRecommender.QueryEngine do
   Does cypher queries as instructed by the recommendation engine
   """
 
-  alias SongRecommender.ContentBasedEngine
+  alias SongRecommender.ContentBasedFilteringEngine
   alias SongRecommender.Songs
   alias SongRecommender.Songs.Song
 
@@ -17,7 +17,7 @@ defmodule SongRecommender.QueryEngine do
     songs_attributes = Task.await(get_songs)
 
     songs_attributes
-    |> ContentBasedEngine.filter_similar_songs(target_song_attributes)
+    |> ContentBasedFilteringEngine.filter_similar_songs(target_song_attributes)
     |> Songs.get_multiple_songs()
   end
 

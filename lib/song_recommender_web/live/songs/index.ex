@@ -307,6 +307,8 @@ defmodule SongRecommenderWeb.SongsLive.Index do
   end
 
   @impl Phoenix.LiveView
+  def handle_async(:get_songs, {:ok, songs}, socket) when songs == [], do: {:noreply, socket}
+
   def handle_async(
         :get_songs,
         {:ok, songs},

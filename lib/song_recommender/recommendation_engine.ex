@@ -37,6 +37,28 @@ defmodule SongRecommender.RecommendationEngine do
   @impl GenServer
   def init(state), do: {:ok, state, {:continue, :initialize_engine}}
 
+  @spec maybe_change_taste_profile(engine_name()) ::
+          {:ok, :profile_changed} | {:error, :profile_should_not_change}
+  def maybe_change_taste_profile(engine_name),
+    do: make_genserver_request(engine_name, :call, :change_taste_profile)
+
+  @spec recommend_new_songs(engine_name()) :: :ok
+  def recommend_new_songs(engine_name), do: make_genserver_request(engine_name, :cast, :get_songs)
+
+  @spec track_followed_artist(engine_name()) :: :ok
+  def track_followed_artist(engine_name),
+    do: make_genserver_request(engine_name, :cast, :artist_followed)
+
+  @spec track_unfollowed_artist(engine_name()) :: :ok
+  def track_unfollowed_artist(engine_name),
+    do: make_genserver_request(engine_name, :cast, :artist_unfollowed)
+
+  @spec recommend_with_song(engine_name(), song()) :: :ok
+  def recommend_with_song(engine_name, song) do
+    song_information = extract_song_information(song)
+    make_genserver_request(engine_name, :cast, {:recommend_similar_songs, song_information})
+  end
+
   @impl GenServer
   def handle_continue(:initialize_engine, %{username: username} = state) do
     recommendation_strategy =
@@ -160,28 +182,6 @@ defmodule SongRecommender.RecommendationEngine do
   def handle_info(:timeout, %{queue_name: queue_name} = state) do
     EngineQueueSupervisor.stop_queue(queue_name)
     {:stop, :normal, state}
-  end
-
-  @spec maybe_change_taste_profile(engine_name()) ::
-          {:ok, :profile_changed} | {:error, :profile_should_not_change}
-  def maybe_change_taste_profile(engine_name),
-    do: make_genserver_request(engine_name, :call, :change_taste_profile)
-
-  @spec recommend_new_songs(engine_name()) :: :ok
-  def recommend_new_songs(engine_name), do: make_genserver_request(engine_name, :cast, :get_songs)
-
-  @spec track_followed_artist(engine_name()) :: :ok
-  def track_followed_artist(engine_name),
-    do: make_genserver_request(engine_name, :cast, :artist_followed)
-
-  @spec track_unfollowed_artist(engine_name()) :: :ok
-  def track_unfollowed_artist(engine_name),
-    do: make_genserver_request(engine_name, :cast, :artist_unfollowed)
-
-  @spec recommend_with_song(engine_name(), song()) :: :ok
-  def recommend_with_song(engine_name, song) do
-    song_information = extract_song_information(song)
-    make_genserver_request(engine_name, :cast, {:recommend_similar_songs, song_information})
   end
 
   defp extract_song_information(%Song{id: id, artist: artist, genre: genre}),

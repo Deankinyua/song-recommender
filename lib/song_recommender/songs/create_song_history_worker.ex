@@ -21,7 +21,6 @@ defmodule SongRecommender.Songs.CreateSongHistoryWorker do
         args: %{"name" => username, "song_distribution" => song_distribution}
       }) do
     generate_history_per_user(username, song_distribution)
-    :ok
   end
 
   defp generate_history_per_user(username, song_distribution) do

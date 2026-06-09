@@ -1,4 +1,4 @@
-defmodule SongRecommender.ContentBasedEngine do
+defmodule SongRecommender.ContentBasedFilteringEngine do
   @moduledoc """
   Returns songs similar to a target song based on their musical properties.
   """

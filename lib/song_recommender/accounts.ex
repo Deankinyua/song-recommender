@@ -17,7 +17,7 @@ defmodule SongRecommender.Accounts do
   @rand_size 32
 
   @doc """
-  Registers a user. Returns an error if the user already exists
+  Registers a user. Does nothing if the user already exists
 
   ## Examples
 
