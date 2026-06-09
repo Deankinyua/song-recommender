@@ -42,6 +42,53 @@ defmodule SongRecommender.Genres do
   end
 
   @doc """
+  Gets the favorite genres of a particular user. Used when the
+  user has spent at least an hour listening to songs.
+
+  ## Examples
+
+      iex> get_favorite_genres("Dean")
+        ["acoustic", "hip-hop"]
+
+  """
+
+  @spec get_favorite_genres(username()) :: [genre_name()]
+  def get_favorite_genres(username) do
+    %Boltx.Response{results: genres} =
+      Boltx.query!(
+        Bolt,
+        """
+        MATCH (u:User {name: $name})
+        CALL (u) {
+          MATCH (u)-[lg:LISTENED_TO_GENRE]->(g:Genre)
+          RETURN g AS theGenre
+          ORDER BY lg.totalDurationPlayedMs DESC
+          LIMIT 5
+
+        UNION
+
+          MATCH (u)-[:PREFERS]->(g:Genre)
+          RETURN g AS theGenre
+          SKIP $randomizer
+          LIMIT 2
+
+        }
+
+        RETURN theGenre.name AS genre
+        """,
+        %{name: username, randomizer: :rand.uniform(5)}
+      )
+
+    if Enum.empty?(genres) do
+      []
+    else
+      genres
+      |> Enum.map(&process_genre(&1))
+      |> Enum.shuffle()
+    end
+  end
+
+  @doc """
   Creates a PREFERS relationship between a user and some genres
 
   ## Examples

@@ -240,8 +240,8 @@ defmodule SongRecommender.Songs do
   Gets songs belonging to some genres and some sang by some artists
   """
 
-  @spec get_songs_with_genre_based_strategy(username(), taste_profile()) :: [song()]
-  def get_songs_with_genre_based_strategy(
+  @spec recommend_songs_with_profile(username(), taste_profile()) :: [song()]
+  def recommend_songs_with_profile(
         username,
         %{artists: artists, genres: genres} = _taste_profile
       ) do
@@ -359,41 +359,33 @@ defmodule SongRecommender.Songs do
       Boltx.query!(
         Bolt,
         """
-        MATCH (targetSong:Song {id: $id})
         CALL () {
 
-          CALL () {
-            MATCH (a:Artist)-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre {name: $genre_name})
-            WHERE a.name <> $artist_name
-            RETURN s AS song
-            SKIP $randomizer
-            LIMIT 45
-          }
-
-          RETURN song
+          MATCH (a:Artist)-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre {name: $genre_name})
+          WHERE a.name <> $artist_name
+          RETURN s AS song
+          SKIP $randomizer
+          LIMIT 45
 
         UNION
 
-          CALL {
-            MATCH (a:Artist {name: $artist_name})-[:SANG]->(s:Song)
-            RETURN s AS song
-            SKIP $randomizer
-            LIMIT 5
+          MATCH (a:Artist {name: $artist_name})-[:SANG]->(s:Song)
+          WHERE s.id <> $id
+          RETURN s AS song
+          SKIP $randomizer
+          LIMIT 5
 
-          UNION
+        UNION
 
-            MATCH (s:Song)
-            WHERE s.normalizedName CONTAINS toLower($artist_name)
-            RETURN s AS song
-            SKIP $randomizer
-            LIMIT 10
-          }
-
-          RETURN song
+          MATCH (s:Song)
+          WHERE s.normalizedName CONTAINS toLower($artist_name) AND s.id <> $id
+          RETURN s AS song
+          SKIP $randomizer
+          LIMIT 10
 
         }
 
-        RETURN DISTINCT song { .* }
+        RETURN song { .* }
 
         """,
         song_information
