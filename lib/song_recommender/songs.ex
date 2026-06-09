@@ -359,7 +359,6 @@ defmodule SongRecommender.Songs do
       Boltx.query!(
         Bolt,
         """
-        MATCH (targetSong:Song {id: $id})
         CALL () {
 
           CALL () {
@@ -376,6 +375,7 @@ defmodule SongRecommender.Songs do
 
           CALL {
             MATCH (a:Artist {name: $artist_name})-[:SANG]->(s:Song)
+            WHERE s.id <> $id
             RETURN s AS song
             SKIP $randomizer
             LIMIT 5
@@ -383,7 +383,7 @@ defmodule SongRecommender.Songs do
           UNION
 
             MATCH (s:Song)
-            WHERE s.normalizedName CONTAINS toLower($artist_name)
+            WHERE s.normalizedName CONTAINS toLower($artist_name) AND s.id <> $id
             RETURN s AS song
             SKIP $randomizer
             LIMIT 10
