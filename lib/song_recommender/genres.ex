@@ -24,7 +24,7 @@ defmodule SongRecommender.Genres do
       Boltx.query!(
         Bolt,
         """
-        MATCH (u:User {name: $name})-[:PREFERS]->(g:Genre)
+        MATCH (u:User {name: $name})-[:PREFERS]->(g)
         RETURN g.name AS genre
         LIMIT 20
         """,
@@ -60,14 +60,14 @@ defmodule SongRecommender.Genres do
         """
         MATCH (u:User {name: $name})
         CALL (u) {
-          MATCH (u)-[lg:LISTENED_TO_GENRE]->(g:Genre)
+          MATCH (u)-[lg:LISTENED_TO_GENRE]->(g)
           RETURN g AS theGenre
           ORDER BY lg.totalDurationPlayedMs DESC
           LIMIT 5
 
         UNION
 
-          MATCH (u)-[:PREFERS]->(g:Genre)
+          MATCH (u)-[:PREFERS]->(g)
           RETURN g AS theGenre
           SKIP $randomizer
           LIMIT 2
@@ -133,7 +133,7 @@ defmodule SongRecommender.Genres do
     Bolt
     |> Boltx.query!(
       """
-      MATCH (u:User {name: $name})-[lg:LISTENED_TO_GENRE]->(g:Genre)
+      MATCH (u:User {name: $name})-[lg:LISTENED_TO_GENRE]->(g)
       RETURN sum(lg.totalDurationPlayedMs) AS lifetime_listening_ms
       """,
       %{name: username}

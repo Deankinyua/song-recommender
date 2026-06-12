@@ -90,7 +90,7 @@ defmodule SongRecommender.Artists do
     Boltx.query!(
       Bolt,
       """
-      MATCH (artist:Artist)-[SANG]->(:Song)<-[listened:LISTENED_TO]-(:User)
+      MATCH (artist:Artist)-[:SANG]->()<-[listened:LISTENED_TO]-(:User)
       WITH artist, count(listened) AS listenerCount
       SET artist.monthlyListeners = listenerCount
       """
@@ -114,7 +114,7 @@ defmodule SongRecommender.Artists do
       Boltx.query!(
         Bolt,
         """
-        MATCH (u:User {name: $name})-[:FOLLOWS]->(a:Artist)
+        MATCH (u:User {name: $name})-[:FOLLOWS]->(a)
         RETURN a.name AS artist
         ORDER BY a.monthlyListeners DESC
         LIMIT 30
@@ -151,14 +151,14 @@ defmodule SongRecommender.Artists do
         """
         MATCH (u:User {name: $name})
         CALL (u) {
-          MATCH (u)-[la:LISTENED_TO_ARTIST]->(a:Artist)
+          MATCH (u)-[la:LISTENED_TO_ARTIST]->(a)
           RETURN a AS theArtist
           ORDER BY la.totalDurationPlayedMs DESC
           LIMIT 15
 
         UNION
 
-          MATCH (u)-[:FOLLOWS]->(a:Artist)
+          MATCH (u)-[:FOLLOWS]->(a)
           RETURN a AS theArtist
           SKIP $randomizer
           LIMIT 5
