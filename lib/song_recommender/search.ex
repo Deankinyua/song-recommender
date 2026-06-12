@@ -27,7 +27,7 @@ defmodule SongRecommender.Search do
         """
         MATCH (n:Artist|Song), (u:User {name: $username})
         WHERE n.normalizedName CONTAINS $query
-        OPTIONAL MATCH (n)<-[:SANG]-(a:Artist)
+        OPTIONAL MATCH (n)<-[:SANG]-(a)
         CALL (*) {
           WHEN a IS NULL THEN {
             WITH EXISTS { (u)-[:FOLLOWS]->(n) } AS following
@@ -42,7 +42,7 @@ defmodule SongRecommender.Search do
                      AS searchItem
           }
           ELSE {
-            MATCH (n)-[:BELONGS_TO]->(g:Genre)
+            MATCH (n)-[:BELONGS_TO]->(g)
             RETURN n {
                      .*,
                      duration_ms: n.durationMs,

@@ -97,7 +97,7 @@ defmodule SongRecommender.Songs do
         Bolt,
         """
         UNWIND $song_ids AS song_id
-        MATCH (artist:Artist)-[:SANG]->(song:Song {id: song_id})-[:BELONGS_TO]->(genre:Genre)
+        MATCH (artist)-[:SANG]->(song:Song {id: song_id})-[:BELONGS_TO]->(genre)
         RETURN song { .*, duration_ms: song.durationMs },
                artist { .*, id: randomUUID(), monthly_listeners: artist.monthlyListeners },
                genre { .* }
@@ -164,16 +164,15 @@ defmodule SongRecommender.Songs do
     Boltx.query!(
       Bolt,
       """
-      MATCH (user:User {name: $username})
-      MATCH (genre:Genre {name: $genre})
-      OPTIONAL MATCH (song:Song)-[:BELONGS_TO]->(genre)
+      MATCH (user:User {name: $username}), (genre:Genre {name: $genre})
+      OPTIONAL MATCH (song)-[:BELONGS_TO]->(genre)
       WHERE NOT EXISTS { (user)-[:LISTENED_TO]->(song) }
       WITH song, user, genre
         ORDER BY song.popularity DESC
         LIMIT 1
       CALL (*) {
         WHEN song IS NULL THEN {
-          MATCH (user)-[l:LISTENED_TO]->(listenedToSong:Song)-[:BELONGS_TO]->(genre)
+          MATCH (user)-[l:LISTENED_TO]->(listenedToSong)-[:BELONGS_TO]->(genre)
           WHERE l.durationPlayedMs < listenedToSong.durationMs * 3
           RETURN listenedToSong AS finalSong
           ORDER BY finalSong.popularity DESC
@@ -217,7 +216,7 @@ defmodule SongRecommender.Songs do
       WITH user,
            songAndDurationPlayed[0] AS song_id,
            songAndDurationPlayed[1] AS durationPlayedMs
-      MATCH (a:Artist)-[:SANG]->(song:Song {id: song_id})-[:BELONGS_TO]->(g:Genre)
+      MATCH (a)-[:SANG]->(song:Song {id: song_id})-[:BELONGS_TO]->(g)
       MERGE (user)-[lt:LISTENED_TO]->(song)
       ON CREATE SET lt.durationPlayedMs = durationPlayedMs
       ON MATCH SET lt.durationPlayedMs = lt.durationPlayedMs + durationPlayedMs
@@ -257,9 +256,9 @@ defmodule SongRecommender.Songs do
         CALL (u) {
 
           CALL (*) {
-            MATCH (u)-[lt:LISTENED_TO]->(s:Song)-[:BELONGS_TO]->(g:Genre)
+            MATCH (u)-[lt:LISTENED_TO]->(s:Song)-[:BELONGS_TO]->(g)
             WHERE duration.inSeconds(lt.lastPlayedDate, datetime()).minutes > 540
-            MATCH (a:Artist)-[:SANG]->(s)
+            MATCH (a)-[:SANG]->(s)
             RETURN s AS song, a AS artist, g AS genre
             ORDER BY lt.durationPlayedMs DESC
             LIMIT 2
@@ -273,18 +272,18 @@ defmodule SongRecommender.Songs do
 
           CALL (*) {
             MATCH (g:Genre {name: genreName})
-            OPTIONAL MATCH (s:Song)-[:BELONGS_TO]->(g)
+            OPTIONAL MATCH (s)-[:BELONGS_TO]->(g)
             WHERE NOT EXISTS { (u)-[:LISTENED_TO]->(s) }
             WITH *
             ORDER BY s.popularity DESC
 
             CALL (*) {
               WHEN s IS NOT NULL THEN {
-                MATCH (a:Artist)-[:SANG]->(s)
+                MATCH (a)-[:SANG]->(s)
                 RETURN a AS theArtist, s AS theSong
               }
               ELSE {
-                MATCH (a:Artist)-[:SANG]->(listenedToSong:Song)-[:BELONGS_TO]->(g)
+                MATCH (a)-[:SANG]->(listenedToSong:Song)-[:BELONGS_TO]->(g)
                 MATCH (u)-[lt:LISTENED_TO]->(listenedToSong)
                 RETURN a AS theArtist, listenedToSong AS theSong
                 ORDER BY lt.lastPlayedDate
@@ -304,18 +303,18 @@ defmodule SongRecommender.Songs do
 
           CALL (*) {
             MATCH (a:Artist {name: artistName})
-            OPTIONAL MATCH (a)-[:SANG]->(s:Song)
+            OPTIONAL MATCH (a)-[:SANG]->(s)
             WHERE NOT EXISTS { (u)-[:LISTENED_TO]->(s) }
             WITH *
             ORDER BY s.popularity DESC
 
             CALL (*) {
               WHEN s IS NOT NULL THEN {
-                MATCH (s)-[:BELONGS_TO]->(g:Genre)
+                MATCH (s)-[:BELONGS_TO]->(g)
                 RETURN g, s AS theSong
               }
               ELSE {
-                MATCH (a)-[:SANG]->(listenedToSong:Song)-[:BELONGS_TO]->(g:Genre)
+                MATCH (a)-[:SANG]->(listenedToSong:Song)-[:BELONGS_TO]->(g)
                 MATCH (u)-[lt:LISTENED_TO]->(listenedToSong)
                 RETURN g, listenedToSong AS theSong
                 ORDER BY lt.lastPlayedDate
@@ -361,7 +360,7 @@ defmodule SongRecommender.Songs do
         """
         CALL () {
 
-          MATCH (a:Artist)-[:SANG]->(s:Song)-[:BELONGS_TO]->(g:Genre {name: $genre_name})
+          MATCH (a)-[:SANG]->(s)-[:BELONGS_TO]->(g:Genre {name: $genre_name})
           WHERE a.name <> $artist_name
           RETURN s AS song
           SKIP $randomizer
@@ -369,7 +368,7 @@ defmodule SongRecommender.Songs do
 
         UNION
 
-          MATCH (a:Artist {name: $artist_name})-[:SANG]->(s:Song)
+          MATCH (a:Artist {name: $artist_name})-[:SANG]->(s)
           WHERE s.id <> $id
           RETURN s AS song
           SKIP $randomizer
