@@ -258,7 +258,7 @@ defmodule SongRecommender.Songs do
 
           CALL (*) {
             MATCH (u)-[lt:LISTENED_TO]->(s:Song)-[:BELONGS_TO]->(g:Genre)
-            WHERE duration.between(lt.lastPlayedDate, datetime()).hours > 9
+            WHERE duration.inSeconds(lt.lastPlayedDate, datetime()).minutes > 540
             MATCH (a:Artist)-[:SANG]->(s)
             RETURN s AS song, a AS artist, g AS genre
             ORDER BY lt.durationPlayedMs DESC
