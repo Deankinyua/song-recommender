@@ -4,8 +4,7 @@ defmodule SongRecommender.RecommendationEngine do
   Determines the recommendation strategy.
   2 recommendation strategies exist: :genre_based and :hybrid.
   :genre_based is used for a user whose listening history does not exceed 60 minutes.
-  :hybrid is used when the listening history exceeds 60 minutes; it is
-  a combination of collaborative filtering and content-based filtering.
+  :hybrid is used when the listening history exceeds 60 minutes.
   """
 
   use GenServer, restart: :transient
