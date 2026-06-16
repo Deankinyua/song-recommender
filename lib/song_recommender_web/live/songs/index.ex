@@ -306,6 +306,19 @@ defmodule SongRecommenderWeb.SongsLive.Index do
      |> stream(:songs, processed_recommended_songs, at: -1, limit: -18)}
   end
 
+  def handle_info(
+        {:DOWN, ref, :process, _object, :normal},
+        %{assigns: %{current_user: user, engine_name: engine, queue_name: queue}} =
+          socket
+      ) do
+    username = user.name
+    Process.demonitor(ref)
+    {:ok, engine_pid} = EngineQueueSupervisor.start_engine(engine, username)
+    _new_engine_ref = Process.monitor(engine_pid)
+    EngineQueueSupervisor.start_song_queue(queue, username)
+    {:noreply, socket}
+  end
+
   @impl Phoenix.LiveView
   def handle_async(:get_songs, {:ok, songs}, socket) when songs == [], do: {:noreply, socket}
 
@@ -393,11 +406,11 @@ defmodule SongRecommenderWeb.SongsLive.Index do
       engine_name = engine_name(username)
       queue_name = queue_name(username)
 
-      EngineQueueSupervisor.start_engine(engine_name, username)
-      EngineQueueSupervisor.start_song_queue(queue_name, username)
+      start_engine_and_queue(engine_name, queue_name, username)
+
       Songs.subscribe(username)
 
-      if !capture_preferences?, do: Process.send_after(self(), :get_initial_songs, 1200)
+      if !capture_preferences?, do: Process.send_after(self(), :get_initial_songs, 1400)
 
       socket
       |> assign(:engine_name, engine_name)
@@ -405,6 +418,18 @@ defmodule SongRecommenderWeb.SongsLive.Index do
     else
       socket
     end
+  end
+
+  defp start_engine_and_queue(engine_name, queue_name, username) do
+    engine_pid =
+      case EngineQueueSupervisor.start_engine(engine_name, username) do
+        {:ok, engine_pid} -> engine_pid
+        {:error, {:already_started, engine_pid}} -> engine_pid
+      end
+
+    Process.monitor(engine_pid)
+
+    EngineQueueSupervisor.start_song_queue(queue_name, username)
   end
 
   defp maybe_fetch_genres(

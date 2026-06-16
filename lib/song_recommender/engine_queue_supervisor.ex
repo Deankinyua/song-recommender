@@ -44,7 +44,7 @@ defmodule SongRecommender.EngineQueueSupervisor do
   def stop_queue(queue_name) do
     queue_name
     |> via_registry()
-    |> GenServer.stop(:normal, 3000)
+    |> GenServer.stop(:normal, 100)
   end
 
   defp via_registry(name), do: {:via, Registry, {EngineQueueRegistry, name}}
