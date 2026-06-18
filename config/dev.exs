@@ -51,7 +51,7 @@ config :song_recommender, SongRecommenderWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}],
   check_origin: false,
   code_reloader: true,
-  debug_errors: true,
+  debug_errors: false,
   secret_key_base: "52q+LIbn16GajeyrOO5xGoI92il49j+mogCmAv2RgvjRTMr2Vzjxm7yiLcSdvFO9",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:song_recommender, ~w(--sourcemap=inline --watch)]},
