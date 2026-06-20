@@ -6,6 +6,7 @@ defmodule SongRecommender.MixProject do
       app: :song_recommender,
       version: "0.1.0",
       elixir: "~> 1.15",
+      # directories to find source files. Defaults to ["lib"].
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
@@ -37,6 +38,12 @@ defmodule SongRecommender.MixProject do
     [
       mod: {SongRecommender.Application, []},
       extra_applications: [:logger, :runtime_tools]
+    ]
+  end
+
+  def cli do
+    [
+      default_task: "phx.server"
     ]
   end
 
