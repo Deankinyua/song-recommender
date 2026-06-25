@@ -17,6 +17,7 @@ defmodule SongRecommender.RecommendationEngine do
   alias SongRecommender.QueryEngine
   alias SongRecommender.Songs
   alias SongRecommender.Songs.Song
+  alias SongRecommender.TrackFollowedArtists
 
   @ideal_song_number 16
   @just_followed_artists_threshold 3
@@ -66,6 +67,8 @@ defmodule SongRecommender.RecommendationEngine do
       |> determine_recommendation_strategy()
 
     taste_profile = fetch_recommendation_utility_data(recommendation_strategy, username)
+
+    cache_followed_artists(username)
 
     queue_name = queue_name(username)
 
@@ -126,6 +129,8 @@ defmodule SongRecommender.RecommendationEngine do
               do: fetch_recommendation_utility_data(recommendation_strategy, username),
               else: taste_profile
 
+          cache_followed_artists(username)
+
           state
           |> Map.put(:followed_artists, 1)
           |> Map.put(:taste_profile, taste_profile)
@@ -153,6 +158,8 @@ defmodule SongRecommender.RecommendationEngine do
             if recommendation_strategy == :genre_based,
               do: fetch_recommendation_utility_data(recommendation_strategy, username),
               else: taste_profile
+
+          cache_followed_artists(username)
 
           state
           |> Map.put(:unfollowed_artists, 1)
@@ -240,6 +247,13 @@ defmodule SongRecommender.RecommendationEngine do
     song_limit = :math.ceil(songs_per_node_type / count) |> trunc()
 
     %{nodes: node_list, limit: song_limit}
+  end
+
+  defp cache_followed_artists(username) do
+    username
+    |> Artists.get_all_followed_artists()
+    |> MapSet.new()
+    |> TrackFollowedArtists.cache_artists(username)
   end
 
   defp queue_name(username), do: "#{username}_song_queue"

@@ -134,6 +134,32 @@ defmodule SongRecommender.Artists do
   end
 
   @doc """
+  Gets all the artists a user has followed. Returns an empty list if the user hasn't
+  followed any artists.
+
+  ## Examples
+
+      iex> get_all_followed_artists("Dean")
+        ["Drake", "Taylor Swift"]
+
+  """
+
+  @spec get_all_followed_artists(username()) :: [artist_name()]
+  def get_all_followed_artists(username) do
+    %Boltx.Response{results: artists} =
+      Boltx.query!(
+        Bolt,
+        """
+        MATCH (u:User {name: $name})-[:FOLLOWS]->(a)
+        RETURN a.name AS artist
+        """,
+        %{name: username}
+      )
+
+    if Enum.empty?(artists), do: [], else: Enum.map(artists, &process_artist(&1))
+  end
+
+  @doc """
   Gets the favorite artists of a particular user. Used when the
   user has spent at least an hour listening to songs.
 
