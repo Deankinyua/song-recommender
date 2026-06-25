@@ -7,6 +7,7 @@ defmodule SongRecommender.Artists do
 
   alias SongRecommender.Artists.Artist
   alias SongRecommender.Songs.Song
+  alias SongRecommender.TrackFollowedArtists
 
   @type artist :: Artist.t()
   @type artist_name :: String.t()
@@ -40,7 +41,7 @@ defmodule SongRecommender.Artists do
 
   @spec set_artist_following_status(song(), username()) :: song()
   def set_artist_following_status(%{artist: artist} = song, username) do
-    following_artist? = check_following_status(username, artist.name)
+    following_artist? = TrackFollowedArtists.following?(username, artist.name)
     updated_artist = Map.replace!(artist, :following, following_artist?)
     Map.replace!(song, :artist, updated_artist)
   end
