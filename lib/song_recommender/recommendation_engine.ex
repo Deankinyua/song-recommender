@@ -192,7 +192,8 @@ defmodule SongRecommender.RecommendationEngine do
     do: {:reply, {:error, :profile_should_not_change}, state, @timeout}
 
   @impl GenServer
-  def handle_info(:timeout, %{queue_name: queue_name} = state) do
+  def handle_info(:timeout, %{queue_name: queue_name, username: username} = state) do
+    TrackFollowedArtists.clear_artists_cache(username)
     EngineQueueSupervisor.stop_queue(queue_name)
     {:stop, :normal, state}
   end
