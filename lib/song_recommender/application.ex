@@ -11,6 +11,7 @@ defmodule SongRecommender.Application do
       [
         SongRecommenderWeb.Telemetry,
         SongRecommender.Repo,
+        SongRecommender.TrackFollowedArtists,
         {DNSCluster,
          query: Application.get_env(:song_recommender, :dns_cluster_query) || :ignore},
         {Phoenix.PubSub, name: SongRecommender.PubSub},
