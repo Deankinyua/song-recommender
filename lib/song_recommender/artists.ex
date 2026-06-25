@@ -7,6 +7,7 @@ defmodule SongRecommender.Artists do
 
   alias SongRecommender.Artists.Artist
   alias SongRecommender.Songs.Song
+  alias SongRecommender.TrackFollowedArtists
 
   @type artist :: Artist.t()
   @type artist_name :: String.t()
@@ -40,7 +41,7 @@ defmodule SongRecommender.Artists do
 
   @spec set_artist_following_status(song(), username()) :: song()
   def set_artist_following_status(%{artist: artist} = song, username) do
-    following_artist? = check_following_status(username, artist.name)
+    following_artist? = TrackFollowedArtists.following?(username, artist.name)
     updated_artist = Map.replace!(artist, :following, following_artist?)
     Map.replace!(song, :artist, updated_artist)
   end
@@ -130,6 +131,32 @@ defmodule SongRecommender.Artists do
       |> Enum.shuffle()
       |> Enum.take(10)
     end
+  end
+
+  @doc """
+  Gets all the artists a user has followed. Returns an empty list if the user hasn't
+  followed any artists.
+
+  ## Examples
+
+      iex> get_all_followed_artists("Dean")
+        ["Drake", "Taylor Swift"]
+
+  """
+
+  @spec get_all_followed_artists(username()) :: [artist_name()]
+  def get_all_followed_artists(username) do
+    %Boltx.Response{results: artists} =
+      Boltx.query!(
+        Bolt,
+        """
+        MATCH (u:User {name: $name})-[:FOLLOWS]->(a)
+        RETURN a.name AS artist
+        """,
+        %{name: username}
+      )
+
+    if Enum.empty?(artists), do: [], else: Enum.map(artists, &process_artist(&1))
   end
 
   @doc """

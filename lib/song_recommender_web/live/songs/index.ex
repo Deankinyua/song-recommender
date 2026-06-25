@@ -166,7 +166,7 @@ defmodule SongRecommenderWeb.SongsLive.Index do
           assigns: %{current_song: previous_song, current_user: user, queue_name: queue}
         } = socket
       ) do
-    following_artist? = Artists.check_following_status(user.name, artist_name)
+    following_artist? = TrackFollowedArtists.following?(user.name, artist_name)
 
     artist_attrs = %{
       "following" => following_artist?,
