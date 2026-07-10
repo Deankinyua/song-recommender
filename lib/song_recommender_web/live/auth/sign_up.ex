@@ -98,7 +98,6 @@ defmodule SongRecommenderWeb.AuthLive.SignUp do
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
-    form = to_form(changeset, as: "user")
-    assign(socket, :form, form)
+    assign(socket, :form, to_form(changeset))
   end
 end
