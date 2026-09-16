@@ -17,12 +17,6 @@ defmodule SongRecommender.MixProject do
         plt_file: {:no_warn, "priv/plts/project.plt"}
       ],
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [
-        ci: :test,
-        coveralls: :test,
-        "coveralls.detail": :test,
-        "coveralls.html": :test
-      ],
       name: "Song Recommender",
       source_url: "https://github.com/Deankinyua/song-recommender",
       docs: &docs/0,
@@ -43,7 +37,15 @@ defmodule SongRecommender.MixProject do
 
   def cli do
     [
-      default_task: "phx.server"
+      default_task: "phx.server",
+      preferred_envs: [
+        ci: :test,
+        dialyzer: :test,
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.html": :test,
+        "deps.audit": :test
+      ]
     ]
   end
 
@@ -128,6 +130,7 @@ defmodule SongRecommender.MixProject do
       ],
       ci: [
         "deps.unlock --check-unused",
+        "deps.audit",
         "format --check-formatted",
         "cmd npx prettier -c .",
         "credo --strict",
